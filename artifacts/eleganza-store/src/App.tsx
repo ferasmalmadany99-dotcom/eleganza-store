@@ -454,7 +454,7 @@ const money = (value: number) =>
 function BrandName({ compact = false }: { compact?: boolean }) {
   return (
     <span
-      className={`brand-name inline-flex items-center whitespace-nowrap ${compact ? 'gap-1.5 text-[19px] sm:gap-2 sm:text-[26px]' : 'gap-2 text-3xl sm:text-4xl'}`}
+      className={`brand-name inline-flex items-center whitespace-nowrap ${compact ? 'gap-1.5 text-[23px] sm:gap-2 sm:text-[30px]' : 'gap-2 text-3xl sm:text-4xl'}`}
       dir="ltr"
       aria-label="Eleganza إليغانزا"
     >
