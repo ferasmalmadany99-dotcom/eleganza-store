@@ -16,17 +16,41 @@ import {
 } from 'lucide-react';
 import heroImage from './assets/beauty-hero.jpg';
 import perfumeImage from './assets/perfume-product.jpg';
+import perfumeImage480 from './assets/perfume-product-480.jpg';
+import perfumeImage960 from './assets/perfume-product-960.jpg';
 import makeupImage from './assets/makeup-product.jpg';
+import makeupImage480 from './assets/makeup-product-480.jpg';
+import makeupImage960 from './assets/makeup-product-960.jpg';
 import jewelryImage from './assets/jewelry-product.jpg';
+import jewelryImage480 from './assets/jewelry-product-480.jpg';
+import jewelryImage960 from './assets/jewelry-product-960.jpg';
 import lipImage from './assets/lip-product.jpg';
+import lipImage480 from './assets/lip-product-480.jpg';
+import lipImage960 from './assets/lip-product-960.jpg';
 import amberReverieImage from './assets/amber-reverie.jpg';
+import amberReverieImage480 from './assets/amber-reverie-480.jpg';
+import amberReverieImage960 from './assets/amber-reverie-960.jpg';
 import silkPetalImage from './assets/silk-petal.jpg';
+import silkPetalImage480 from './assets/silk-petal-480.jpg';
+import silkPetalImage960 from './assets/silk-petal-960.jpg';
 import solsticeChainImage from './assets/solstice-chain.jpg';
+import solsticeChainImage480 from './assets/solstice-chain-480.jpg';
+import solsticeChainImage960 from './assets/solstice-chain-960.jpg';
 import nocturneRougeImage from './assets/nocturne-rouge.jpg';
+import nocturneRougeImage480 from './assets/nocturne-rouge-480.jpg';
+import nocturneRougeImage960 from './assets/nocturne-rouge-960.jpg';
 import cedarAfterglowImage from './assets/cedar-afterglow.jpg';
+import cedarAfterglowImage480 from './assets/cedar-afterglow-480.jpg';
+import cedarAfterglowImage960 from './assets/cedar-afterglow-960.jpg';
 import dawnFlushImage from './assets/dawn-flush.jpg';
+import dawnFlushImage480 from './assets/dawn-flush-480.jpg';
+import dawnFlushImage960 from './assets/dawn-flush-960.jpg';
 import aureliaDropsImage from './assets/aurelia-drops.jpg';
+import aureliaDropsImage480 from './assets/aurelia-drops-480.jpg';
+import aureliaDropsImage960 from './assets/aurelia-drops-960.jpg';
 import plumElanImage from './assets/plum-elan.jpg';
+import plumElanImage480 from './assets/plum-elan-480.jpg';
+import plumElanImage960 from './assets/plum-elan-960.jpg';
 
 type Category = 'All' | 'New in' | 'Perfume' | 'Makeup' | 'Accessories';
 type Language = 'en' | 'ar';
@@ -39,6 +63,8 @@ type Product = {
   material: string;
   color: string;
   image: string;
+  image480: string;
+  image960: string;
   note: string;
   badge?: string;
 };
@@ -54,6 +80,8 @@ const products: Product[] = [
     material: 'Eau de parfum / 50 ml',
     color: 'Sandalwood / amber',
     image: perfumeImage,
+    image480: perfumeImage480,
+    image960: perfumeImage960,
     note: 'A warm, quietly magnetic trail with staying power.',
     badge: 'Bestseller',
   },
@@ -65,6 +93,8 @@ const products: Product[] = [
     material: 'Cream blush / 7 g',
     color: 'Petal',
     image: makeupImage,
+    image480: makeupImage480,
+    image960: makeupImage960,
     note: 'A sheer flush that looks like your own, only softer.',
     badge: 'New',
   },
@@ -76,6 +106,8 @@ const products: Product[] = [
     material: 'Gold vermeil',
     color: 'Warm gold',
     image: jewelryImage,
+    image480: jewelryImage480,
+    image960: jewelryImage960,
     note: 'A small golden punctuation for every day.',
   },
   {
@@ -86,6 +118,8 @@ const products: Product[] = [
     material: 'Satin lipstick / 3.5 g',
     color: 'Deep berry',
     image: lipImage,
+    image480: lipImage480,
+    image960: lipImage960,
     note: 'A soft-focus stain with a little more intention.',
     badge: 'Edition 01',
   },
@@ -97,6 +131,8 @@ const products: Product[] = [
     material: 'Eau de parfum / 75 ml',
     color: 'Amber / vanilla',
     image: amberReverieImage,
+    image480: amberReverieImage480,
+    image960: amberReverieImage960,
     note: 'A rich amber glow softened by smooth vanilla.',
     badge: 'New',
   },
@@ -108,6 +144,8 @@ const products: Product[] = [
     material: 'Powder blush / 8 g',
     color: 'Soft coral',
     image: silkPetalImage,
+    image480: silkPetalImage480,
+    image960: silkPetalImage960,
     note: 'A weightless wash of coral that brings warmth to the face.',
   },
   {
@@ -118,6 +156,8 @@ const products: Product[] = [
     material: 'Gold vermeil / 42 cm',
     color: 'Polished gold',
     image: solsticeChainImage,
+    image480: solsticeChainImage480,
+    image960: solsticeChainImage960,
     note: 'A fine golden chain made to catch the light with every movement.',
     badge: 'Bestseller',
   },
@@ -129,6 +169,8 @@ const products: Product[] = [
     material: 'Matte lipstick / 3.5 g',
     color: 'Burnished red',
     image: nocturneRougeImage,
+    image480: nocturneRougeImage480,
+    image960: nocturneRougeImage960,
     note: 'A confident red with a soft matte finish that stays comfortable.',
   },
   {
@@ -139,6 +181,8 @@ const products: Product[] = [
     material: 'Eau de parfum / 50 ml',
     color: 'Cedar / white musk',
     image: cedarAfterglowImage,
+    image480: cedarAfterglowImage480,
+    image960: cedarAfterglowImage960,
     note: 'Clean cedar and soft musk settle close to the skin.',
   },
   {
@@ -149,6 +193,8 @@ const products: Product[] = [
     material: 'Cream blush / 7 g',
     color: 'Warm peach',
     image: dawnFlushImage,
+    image480: dawnFlushImage480,
+    image960: dawnFlushImage960,
     note: 'A fresh peach tint that gives the complexion an easy glow.',
     badge: 'New',
   },
@@ -160,6 +206,8 @@ const products: Product[] = [
     material: 'Gold vermeil',
     color: 'Satin gold',
     image: aureliaDropsImage,
+    image480: aureliaDropsImage480,
+    image960: aureliaDropsImage960,
     note: 'Light-catching drops with a refined shape and effortless movement.',
   },
   {
@@ -170,6 +218,8 @@ const products: Product[] = [
     material: 'Satin lipstick / 3.5 g',
     color: 'Muted plum',
     image: plumElanImage,
+    image480: plumElanImage480,
+    image960: plumElanImage960,
     note: 'A muted plum that adds depth while remaining easy to wear.',
     badge: 'Edition 01',
   },
@@ -514,7 +564,15 @@ function ProductCard({
     <article className="group" data-testid={`card-product-${product.id}`}>
       <div className="image-zoom relative aspect-[4/5] overflow-hidden bg-[#e3dbce]">
         <button onClick={onSelect} className="absolute inset-0 z-10 cursor-pointer" aria-label={`View ${product.name}`} data-testid={`button-view-${product.id}`} />
-        <img src={product.image} alt={product.name} className="h-full w-full object-cover" />
+        <img
+          src={product.image960}
+          srcSet={`${product.image480} 480w, ${product.image960} 960w`}
+          sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
+          alt={product.name}
+          loading="lazy"
+          decoding="async"
+          className="h-full w-full object-cover"
+        />
         {product.badge && <span className="absolute left-4 top-4 z-20 bg-[#f1e4d4] px-2.5 py-1 font-mono-ui text-[9px] uppercase tracking-[.15em] text-[#704637]">{getBadgeLabel(product.badge, c)}</span>}
         <button onClick={onFavorite} aria-label={favorite ? `Remove ${product.name} from favorites` : `Add ${product.name} to favorites`} className={`absolute right-4 top-4 z-20 grid h-9 w-9 place-items-center bg-[#f8f0e6]/90 transition-all hover:bg-[#f8f0e6] ${favorite ? 'text-[#a64e3a]' : 'text-[#312b25]'}`} data-testid={`button-favorite-${product.id}`}>
           <Heart size={16} strokeWidth={1.4} fill={favorite ? 'currentColor' : 'none'} />
@@ -560,7 +618,16 @@ function ProductDetail({
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-[#211b18]/55 p-0 backdrop-blur-[2px] sm:items-center sm:p-6" role="dialog" aria-modal="true" aria-label={`${product.name} details`}>
       <div className="relative max-h-[94dvh] w-full max-w-[980px] overflow-auto bg-[#f8f0e6] sm:grid sm:grid-cols-2">
         <button onClick={onClose} className="absolute right-4 top-4 z-10 grid h-10 w-10 place-items-center bg-[#f8f0e6]/80 text-[#312b25] transition-colors hover:bg-[#f1e4d4]" aria-label={c.close} data-testid="button-close-detail"><X size={18} strokeWidth={1.4} /></button>
-        <div className="aspect-[4/4.7] bg-[#ded4c7] sm:aspect-auto"><img src={product.image} alt={product.name} className="h-full w-full object-cover" /></div>
+        <div className="aspect-[4/4.7] bg-[#ded4c7] sm:aspect-auto">
+          <img
+            src={product.image960}
+            srcSet={`${product.image480} 480w, ${product.image960} 960w, ${product.image} 1024w`}
+            sizes="(min-width: 640px) 490px, 100vw"
+            alt={product.name}
+            decoding="async"
+            className="h-full w-full object-cover"
+          />
+        </div>
         <div className="flex flex-col justify-between p-7 sm:p-12">
           <div>
             <SectionKicker>{categoryLabels[language][product.category]}</SectionKicker>
@@ -623,7 +690,7 @@ function BagDrawer({
                 const itemText = getProductCopy(item, language);
                 return (
                 <div key={item.id} className="flex gap-4 border-b border-[#312b25]/12 pb-6" data-testid={`row-bag-${item.id}`}>
-                  <img src={item.image} alt={item.name} className="h-28 w-24 object-cover" />
+                  <img src={item.image480} alt={item.name} width="96" height="112" loading="lazy" decoding="async" className="h-28 w-24 object-cover" />
                   <div className="flex min-w-0 flex-1 flex-col justify-between">
                     <div className="flex items-start justify-between gap-2"><div><h3 className="font-display text-2xl leading-none">{item.name}</h3><p className="mt-2 font-mono-ui text-[9px] uppercase tracking-[.1em] text-[#87796d]">{itemText.color}</p></div><button onClick={() => onRemove(item.id)} className="text-[#98887b] hover:text-[#9f523d]" aria-label={`Remove ${item.name}`} data-testid={`button-remove-${item.id}`}><X size={14} /></button></div>
                     <div className="flex items-end justify-between"><div className="flex items-center border border-[#312b25]/20"><button className="grid h-7 w-7 place-items-center hover:bg-[#efe2d3]" onClick={() => onUpdate(item.id, -1)} aria-label={`Decrease ${item.name}`} data-testid={`button-decrease-${item.id}`}><Minus size={12} /></button><span className="w-7 text-center font-mono-ui text-[10px]" data-testid={`text-quantity-${item.id}`}>{item.quantity}</span><button className="grid h-7 w-7 place-items-center hover:bg-[#efe2d3]" onClick={() => onUpdate(item.id, 1)} aria-label={`Increase ${item.name}`} data-testid={`button-increase-${item.id}`}><Plus size={12} /></button></div><span className="font-mono-ui text-xs">{money(item.price * item.quantity)}</span></div>
