@@ -542,7 +542,7 @@ function Hero({ onShop, c }: { onShop: () => void; c: Copy }) {
       <div className="relative mx-auto flex min-h-[680px] max-w-[1440px] flex-col justify-end px-5 pb-14 sm:min-h-[760px] sm:px-8 sm:pb-20 lg:px-12">
         <div className="max-w-[650px]">
           <p className="rise-in font-mono-ui text-[10px] uppercase tracking-[.3em] text-[#f1d2bd]">{c.heroKicker}</p>
-          <h1 className="rise-in rise-in-delay-1 mt-4 max-w-[620px] font-display text-[clamp(4.6rem,10vw,9.6rem)] leading-[.82] tracking-[-.055em]">
+          <h1 className="arabic-hero-title rise-in rise-in-delay-1 mt-4 max-w-[620px] font-display text-[clamp(4.6rem,10vw,9.6rem)] leading-[.82] tracking-[-.055em]">
             {c.heroTitle}
           </h1>
           <div className="rise-in rise-in-delay-2 mt-8 flex flex-col items-start gap-5 sm:flex-row sm:items-center">
@@ -655,10 +655,10 @@ function ProductDetail({
         <div className="flex flex-col justify-between p-7 sm:p-12">
           <div>
             <SectionKicker>{categoryLabels[language][product.category]}</SectionKicker>
-            <h2 className="mt-5 font-display text-5xl leading-[.9] tracking-[-.04em] text-[#312b25]">{product.name}</h2>
+            <h2 className="arabic-section-title mt-5 font-display text-5xl leading-[.9] tracking-[-.04em] text-[#312b25]">{product.name}</h2>
             <p className="mt-4 font-mono-ui text-sm text-[#6f6358]">{money(product.price)}</p>
             <div className="my-8 h-px bg-[#312b25]/15" />
-            <p className="font-display text-2xl leading-tight text-[#55473c]">{productText.note}</p>
+            <p className="arabic-body-display font-display text-2xl leading-tight text-[#55473c]">{productText.note}</p>
             <dl className="mt-8 space-y-4 border-t border-[#312b25]/15 pt-5 font-mono-ui text-[10px] uppercase tracking-[.13em] text-[#7d6d61]">
               <div className="flex justify-between"><dt>{c.format}</dt><dd className="text-right text-[#312b25]">{productText.material}</dd></div>
               <div className="flex justify-between"><dt>{c.notes}</dt><dd className="text-right text-[#312b25]">{productText.color}</dd></div>
@@ -805,7 +805,7 @@ function App() {
       <main>
         <section id="shop" className="mx-auto max-w-[1440px] px-5 py-20 sm:px-8 sm:py-28 lg:px-12">
           <div className="flex flex-col justify-between gap-8 sm:flex-row sm:items-end">
-            <div><SectionKicker>{c.selectedForNow}</SectionKicker><h2 className="mt-4 max-w-[500px] font-display text-5xl leading-[.9] tracking-[-.04em] sm:text-7xl">{c.essentials}</h2></div>
+            <div><SectionKicker>{c.selectedForNow}</SectionKicker><h2 className="arabic-section-title mt-4 max-w-[500px] font-display text-5xl leading-[.9] tracking-[-.04em] sm:text-7xl">{c.essentials}</h2></div>
             <p className="max-w-[250px] text-sm leading-6 text-[#77695e]">{c.essentialsDescription}</p>
           </div>
           <div className="mt-14 flex items-center justify-between border-y border-[#312b25]/15 py-4">
@@ -817,25 +817,25 @@ function App() {
 
         <section id="about" className="bg-[#273b39] text-[#f5ede2]">
           <div className="mx-auto grid max-w-[1440px] lg:grid-cols-[1.15fr_.85fr]">
-            <div className="flex min-h-[530px] flex-col justify-between px-5 py-14 sm:px-8 sm:py-20 lg:px-12"><SectionKicker dark>{c.ourPointOfView}</SectionKicker><div><p className="max-w-[680px] font-display text-[clamp(3rem,6vw,6rem)] leading-[.88] tracking-[-.045em]">{c.aboutTitle}</p><p className="mt-8 max-w-[360px] text-sm leading-6 text-[#d6d2c8]/70">{c.aboutDescription}</p></div><button onClick={() => notify(language === 'ar' ? 'ملاحظات الاستوديو ستتوفر قريبًا' : 'Our studio notes are coming soon')} className="flex w-fit items-center gap-3 border-b border-[#d6d2c8]/50 pb-2 font-mono-ui text-[10px] uppercase tracking-[.18em] hover:border-[#d18c6d] hover:text-[#d18c6d]" data-testid="button-read-about">{c.readNotes} <ArrowRight size={15} strokeWidth={1.3} /></button></div>
+             <div className="flex min-h-[530px] flex-col justify-between px-5 py-14 sm:px-8 sm:py-20 lg:px-12"><SectionKicker dark>{c.ourPointOfView}</SectionKicker><div><p className="arabic-feature-title max-w-[680px] font-display text-[clamp(3rem,6vw,6rem)] leading-[.88] tracking-[-.045em]">{c.aboutTitle}</p><p className="mt-8 max-w-[360px] text-sm leading-6 text-[#d6d2c8]/70">{c.aboutDescription}</p></div><button onClick={() => notify(language === 'ar' ? 'ملاحظات الاستوديو ستتوفر قريبًا' : 'Our studio notes are coming soon')} className="flex w-fit items-center gap-3 border-b border-[#d6d2c8]/50 pb-2 font-mono-ui text-[10px] uppercase tracking-[.18em] hover:border-[#d18c6d] hover:text-[#d18c6d]" data-testid="button-read-about">{c.readNotes} <ArrowRight size={15} strokeWidth={1.3} /></button></div>
             <div className="relative min-h-[390px] overflow-hidden bg-[#b87555] lg:min-h-0"><img src={makeupImage} alt="Rose cream blush in warm editorial light" className="h-full w-full object-cover mix-blend-multiply opacity-80" /><div className="absolute inset-0 bg-[#b87555]/30" /><div className="absolute bottom-8 left-8 font-mono-ui text-[9px] uppercase tracking-[.2em] text-[#f5ede2]/80">{c.beautyStudy}</div></div>
           </div>
         </section>
 
         <section id="journal" className="mx-auto max-w-[1440px] px-5 py-20 sm:px-8 sm:py-28 lg:px-12">
-          <div className="flex items-end justify-between"><div><SectionKicker>{c.theJournal}</SectionKicker><h2 className="mt-4 font-display text-5xl leading-none tracking-[-.04em] sm:text-7xl">{c.journalTitle}</h2></div><button onClick={() => notify(language === 'ar' ? 'المزيد من المقالات قريبًا' : 'More journal entries are on their way')} className="hidden items-center gap-2 font-mono-ui text-[10px] uppercase tracking-[.16em] text-[#9f523d] sm:flex" data-testid="button-view-journal">{c.viewAll} <ArrowRight size={15} /></button></div>
+           <div className="flex items-end justify-between"><div><SectionKicker>{c.theJournal}</SectionKicker><h2 className="arabic-section-title mt-4 font-display text-5xl leading-none tracking-[-.04em] sm:text-7xl">{c.journalTitle}</h2></div><button onClick={() => notify(language === 'ar' ? 'المزيد من المقالات قريبًا' : 'More journal entries are on their way')} className="hidden items-center gap-2 font-mono-ui text-[10px] uppercase tracking-[.16em] text-[#9f523d] sm:flex" data-testid="button-view-journal">{c.viewAll} <ArrowRight size={15} /></button></div>
           <div className="mt-12 grid gap-8 md:grid-cols-[1.3fr_.7fr]">
-            <button onClick={() => notify(language === 'ar' ? 'جارٍ فتح المقال' : 'Opening: The art of the everyday')} className="group text-left" data-testid="article-everyday"><div className="image-zoom relative aspect-[1.7/1] overflow-hidden bg-[#d3c4b4]"><img src={heroImage} alt="Eleganza beauty ritual in warm light" className="h-full w-full object-cover grayscale-[.1]" /><span className="absolute bottom-5 left-5 bg-[#f8f0e6] px-3 py-2 font-mono-ui text-[9px] uppercase tracking-[.15em]">{c.fieldNotes}</span></div><h3 className="mt-5 max-w-[520px] font-display text-4xl leading-[.92] transition-colors group-hover:text-[#9f523d]">{c.ritualArticle}</h3></button>
+             <button onClick={() => notify(language === 'ar' ? 'جارٍ فتح المقال' : 'Opening: The art of the everyday')} className="group text-left" data-testid="article-everyday"><div className="image-zoom relative aspect-[1.7/1] overflow-hidden bg-[#d3c4b4]"><img src={heroImage} alt="Eleganza beauty ritual in warm light" className="h-full w-full object-cover grayscale-[.1]" /><span className="absolute bottom-5 left-5 bg-[#f8f0e6] px-3 py-2 font-mono-ui text-[9px] uppercase tracking-[.15em]">{c.fieldNotes}</span></div><h3 className="arabic-article-title mt-5 max-w-[520px] font-display text-4xl leading-[.92] transition-colors group-hover:text-[#9f523d]">{c.ritualArticle}</h3></button>
             <div className="flex flex-col justify-between gap-8 border-t border-[#312b25]/15 pt-5 md:border-t-0 md:border-l md:pl-8">
-               <button onClick={() => notify(language === 'ar' ? 'جارٍ فتح المقال' : 'Opening: How to choose a signature scent')} className="group text-left" data-testid="article-room"><p className="font-mono-ui text-[9px] uppercase tracking-[.15em] text-[#9f523d]">{language === 'ar' ? 'عطور / 02' : 'Scent / 02'}</p><h3 className="mt-3 font-display text-3xl leading-[.95] group-hover:text-[#9f523d]">{c.scentArticle}</h3><span className="mt-4 flex items-center gap-2 font-mono-ui text-[9px] uppercase tracking-[.15em] text-[#98887a]">{c.readStory} <ArrowRight size={13} /></span></button>
-               <button onClick={() => notify(language === 'ar' ? 'جارٍ فتح المقال' : 'Opening: The five-minute face')} className="group border-t border-[#312b25]/15 pt-5 text-left" data-testid="article-form"><p className="font-mono-ui text-[9px] uppercase tracking-[.15em] text-[#9f523d]">{language === 'ar' ? 'في التطبيق / 03' : 'In practice / 03'}</p><h3 className="mt-3 font-display text-3xl leading-[.95] group-hover:text-[#9f523d]">{c.faceArticle}</h3><span className="mt-4 flex items-center gap-2 font-mono-ui text-[9px] uppercase tracking-[.15em] text-[#98887a]">{c.readStory} <ArrowRight size={13} /></span></button>
+                <button onClick={() => notify(language === 'ar' ? 'جارٍ فتح المقال' : 'Opening: How to choose a signature scent')} className="group text-left" data-testid="article-room"><p className="font-mono-ui text-[9px] uppercase tracking-[.15em] text-[#9f523d]">{language === 'ar' ? 'عطور / 02' : 'Scent / 02'}</p><h3 className="arabic-article-title mt-3 font-display text-3xl leading-[.95] group-hover:text-[#9f523d]">{c.scentArticle}</h3><span className="mt-4 flex items-center gap-2 font-mono-ui text-[9px] uppercase tracking-[.15em] text-[#98887a]">{c.readStory} <ArrowRight size={13} /></span></button>
+                <button onClick={() => notify(language === 'ar' ? 'جارٍ فتح المقال' : 'Opening: The five-minute face')} className="group border-t border-[#312b25]/15 pt-5 text-left" data-testid="article-form"><p className="font-mono-ui text-[9px] uppercase tracking-[.15em] text-[#9f523d]">{language === 'ar' ? 'في التطبيق / 03' : 'In practice / 03'}</p><h3 className="arabic-article-title mt-3 font-display text-3xl leading-[.95] group-hover:text-[#9f523d]">{c.faceArticle}</h3><span className="mt-4 flex items-center gap-2 font-mono-ui text-[9px] uppercase tracking-[.15em] text-[#98887a]">{c.readStory} <ArrowRight size={13} /></span></button>
             </div>
           </div>
         </section>
 
         <section className="border-y border-[#312b25]/15 bg-[#ece1d2]">
           <div className="mx-auto flex max-w-[1440px] flex-col gap-8 px-5 py-14 sm:px-8 sm:py-16 lg:flex-row lg:items-center lg:justify-between lg:px-12">
-            <div><SectionKicker>{c.slowerInbox}</SectionKicker><h2 className="mt-3 font-display text-4xl leading-none sm:text-5xl">{c.inboxTitle}</h2></div>
+             <div><SectionKicker>{c.slowerInbox}</SectionKicker><h2 className="arabic-section-title mt-3 font-display text-4xl leading-none sm:text-5xl">{c.inboxTitle}</h2></div>
             <form className="flex w-full max-w-[420px] border-b border-[#312b25]/45 py-3" onSubmit={(event) => { event.preventDefault(); notify(language === 'ar' ? 'تم اشتراكك. شكرًا لك.' : 'You’re on the list. Thank you.'); }}><input type="email" required placeholder={c.email} className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-[#8b7c70]" data-testid="input-newsletter" /><button className="font-mono-ui text-[10px] uppercase tracking-[.18em] text-[#9f523d]" data-testid="button-subscribe">{c.subscribe}</button></form>
           </div>
         </section>

@@ -150,6 +150,30 @@
   .rtl-ui { font-family: 'Noto Kufi Arabic', 'DM Sans', sans-serif; }
   .rtl-ui .font-display { font-family: 'Noto Naskh Arabic', 'Instrument Serif', serif; }
   .rtl-ui .font-mono-ui { font-family: 'Noto Kufi Arabic', 'DM Mono', monospace; letter-spacing: 0; }
+  .rtl-ui .arabic-hero-title {
+    max-width: 560px;
+    font-size: clamp(3.25rem, 6.4vw, 6.75rem);
+    line-height: 1.08;
+    letter-spacing: 0;
+    text-wrap: balance;
+  }
+  .rtl-ui .arabic-section-title {
+    font-size: clamp(2.65rem, 5vw, 4.75rem);
+    line-height: 1.14;
+    letter-spacing: 0;
+    text-wrap: balance;
+  }
+  .rtl-ui .arabic-feature-title {
+    font-size: clamp(2.75rem, 5vw, 5rem);
+    line-height: 1.12;
+    letter-spacing: 0;
+    text-wrap: balance;
+  }
+  .rtl-ui .arabic-article-title,
+  .rtl-ui .arabic-body-display {
+    line-height: 1.35;
+    letter-spacing: 0;
+  }
   .rtl-ui .text-left { text-align: right; }
   .rtl-ui .text-right { text-align: left; }
   .rtl-ui .float-right { float: left; }
