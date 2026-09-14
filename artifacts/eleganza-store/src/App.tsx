@@ -19,6 +19,14 @@ import perfumeImage from './assets/perfume-product.jpg';
 import makeupImage from './assets/makeup-product.jpg';
 import jewelryImage from './assets/jewelry-product.jpg';
 import lipImage from './assets/lip-product.jpg';
+import amberReverieImage from './assets/amber-reverie.jpg';
+import silkPetalImage from './assets/silk-petal.jpg';
+import solsticeChainImage from './assets/solstice-chain.jpg';
+import nocturneRougeImage from './assets/nocturne-rouge.jpg';
+import cedarAfterglowImage from './assets/cedar-afterglow.jpg';
+import dawnFlushImage from './assets/dawn-flush.jpg';
+import aureliaDropsImage from './assets/aurelia-drops.jpg';
+import plumElanImage from './assets/plum-elan.jpg';
 
 type Category = 'All' | 'New in' | 'Perfume' | 'Makeup' | 'Accessories';
 type Language = 'en' | 'ar';
@@ -88,7 +96,7 @@ const products: Product[] = [
     price: 168,
     material: 'Eau de parfum / 75 ml',
     color: 'Amber / vanilla',
-    image: perfumeImage,
+    image: amberReverieImage,
     note: 'A rich amber glow softened by smooth vanilla.',
     badge: 'New',
   },
@@ -99,7 +107,7 @@ const products: Product[] = [
     price: 44,
     material: 'Powder blush / 8 g',
     color: 'Soft coral',
-    image: makeupImage,
+    image: silkPetalImage,
     note: 'A weightless wash of coral that brings warmth to the face.',
   },
   {
@@ -109,7 +117,7 @@ const products: Product[] = [
     price: 118,
     material: 'Gold vermeil / 42 cm',
     color: 'Polished gold',
-    image: jewelryImage,
+    image: solsticeChainImage,
     note: 'A fine golden chain made to catch the light with every movement.',
     badge: 'Bestseller',
   },
@@ -120,7 +128,7 @@ const products: Product[] = [
     price: 39,
     material: 'Matte lipstick / 3.5 g',
     color: 'Burnished red',
-    image: lipImage,
+    image: nocturneRougeImage,
     note: 'A confident red with a soft matte finish that stays comfortable.',
   },
   {
@@ -130,7 +138,7 @@ const products: Product[] = [
     price: 152,
     material: 'Eau de parfum / 50 ml',
     color: 'Cedar / white musk',
-    image: perfumeImage,
+    image: cedarAfterglowImage,
     note: 'Clean cedar and soft musk settle close to the skin.',
   },
   {
@@ -140,7 +148,7 @@ const products: Product[] = [
     price: 46,
     material: 'Cream blush / 7 g',
     color: 'Warm peach',
-    image: makeupImage,
+    image: dawnFlushImage,
     note: 'A fresh peach tint that gives the complexion an easy glow.',
     badge: 'New',
   },
@@ -151,7 +159,7 @@ const products: Product[] = [
     price: 105,
     material: 'Gold vermeil',
     color: 'Satin gold',
-    image: jewelryImage,
+    image: aureliaDropsImage,
     note: 'Light-catching drops with a refined shape and effortless movement.',
   },
   {
@@ -161,7 +169,7 @@ const products: Product[] = [
     price: 38,
     material: 'Satin lipstick / 3.5 g',
     color: 'Muted plum',
-    image: lipImage,
+    image: plumElanImage,
     note: 'A muted plum that adds depth while remaining easy to wear.',
     badge: 'Edition 01',
   },
