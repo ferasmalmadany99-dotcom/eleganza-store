@@ -906,6 +906,36 @@ function ArticleReader({ article, onClose, c }: { article: Article; onClose: () 
   );
 }
 
+function JournalIndex({ entries, onClose, onSelect, c }: { entries: Article[]; onClose: () => void; onSelect: (id: ArticleId) => void; c: Copy }) {
+  return (
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-[#f8f0e6] text-[#312b25]" role="dialog" aria-modal="true" aria-label={c.journal}>
+      <div className="sticky top-0 z-20 flex items-center justify-between border-b border-[#312b25]/15 bg-[#f8f0e6]/95 px-5 py-4 backdrop-blur sm:px-8 lg:px-12">
+        <BrandName compact />
+        <button onClick={onClose} className="flex items-center gap-2 font-mono-ui text-[10px] uppercase tracking-[.15em]" aria-label={c.close} data-testid="button-close-journal-index">
+          {c.close} <X size={18} strokeWidth={1.3} />
+        </button>
+      </div>
+      <section className="mx-auto max-w-[1440px] px-5 pb-20 pt-12 sm:px-8 sm:pt-16 lg:px-12">
+        <SectionKicker>{c.theJournal}</SectionKicker>
+        <h1 className="arabic-section-title mt-4 font-display text-5xl leading-none tracking-[-.04em] sm:text-7xl">{c.journalTitle}</h1>
+        <div className="mt-12 grid gap-x-7 gap-y-12 md:grid-cols-2 lg:grid-cols-3">
+          {entries.map((entry) => (
+            <button key={entry.id} onClick={() => onSelect(entry.id)} className="group min-w-0 text-start" data-testid={`journal-index-${entry.id}`}>
+              <div className="image-zoom aspect-[4/3] overflow-hidden bg-[#d3c4b4]">
+                <img src={entry.image} alt="" className="h-full w-full object-cover" />
+              </div>
+              <p className="mt-5 font-mono-ui text-[9px] uppercase tracking-[.15em] text-[#9f523d]">{entry.category} / {entry.date}</p>
+              <h2 className="arabic-article-title mt-3 font-display text-3xl leading-[1.05] transition-colors group-hover:text-[#9f523d]">{entry.title}</h2>
+              <p className="mt-4 line-clamp-3 text-sm leading-7 text-[#706258]">{entry.introduction}</p>
+              <span className="mt-5 flex items-center gap-2 font-mono-ui text-[9px] uppercase tracking-[.15em] text-[#98887a]">{c.readStory} <ArrowRight size={13} /></span>
+            </button>
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+}
+
 function App() {
   const [language, setLanguage] = useState<Language>(() => {
     const requestedLanguage = new URLSearchParams(window.location.search).get('lang');
@@ -920,6 +950,7 @@ function App() {
   const [bagOpen, setBagOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [journalIndexOpen, setJournalIndexOpen] = useState(false);
   const [selectedArticleId, setSelectedArticleId] = useState<ArticleId | null>(null);
   const [notice, setNotice] = useState('');
   const c = copy[language];
@@ -983,7 +1014,7 @@ function App() {
         </section>
 
         <section id="journal" className="mx-auto max-w-[1440px] px-5 py-20 sm:px-8 sm:py-28 lg:px-12">
-           <div className="flex items-end justify-between"><div><SectionKicker>{c.theJournal}</SectionKicker><h2 className="arabic-section-title mt-4 font-display text-5xl leading-none tracking-[-.04em] sm:text-7xl">{c.journalTitle}</h2></div><button onClick={() => notify(language === 'ar' ? 'المزيد من المقالات قريبًا' : 'More journal entries are on their way')} className="hidden items-center gap-2 font-mono-ui text-[10px] uppercase tracking-[.16em] text-[#9f523d] sm:flex" data-testid="button-view-journal">{c.viewAll} <ArrowRight size={15} /></button></div>
+           <div className="flex items-end justify-between"><div><SectionKicker>{c.theJournal}</SectionKicker><h2 className="arabic-section-title mt-4 font-display text-5xl leading-none tracking-[-.04em] sm:text-7xl">{c.journalTitle}</h2></div><button onClick={() => setJournalIndexOpen(true)} className="hidden items-center gap-2 font-mono-ui text-[10px] uppercase tracking-[.16em] text-[#9f523d] sm:flex" data-testid="button-view-journal">{c.viewAll} <ArrowRight size={15} /></button></div>
           <div className="mt-12 grid min-w-0 gap-10 lg:grid-cols-[minmax(0,1.55fr)_minmax(280px,.75fr)] lg:gap-8">
               <button onClick={() => setSelectedArticleId('ritual')} className="group min-w-0 text-start" data-testid="article-everyday"><div className="image-zoom relative aspect-[1.7/1] overflow-hidden bg-[#d3c4b4]"><img src={heroImage} alt="Eleganza beauty ritual in warm light" className="h-full w-full object-cover grayscale-[.1]" /><span className="absolute bottom-5 start-5 bg-[#f8f0e6] px-3 py-2 font-mono-ui text-[9px] uppercase tracking-[.15em]">{c.fieldNotes}</span></div><h3 className="arabic-article-title mt-5 max-w-[620px] font-display text-4xl leading-[.98] transition-colors group-hover:text-[#9f523d] lg:text-[2.65rem]">{c.ritualArticle}</h3></button>
             <div className="flex min-w-0 flex-col border-t border-[#312b25]/15 pt-6 lg:border-s lg:border-t-0 lg:ps-8 lg:pt-0">
@@ -1012,6 +1043,7 @@ function App() {
       {bagOpen && <BagDrawer items={bag} language={language} c={c} onClose={() => setBagOpen(false)} onUpdate={updateQuantity} onRemove={(id) => setBag((current) => current.filter((item) => item.id !== id))} onCheckout={() => notify(language === 'ar' ? 'يتم تجهيز صفحة الدفع لك' : 'Checkout is being prepared for you')} />}
       {searchOpen && <SearchPanel products={products} c={c} language={language} onClose={() => setSearchOpen(false)} onSelect={(product) => { setSearchOpen(false); setSelectedProduct(product); }} />}
       {selectedProduct && <ProductDetail product={selectedProduct} language={language} c={c} favorite={favorites.includes(selectedProduct.id)} onFavorite={() => toggleFavorite(selectedProduct.id)} onAdd={() => { addToBag(selectedProduct); setSelectedProduct(null); }} onClose={() => setSelectedProduct(null)} />}
+      {journalIndexOpen && !selectedArticle && <JournalIndex entries={articles[language]} c={c} onClose={() => setJournalIndexOpen(false)} onSelect={setSelectedArticleId} />}
       {selectedArticle && <ArticleReader article={selectedArticle} c={c} onClose={() => setSelectedArticleId(null)} />}
     </div>
   );
