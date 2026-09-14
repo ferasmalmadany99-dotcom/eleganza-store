@@ -157,12 +157,46 @@
     transform: translateY(.12em) rotate(45deg);
   }
   .brand-name-ar {
+    position: relative;
+    display: inline-block;
     font-family: 'Aref Ruqaa Ink', 'Noto Naskh Arabic', serif;
     font-weight: 700;
-    font-size: .9em;
+    font-size: 1.02em;
     line-height: 1;
+    color: #fff;
     transform: translateY(.03em);
   }
+  .brand-name-ar-marks {
+    position: absolute;
+    inset: 0;
+    direction: rtl;
+    pointer-events: none;
+    color: #b64032;
+  }
+  .brand-name-ar-marks i {
+    position: absolute;
+    width: .28em;
+    height: .075em;
+    border-radius: 999px;
+    background: currentColor;
+    font-style: normal;
+    font-size: 0;
+    transform: rotate(-8deg);
+  }
+  .brand-name-ar-marks i:nth-child(1) { right: 8%; top: 78%; }
+  .brand-name-ar-marks i:nth-child(2) { right: 25%; top: 78%; }
+  .brand-name-ar-marks i:nth-child(3) { right: 42%; top: 1%; }
+  .brand-name-ar-marks i:nth-child(4) {
+    right: 61%;
+    top: -2%;
+    width: .19em;
+    height: .19em;
+    border: .055em solid currentColor;
+    background: transparent;
+    border-radius: 50%;
+    transform: none;
+  }
+  .brand-name-ar-marks i:nth-child(5) { right: 79%; top: 1%; }
   .hairline { height: 1px; background: hsl(var(--foreground) / 0.16); }
   .text-balance { text-wrap: balance; }
   .grain::after {

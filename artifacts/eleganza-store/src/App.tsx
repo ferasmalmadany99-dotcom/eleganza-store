@@ -460,7 +460,12 @@ function BrandName({ compact = false }: { compact?: boolean }) {
     >
       <span className="brand-name-en">Eleganza</span>
       <span className="brand-name-ornament" aria-hidden="true">✦</span>
-      <span className="brand-name-ar" dir="rtl">إِلِيغَانْزَا</span>
+      <span className="brand-name-ar" dir="rtl">
+        <span>إليغانزا</span>
+        <span className="brand-name-ar-marks" aria-hidden="true">
+          <i>ِ</i><i>ِ</i><i>َ</i><i>ْ</i><i>َ</i>
+        </span>
+      </span>
     </span>
   );
 }
