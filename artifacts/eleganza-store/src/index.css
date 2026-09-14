@@ -163,7 +163,7 @@
     font-weight: 700;
     font-size: 1.02em;
     line-height: 1;
-    color: #fff;
+    color: #fff !important;
     transform: translateY(.03em);
   }
   .brand-name-ar-marks {
@@ -171,12 +171,12 @@
     inset: 0;
     direction: rtl;
     pointer-events: none;
-    color: #b64032;
+    color: #d64736 !important;
   }
   .brand-name-ar-marks i {
     position: absolute;
-    width: .28em;
-    height: .075em;
+    width: .22em;
+    height: .06em;
     border-radius: 999px;
     background: currentColor;
     font-style: normal;
