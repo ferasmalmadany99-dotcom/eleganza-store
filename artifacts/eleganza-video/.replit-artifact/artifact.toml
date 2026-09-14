@@ -1,0 +1,28 @@
+kind = "video"
+previewPath = "/eleganza-video/"
+title = "Eleganza Beauty Film"
+description = "A vertical animated brand film for Eleganza, showcasing fragrance, makeup, and accessories through editorial motion graphics and original product imagery."
+version = "1.0.0"
+id = "artifacts/eleganza-video"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/eleganza-video/" ]
+localPort = 23160
+
+[services.development]
+run = "pnpm --filter @workspace/eleganza-video run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/eleganza-video", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/eleganza-video/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23160"
+BASE_PATH = "/eleganza-video/"

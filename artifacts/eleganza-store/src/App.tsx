@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   ArrowDownRight,
   ArrowLeft,
@@ -21,6 +21,7 @@ import jewelryImage from './assets/jewelry-product.jpg';
 import lipImage from './assets/lip-product.jpg';
 
 type Category = 'All' | 'New in' | 'Perfume' | 'Makeup' | 'Accessories';
+type Language = 'en' | 'ar';
 
 type Product = {
   id: string;
@@ -84,19 +85,180 @@ const products: Product[] = [
 
 const filters: Category[] = ['All', 'New in', 'Perfume', 'Makeup', 'Accessories'];
 
+const copy = {
+  en: {
+    menu: 'Menu',
+    shop: 'Shop',
+    journal: 'Journal',
+    about: 'About',
+    search: 'Search',
+    bag: 'Bag',
+    openMenu: 'Open menu',
+    openBag: 'Open bag',
+    heroKicker: 'The beauty edit — 01 / 03',
+    heroTitle: <>Made for<br /><em>the long view.</em></>,
+    heroDescription: 'Fragrance, color and small rituals with a little more staying power.',
+    shopEdit: 'Shop the edit',
+    scrollDiscover: 'Scroll to discover',
+    selectedForNow: 'Selected for now',
+    essentials: <>The essentials<br /><em>in rotation.</em></>,
+    essentialsDescription: 'A small, intentional edit of scent, color and adornment for the everyday.',
+    all: 'All',
+    newIn: 'New in',
+    perfume: 'Perfume',
+    makeup: 'Makeup',
+    accessories: 'Accessories',
+    ourPointOfView: 'Our point of view',
+    aboutTitle: <>Beauty, but <em>better considered.</em></>,
+    aboutDescription: 'Eleganza is a practice in editing. We look for the note that lingers, the color that feels like you, and the small detail that changes the whole ritual.',
+    readNotes: 'Read our notes',
+    beautyStudy: 'Beauty study / 001',
+    theJournal: 'The journal',
+    journalTitle: <>Notes on <em>living well.</em></>,
+    viewAll: 'View all',
+    fieldNotes: 'Field notes / 14.09.24',
+    ritualArticle: 'The art of the ritual: on scent, skin and taking your time.',
+    scentArticle: 'How to choose a signature scent without rushing the decision.',
+    faceArticle: 'The five-minute face: a few good things, applied with intention.',
+    readStory: 'Read story',
+    slowerInbox: 'A slower inbox',
+    inboxTitle: 'A note when there’s something to say.',
+    email: 'Your email address',
+    subscribe: 'Subscribe',
+    explore: 'Explore',
+    help: 'Help',
+    follow: 'Follow',
+    shipping: 'Shipping',
+    contact: 'Contact',
+    footerDescription: 'The quiet pleasure of finding the right thing.',
+    madeInLondon: 'Made with patience in London',
+    findPiece: 'Find a piece',
+    searchPlaceholder: 'Search fragrance, makeup, accessories...',
+    consideredThings: 'A few considered things',
+    results: 'results',
+    noResults: 'We couldn’t find that one. Try a material or category.',
+    close: 'Close',
+    yourEdit: 'Your edit',
+    theBag: 'The bag',
+    nothingHere: 'Nothing here yet.',
+    emptyBagDescription: 'Take your time. The good things are still waiting.',
+    continueBrowsing: 'Continue browsing',
+    subtotal: 'Subtotal',
+    freeShipping: 'Complimentary shipping on orders over $300.',
+    checkout: 'Continue to checkout',
+    format: 'Format',
+    notes: 'Notes',
+    dispatch: 'Dispatch',
+    dispatchTime: 'Within 2–3 days',
+    addToBag: 'Add to bag',
+    bestseller: 'Bestseller',
+    new: 'New',
+    edition: 'Edition 01',
+    languageLabel: 'العربية',
+    ariaLanguage: 'Switch to Arabic',
+  },
+  ar: {
+    menu: 'القائمة',
+    shop: 'المتجر',
+    journal: 'المجلة',
+    about: 'عن إيليغانزا',
+    search: 'بحث',
+    bag: 'السلة',
+    openMenu: 'فتح القائمة',
+    openBag: 'فتح السلة',
+    heroKicker: 'اختيارات الجمال — 01 / 03',
+    heroTitle: <>صُمّمت<br /><em>لتبقى.</em></>,
+    heroDescription: 'عطور وألوان وطقوس صغيرة تدوم معك أكثر.',
+    shopEdit: 'تسوّق الاختيارات',
+    scrollDiscover: 'مرّر للاستكشاف',
+    selectedForNow: 'مختاراتنا الآن',
+    essentials: <>الأساسيات<br /><em>في دورتها.</em></>,
+    essentialsDescription: 'اختيارات صغيرة ومدروسة من العطور والألوان والإكسسوارات ليومك.',
+    all: 'الكل',
+    newIn: 'وصل حديثًا',
+    perfume: 'عطور',
+    makeup: 'مكياج',
+    accessories: 'إكسسوارات',
+    ourPointOfView: 'وجهة نظرنا',
+    aboutTitle: <>الجمال، لكن <em>باختيار أفضل.</em></>,
+    aboutDescription: 'إيليغانزا تمرين على الانتقاء. نبحث عن الأثر الذي يبقى، واللون الذي يشبهك، والتفصيل الصغير الذي يغيّر الطقس كله.',
+    readNotes: 'اقرأ ملاحظاتنا',
+    beautyStudy: 'دراسة جمال / 001',
+    theJournal: 'المجلة',
+    journalTitle: <>ملاحظات عن <em>حياة أجمل.</em></>,
+    viewAll: 'عرض الكل',
+    fieldNotes: 'ملاحظات ميدانية / 14.09.24',
+    ritualArticle: 'فن الطقس اليومي: عن العطر والبشرة وأخذ الوقت.',
+    scentArticle: 'كيف تختار عطرك المميز دون استعجال القرار.',
+    faceArticle: 'إطلالة الخمس دقائق: أشياء قليلة جيدة، بلمسة مقصودة.',
+    readStory: 'اقرأ القصة',
+    slowerInbox: 'رسائل أبطأ',
+    inboxTitle: 'رسالة عندما يكون هناك ما يستحق القول.',
+    email: 'بريدك الإلكتروني',
+    subscribe: 'اشترك',
+    explore: 'استكشف',
+    help: 'مساعدة',
+    follow: 'تابعنا',
+    shipping: 'الشحن',
+    contact: 'تواصل معنا',
+    footerDescription: 'متعة هادئة في العثور على الشيء المناسب.',
+    madeInLondon: 'صُنع بصبر في لندن',
+    findPiece: 'ابحث عن قطعة',
+    searchPlaceholder: 'ابحث في العطور والمكياج والإكسسوارات...',
+    consideredThings: 'بعض الاختيارات المدروسة',
+    results: 'نتائج',
+    noResults: 'لم نجد ما تبحث عنه. جرّب مادة أو تصنيفًا آخر.',
+    close: 'إغلاق',
+    yourEdit: 'اختياراتك',
+    theBag: 'السلة',
+    nothingHere: 'السلة فارغة حاليًا.',
+    emptyBagDescription: 'خذ وقتك. الأشياء الجميلة ما زالت بانتظارك.',
+    continueBrowsing: 'تابع التصفح',
+    subtotal: 'المجموع الفرعي',
+    freeShipping: 'الشحن مجاني للطلبات التي تتجاوز 300 دولار.',
+    checkout: 'متابعة إلى الدفع',
+    format: 'النوع',
+    notes: 'الدرجات',
+    dispatch: 'التوصيل',
+    dispatchTime: 'خلال 2–3 أيام',
+    addToBag: 'أضف إلى السلة',
+    bestseller: 'الأكثر مبيعًا',
+    new: 'جديد',
+    edition: 'إصدار 01',
+    languageLabel: 'English',
+    ariaLanguage: 'التبديل إلى الإنجليزية',
+  },
+} as const;
+
+type Copy = typeof copy.en;
+
+const categoryLabels: Record<Language, Record<Category, string>> = {
+  en: { All: copy.en.all, 'New in': copy.en.newIn, Perfume: copy.en.perfume, Makeup: copy.en.makeup, Accessories: copy.en.accessories },
+  ar: { All: copy.ar.all, 'New in': copy.ar.newIn, Perfume: copy.ar.perfume, Makeup: copy.ar.makeup, Accessories: copy.ar.accessories },
+};
+
+const getBadgeLabel = (badge: string | undefined, c: Copy) =>
+  badge === 'Bestseller' ? c.bestseller : badge === 'New' ? c.new : badge === 'Edition 01' ? c.edition : badge;
+
 const money = (value: number) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value);
 
 function Header({
   bagCount,
+  language,
+  c,
   onBag,
   onSearch,
   onMenu,
+  onLanguageToggle,
 }: {
   bagCount: number;
+  language: Language;
+  c: Copy;
   onBag: () => void;
   onSearch: () => void;
   onMenu: () => void;
+  onLanguageToggle: () => void;
 }) {
   const jump = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
   return (
@@ -104,31 +266,34 @@ function Header({
       <div className="mx-auto flex max-w-[1440px] items-center justify-between px-5 py-5 sm:px-8 lg:px-12">
         <button className="flex items-center gap-2 lg:hidden" onClick={onMenu} aria-label="Open menu" data-testid="button-open-menu">
           <Menu size={19} strokeWidth={1.5} />
-          <span className="font-mono-ui text-[10px] uppercase tracking-[.22em]">Menu</span>
+          <span className="font-mono-ui text-[10px] uppercase tracking-[.22em]">{c.menu}</span>
         </button>
         <div className="hidden w-[260px] items-center gap-8 lg:flex">
           <button className="font-mono-ui text-[10px] uppercase tracking-[.22em] transition-opacity hover:opacity-60" onClick={() => jump('shop')} data-testid="link-shop">
-            Shop
+            {c.shop}
           </button>
           <button className="font-mono-ui text-[10px] uppercase tracking-[.22em] transition-opacity hover:opacity-60" onClick={() => jump('journal')} data-testid="link-journal">
-            Journal
+            {c.journal}
           </button>
           <button className="font-mono-ui text-[10px] uppercase tracking-[.22em] transition-opacity hover:opacity-60" onClick={() => jump('about')} data-testid="link-about">
-            About
+            {c.about}
           </button>
         </div>
         <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="font-display text-4xl leading-none tracking-[-.04em]" data-testid="link-home">
           Eleganza
         </button>
-        <div className="flex w-[260px] justify-end gap-5">
-          <button aria-label="Search" onClick={onSearch} className="transition-opacity hover:opacity-60" data-testid="button-open-search">
+        <div className="flex w-[260px] items-center justify-end gap-4">
+          <button aria-label={c.search} onClick={onSearch} className="transition-opacity hover:opacity-60" data-testid="button-open-search">
             <Search size={19} strokeWidth={1.4} />
           </button>
-          <button aria-label="Open bag" onClick={onBag} className="group flex items-center gap-2 transition-opacity hover:opacity-60" data-testid="button-open-bag">
+          <button aria-label={c.openBag} onClick={onBag} className="group flex items-center gap-2 transition-opacity hover:opacity-60" data-testid="button-open-bag">
             <ShoppingBag size={19} strokeWidth={1.4} />
             <span className="font-mono-ui text-[10px] uppercase tracking-[.18em]">
-              Bag <span className="opacity-60">({String(bagCount).padStart(2, '0')})</span>
+              {c.bag} <span className="opacity-60">({String(bagCount).padStart(2, '0')})</span>
             </span>
+          </button>
+          <button onClick={onLanguageToggle} aria-label={c.ariaLanguage} className="border-s border-white/30 ps-4 font-mono-ui text-[10px] uppercase tracking-[.12em] transition-opacity hover:opacity-60" data-testid="button-language-toggle">
+            {c.languageLabel}
           </button>
         </div>
       </div>
@@ -137,27 +302,27 @@ function Header({
   );
 }
 
-function Hero({ onShop }: { onShop: () => void }) {
+function Hero({ onShop, c }: { onShop: () => void; c: Copy }) {
   return (
     <section className="relative min-h-[680px] overflow-hidden bg-[#6c4a3a] text-[#f7f0e6] sm:min-h-[760px]">
       <img src={heroImage} alt="Eleganza fragrance, makeup and jewelry arranged in warm light" className="absolute inset-0 h-full w-full object-cover object-center opacity-90" />
       <div className="absolute inset-0 bg-gradient-to-r from-[#1d201a]/70 via-[#3e2d24]/15 to-transparent" />
       <div className="relative mx-auto flex min-h-[680px] max-w-[1440px] flex-col justify-end px-5 pb-14 sm:min-h-[760px] sm:px-8 sm:pb-20 lg:px-12">
         <div className="max-w-[650px]">
-          <p className="rise-in font-mono-ui text-[10px] uppercase tracking-[.3em] text-[#f1d2bd]">The beauty edit — 01 / 03</p>
+          <p className="rise-in font-mono-ui text-[10px] uppercase tracking-[.3em] text-[#f1d2bd]">{c.heroKicker}</p>
           <h1 className="rise-in rise-in-delay-1 mt-4 max-w-[620px] font-display text-[clamp(4.6rem,10vw,9.6rem)] leading-[.82] tracking-[-.055em]">
-            Made for<br /><em>the long view.</em>
+            {c.heroTitle}
           </h1>
           <div className="rise-in rise-in-delay-2 mt-8 flex flex-col items-start gap-5 sm:flex-row sm:items-center">
-            <p className="max-w-[250px] text-sm leading-6 text-[#f6ebe0]/80">Fragrance, color and small rituals with a little more staying power.</p>
+            <p className="max-w-[250px] text-sm leading-6 text-[#f6ebe0]/80">{c.heroDescription}</p>
             <button onClick={onShop} className="group flex items-center gap-3 border-b border-[#f7f0e6]/70 pb-2 font-mono-ui text-[10px] uppercase tracking-[.2em] transition-colors hover:border-[#f1d2bd] hover:text-[#f1d2bd]" data-testid="button-shop-edit">
-              Shop the edit <ArrowDownRight size={15} strokeWidth={1.3} className="transition-transform group-hover:translate-x-1 group-hover:translate-y-1" />
+              {c.shopEdit} <ArrowDownRight size={15} strokeWidth={1.3} className="transition-transform group-hover:translate-x-1 group-hover:translate-y-1" />
             </button>
           </div>
         </div>
       </div>
       <div className="absolute bottom-6 right-5 hidden items-center gap-4 sm:flex lg:right-12">
-        <span className="font-mono-ui text-[9px] uppercase tracking-[.2em] opacity-60">Scroll to discover</span>
+        <span className="font-mono-ui text-[9px] uppercase tracking-[.2em] opacity-60">{c.scrollDiscover}</span>
         <span className="h-px w-14 bg-white/50" />
       </div>
     </section>
@@ -170,12 +335,16 @@ function SectionKicker({ children, dark = false }: { children: string; dark?: bo
 
 function ProductCard({
   product,
+  language,
+  c,
   favorite,
   onFavorite,
   onSelect,
   onAdd,
 }: {
   product: Product;
+  language: Language;
+  c: Copy;
   favorite: boolean;
   onFavorite: () => void;
   onSelect: () => void;
@@ -186,19 +355,19 @@ function ProductCard({
       <div className="image-zoom relative aspect-[4/5] overflow-hidden bg-[#e3dbce]">
         <button onClick={onSelect} className="absolute inset-0 z-10 cursor-pointer" aria-label={`View ${product.name}`} data-testid={`button-view-${product.id}`} />
         <img src={product.image} alt={product.name} className="h-full w-full object-cover" />
-        {product.badge && <span className="absolute left-4 top-4 z-20 bg-[#f1e4d4] px-2.5 py-1 font-mono-ui text-[9px] uppercase tracking-[.15em] text-[#704637]">{product.badge}</span>}
+        {product.badge && <span className="absolute left-4 top-4 z-20 bg-[#f1e4d4] px-2.5 py-1 font-mono-ui text-[9px] uppercase tracking-[.15em] text-[#704637]">{getBadgeLabel(product.badge, c)}</span>}
         <button onClick={onFavorite} aria-label={favorite ? `Remove ${product.name} from favorites` : `Add ${product.name} to favorites`} className={`absolute right-4 top-4 z-20 grid h-9 w-9 place-items-center bg-[#f8f0e6]/90 transition-all hover:bg-[#f8f0e6] ${favorite ? 'text-[#a64e3a]' : 'text-[#312b25]'}`} data-testid={`button-favorite-${product.id}`}>
           <Heart size={16} strokeWidth={1.4} fill={favorite ? 'currentColor' : 'none'} />
         </button>
         <button onClick={onAdd} className="absolute bottom-0 left-0 right-0 z-20 translate-y-full bg-[#f8f0e6]/95 px-4 py-4 text-left font-mono-ui text-[10px] uppercase tracking-[.18em] text-[#322b25] transition-transform duration-300 group-hover:translate-y-0" data-testid={`button-add-${product.id}`}>
-          Add to bag <Plus size={13} className="float-right" strokeWidth={1.5} />
+          {c.addToBag} <Plus size={13} className="float-right" strokeWidth={1.5} />
         </button>
       </div>
       <button onClick={onSelect} className="mt-4 block text-left" data-testid={`button-details-${product.id}`}>
         <div className="flex items-start justify-between gap-3">
           <div>
             <h3 className="font-display text-[25px] leading-none text-[#312b25]">{product.name}</h3>
-            <p className="mt-2 font-mono-ui text-[9px] uppercase tracking-[.14em] text-[#87796d]">{product.color} / {product.material}</p>
+            <p className="mt-2 font-mono-ui text-[9px] uppercase tracking-[.14em] text-[#87796d]">{language === 'ar' ? `${product.color} / ${product.material}` : `${product.color} / ${product.material}`}</p>
           </div>
           <span className="font-mono-ui text-[11px] text-[#312b25]">{money(product.price)}</span>
         </div>
@@ -209,12 +378,16 @@ function ProductCard({
 
 function ProductDetail({
   product,
+  language,
+  c,
   favorite,
   onFavorite,
   onAdd,
   onClose,
 }: {
   product: Product;
+  language: Language;
+  c: Copy;
   favorite: boolean;
   onFavorite: () => void;
   onAdd: () => void;
@@ -223,24 +396,24 @@ function ProductDetail({
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-[#211b18]/55 p-0 backdrop-blur-[2px] sm:items-center sm:p-6" role="dialog" aria-modal="true" aria-label={`${product.name} details`}>
       <div className="relative max-h-[94dvh] w-full max-w-[980px] overflow-auto bg-[#f8f0e6] sm:grid sm:grid-cols-2">
-        <button onClick={onClose} className="absolute right-4 top-4 z-10 grid h-10 w-10 place-items-center bg-[#f8f0e6]/80 text-[#312b25] transition-colors hover:bg-[#f1e4d4]" aria-label="Close details" data-testid="button-close-detail"><X size={18} strokeWidth={1.4} /></button>
+        <button onClick={onClose} className="absolute right-4 top-4 z-10 grid h-10 w-10 place-items-center bg-[#f8f0e6]/80 text-[#312b25] transition-colors hover:bg-[#f1e4d4]" aria-label={c.close} data-testid="button-close-detail"><X size={18} strokeWidth={1.4} /></button>
         <div className="aspect-[4/4.7] bg-[#ded4c7] sm:aspect-auto"><img src={product.image} alt={product.name} className="h-full w-full object-cover" /></div>
         <div className="flex flex-col justify-between p-7 sm:p-12">
           <div>
-            <SectionKicker>{product.category}</SectionKicker>
+            <SectionKicker>{categoryLabels[language][product.category]}</SectionKicker>
             <h2 className="mt-5 font-display text-5xl leading-[.9] tracking-[-.04em] text-[#312b25]">{product.name}</h2>
             <p className="mt-4 font-mono-ui text-sm text-[#6f6358]">{money(product.price)}</p>
             <div className="my-8 h-px bg-[#312b25]/15" />
             <p className="font-display text-2xl leading-tight text-[#55473c]">{product.note}</p>
             <dl className="mt-8 space-y-4 border-t border-[#312b25]/15 pt-5 font-mono-ui text-[10px] uppercase tracking-[.13em] text-[#7d6d61]">
-              <div className="flex justify-between"><dt>Format</dt><dd className="text-right text-[#312b25]">{product.material}</dd></div>
-              <div className="flex justify-between"><dt>Notes</dt><dd className="text-right text-[#312b25]">{product.color}</dd></div>
-              <div className="flex justify-between"><dt>Dispatch</dt><dd className="text-right text-[#312b25]">Within 2–3 days</dd></div>
+              <div className="flex justify-between"><dt>{c.format}</dt><dd className="text-right text-[#312b25]">{product.material}</dd></div>
+              <div className="flex justify-between"><dt>{c.notes}</dt><dd className="text-right text-[#312b25]">{product.color}</dd></div>
+              <div className="flex justify-between"><dt>{c.dispatch}</dt><dd className="text-right text-[#312b25]">{c.dispatchTime}</dd></div>
             </dl>
           </div>
           <div className="mt-10 flex gap-3">
-            <button onClick={onAdd} className="flex-1 bg-[#9f523d] px-5 py-4 font-mono-ui text-[10px] uppercase tracking-[.2em] text-[#fff5e8] transition-colors hover:bg-[#7f3f31]" data-testid={`button-detail-add-${product.id}`}>Add to bag</button>
-            <button onClick={onFavorite} className={`grid w-14 place-items-center border border-[#312b25]/20 transition-colors hover:bg-[#efe2d3] ${favorite ? 'text-[#a64e3a]' : 'text-[#312b25]'}`} aria-label="Toggle favorite" data-testid={`button-detail-favorite-${product.id}`}><Heart size={18} strokeWidth={1.3} fill={favorite ? 'currentColor' : 'none'} /></button>
+            <button onClick={onAdd} className="flex-1 bg-[#9f523d] px-5 py-4 font-mono-ui text-[10px] uppercase tracking-[.2em] text-[#fff5e8] transition-colors hover:bg-[#7f3f31]" data-testid={`button-detail-add-${product.id}`}>{c.addToBag}</button>
+            <button onClick={onFavorite} className={`grid w-14 place-items-center border border-[#312b25]/20 transition-colors hover:bg-[#efe2d3] ${favorite ? 'text-[#a64e3a]' : 'text-[#312b25]'}`} aria-label={c.languageLabel === 'العربية' ? 'إضافة إلى المفضلة' : 'Toggle favorite'} data-testid={`button-detail-favorite-${product.id}`}><Heart size={18} strokeWidth={1.3} fill={favorite ? 'currentColor' : 'none'} /></button>
           </div>
         </div>
       </div>
@@ -250,12 +423,14 @@ function ProductDetail({
 
 function BagDrawer({
   items,
+  c,
   onClose,
   onUpdate,
   onRemove,
   onCheckout,
 }: {
   items: CartItem[];
+  c: Copy;
   onClose: () => void;
   onUpdate: (id: string, amount: number) => void;
   onRemove: (id: string) => void;
@@ -264,18 +439,18 @@ function BagDrawer({
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   return (
     <div className="fixed inset-0 z-50 bg-[#211b18]/45 backdrop-blur-[2px]" onClick={onClose}>
-      <aside className="absolute bottom-0 right-0 top-0 flex w-full max-w-[480px] flex-col bg-[#f8f0e6] text-[#312b25] shadow-2xl" onClick={(event) => event.stopPropagation()} role="dialog" aria-label="Shopping bag">
+       <aside className="absolute bottom-0 right-0 top-0 flex w-full max-w-[480px] flex-col bg-[#f8f0e6] text-[#312b25] shadow-2xl" onClick={(event) => event.stopPropagation()} role="dialog" aria-label={c.bag}>
         <div className="flex items-center justify-between border-b border-[#312b25]/15 px-6 py-5 sm:px-8">
-          <div><p className="font-mono-ui text-[10px] uppercase tracking-[.2em] text-[#9f523d]">Your edit</p><h2 className="mt-1 font-display text-4xl">The bag <span className="font-sans text-sm text-[#89796c]">({items.length})</span></h2></div>
-          <button onClick={onClose} aria-label="Close bag" className="grid h-10 w-10 place-items-center border border-[#312b25]/15 hover:bg-[#efe2d3]" data-testid="button-close-bag"><X size={18} strokeWidth={1.3} /></button>
+           <div><p className="font-mono-ui text-[10px] uppercase tracking-[.2em] text-[#9f523d]">{c.yourEdit}</p><h2 className="mt-1 font-display text-4xl">{c.theBag} <span className="font-sans text-sm text-[#89796c]">({items.length})</span></h2></div>
+           <button onClick={onClose} aria-label={c.close} className="grid h-10 w-10 place-items-center border border-[#312b25]/15 hover:bg-[#efe2d3]" data-testid="button-close-bag"><X size={18} strokeWidth={1.3} /></button>
         </div>
         <div className="no-scrollbar flex-1 overflow-auto px-6 py-6 sm:px-8">
           {items.length === 0 ? (
             <div className="flex h-full min-h-[380px] flex-col items-center justify-center text-center">
               <ShoppingBag size={28} strokeWidth={1} className="text-[#9f523d]" />
-              <p className="mt-5 font-display text-3xl">Nothing here yet.</p>
-              <p className="mt-2 max-w-[230px] text-sm leading-6 text-[#75685d]">Take your time. The good things are still waiting.</p>
-              <button onClick={onClose} className="mt-7 border-b border-[#9f523d] pb-1 font-mono-ui text-[10px] uppercase tracking-[.18em] text-[#9f523d]" data-testid="button-continue-shopping">Continue browsing</button>
+               <p className="mt-5 font-display text-3xl">{c.nothingHere}</p>
+               <p className="mt-2 max-w-[230px] text-sm leading-6 text-[#75685d]">{c.emptyBagDescription}</p>
+               <button onClick={onClose} className="mt-7 border-b border-[#9f523d] pb-1 font-mono-ui text-[10px] uppercase tracking-[.18em] text-[#9f523d]" data-testid="button-continue-shopping">{c.continueBrowsing}</button>
             </div>
           ) : (
             <div className="space-y-6">
@@ -291,21 +466,21 @@ function BagDrawer({
             </div>
           )}
         </div>
-        {items.length > 0 && <div className="border-t border-[#312b25]/15 px-6 py-6 sm:px-8"><div className="flex items-center justify-between"><span className="font-mono-ui text-[10px] uppercase tracking-[.16em] text-[#75685d]">Subtotal</span><span className="font-display text-3xl">{money(subtotal)}</span></div><p className="mt-2 text-xs text-[#827469]">Complimentary shipping on orders over $300.</p><button onClick={onCheckout} className="mt-6 flex w-full items-center justify-center gap-3 bg-[#9f523d] py-4 font-mono-ui text-[10px] uppercase tracking-[.2em] text-[#fff5e8] hover:bg-[#7f3f31]" data-testid="button-checkout">Continue to checkout <ArrowRight size={15} /></button></div>}
+         {items.length > 0 && <div className="border-t border-[#312b25]/15 px-6 py-6 sm:px-8"><div className="flex items-center justify-between"><span className="font-mono-ui text-[10px] uppercase tracking-[.16em] text-[#75685d]">{c.subtotal}</span><span className="font-display text-3xl">{money(subtotal)}</span></div><p className="mt-2 text-xs text-[#827469]">{c.freeShipping}</p><button onClick={onCheckout} className="mt-6 flex w-full items-center justify-center gap-3 bg-[#9f523d] py-4 font-mono-ui text-[10px] uppercase tracking-[.2em] text-[#fff5e8] hover:bg-[#7f3f31]" data-testid="button-checkout">{c.checkout} <ArrowRight size={15} /></button></div>}
       </aside>
     </div>
   );
 }
 
-function SearchPanel({ onClose, products: catalog, onSelect }: { onClose: () => void; products: Product[]; onSelect: (product: Product) => void }) {
+function SearchPanel({ onClose, products: catalog, onSelect, c, language }: { onClose: () => void; products: Product[]; onSelect: (product: Product) => void; c: Copy; language: Language }) {
   const [query, setQuery] = useState('');
   const results = catalog.filter((product) => `${product.name} ${product.category} ${product.material}`.toLowerCase().includes(query.toLowerCase()));
   return (
     <div className="fixed inset-0 z-50 bg-[#f8f0e6] text-[#312b25]">
       <div className="mx-auto max-w-[980px] px-5 py-6 sm:px-8 lg:px-12">
-        <div className="flex items-center justify-between border-b border-[#312b25]/15 pb-5"><span className="font-display text-4xl">Find a piece</span><button onClick={onClose} aria-label="Close search" data-testid="button-close-search"><X size={21} strokeWidth={1.3} /></button></div>
-        <div className="flex items-center gap-4 border-b border-[#312b25]/30 py-7"><Search size={20} strokeWidth={1.3} className="text-[#9f523d]" /><input autoFocus value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search fragrance, makeup, accessories..." className="w-full bg-transparent font-display text-3xl outline-none placeholder:text-[#b7a99d]" data-testid="input-search" /></div>
-        <div className="mt-8"><p className="font-mono-ui text-[10px] uppercase tracking-[.2em] text-[#9f523d]">{query ? `${results.length} results` : 'A few considered things'}</p><div className="mt-5 divide-y divide-[#312b25]/12">{results.map((product) => <button onClick={() => onSelect(product)} key={product.id} className="flex w-full items-center justify-between py-5 text-left hover:text-[#9f523d]" data-testid={`search-result-${product.id}`}><span className="font-display text-3xl">{product.name}</span><span className="font-mono-ui text-[10px] uppercase tracking-[.12em] text-[#8a796d]">{product.category} / {money(product.price)}</span></button>)}</div>{results.length === 0 && <p className="mt-8 font-display text-2xl text-[#817267]">We couldn’t find that one. Try a material or category.</p>}</div>
+        <div className="flex items-center justify-between border-b border-[#312b25]/15 pb-5"><span className="font-display text-4xl">{c.findPiece}</span><button onClick={onClose} aria-label={c.close} data-testid="button-close-search"><X size={21} strokeWidth={1.3} /></button></div>
+        <div className="flex items-center gap-4 border-b border-[#312b25]/30 py-7"><Search size={20} strokeWidth={1.3} className="text-[#9f523d]" /><input autoFocus value={query} onChange={(event) => setQuery(event.target.value)} placeholder={c.searchPlaceholder} className="w-full bg-transparent font-display text-3xl outline-none placeholder:text-[#b7a99d]" data-testid="input-search" /></div>
+        <div className="mt-8"><p className="font-mono-ui text-[10px] uppercase tracking-[.2em] text-[#9f523d]">{query ? `${results.length} ${c.results}` : c.consideredThings}</p><div className="mt-5 divide-y divide-[#312b25]/12">{results.map((product) => <button onClick={() => onSelect(product)} key={product.id} className="flex w-full items-center justify-between py-5 text-left hover:text-[#9f523d]" data-testid={`search-result-${product.id}`}><span className="font-display text-3xl">{product.name}</span><span className="font-mono-ui text-[10px] uppercase tracking-[.12em] text-[#8a796d]">{categoryLabels[language][product.category]} / {money(product.price)}</span></button>)}</div>{results.length === 0 && <p className="mt-8 font-display text-2xl text-[#817267]">{c.noResults}</p>}</div>
       </div>
     </div>
   );
