@@ -458,7 +458,7 @@ function Header({
   onBag,
   onSearch,
   onMenu,
-  onLanguageToggle,
+  onLanguageChange,
 }: {
   bagCount: number;
   language: Language;
@@ -466,7 +466,7 @@ function Header({
   onBag: () => void;
   onSearch: () => void;
   onMenu: () => void;
-  onLanguageToggle: () => void;
+  onLanguageChange: (language: Language) => void;
 }) {
   const jump = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
   return (
@@ -500,9 +500,33 @@ function Header({
               {c.bag} <span className="opacity-60">({String(bagCount).padStart(2, '0')})</span>
             </span>
           </button>
-          <button onClick={onLanguageToggle} aria-label={c.ariaLanguage} className="border-s border-white/30 ps-2 font-mono-ui text-[9px] uppercase tracking-[.08em] transition-opacity hover:opacity-60 sm:ps-4 sm:text-[10px] sm:tracking-[.12em]" data-testid="button-language-toggle">
-            {c.languageLabel}
-          </button>
+          <details className="group relative border-s border-white/30 ps-2 sm:ps-4">
+            <summary aria-label={c.ariaLanguage} className="flex cursor-pointer list-none items-center gap-1 font-mono-ui text-[9px] uppercase tracking-[.08em] transition-opacity hover:opacity-60 [&::-webkit-details-marker]:hidden sm:text-[10px] sm:tracking-[.12em]" data-testid="button-language-toggle">
+              <span>{language === 'ar' ? 'AR' : 'EN'}</span>
+              <ChevronDown size={12} strokeWidth={1.5} className="transition-transform group-open:rotate-180" />
+            </summary>
+            <div className="absolute end-0 top-full mt-3 min-w-[145px] border border-[#ded0c3] bg-[#f8f0e6] py-1 text-[#312b25] shadow-[0_12px_35px_rgba(31,24,20,.18)]">
+              {([
+                ['ar', 'العربية'],
+                ['en', 'English'],
+              ] as const).map(([value, label]) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={(event) => {
+                    onLanguageChange(value);
+                    event.currentTarget.closest('details')?.removeAttribute('open');
+                  }}
+                  className={`flex w-full items-center justify-between px-4 py-3 text-start font-mono-ui text-[10px] tracking-[.1em] transition-colors hover:bg-[#eadbcd] ${language === value ? 'text-[#9f523d]' : ''}`}
+                  aria-current={language === value ? 'true' : undefined}
+                  data-testid={`language-option-${value}`}
+                >
+                  <span>{label}</span>
+                  {language === value && <span aria-hidden="true">•</span>}
+                </button>
+              ))}
+            </div>
+          </details>
         </div>
       </div>
       <div className="mx-5 h-px bg-white/20 sm:mx-8 lg:mx-12" />
@@ -772,7 +796,7 @@ function App() {
   return (
     <div className={`grain min-h-[100dvh] bg-[#f8f0e6] text-[#312b25] ${language === 'ar' ? 'rtl-ui' : ''}`}>
       <section className="relative">
-        <Header bagCount={bagCount} language={language} c={c} onBag={() => setBagOpen(true)} onSearch={() => setSearchOpen(true)} onMenu={() => setMenuOpen(true)} onLanguageToggle={() => setLanguage((current) => current === 'en' ? 'ar' : 'en')} />
+        <Header bagCount={bagCount} language={language} c={c} onBag={() => setBagOpen(true)} onSearch={() => setSearchOpen(true)} onMenu={() => setMenuOpen(true)} onLanguageChange={setLanguage} />
         <Hero onShop={jumpToShop} c={c} />
       </section>
 
