@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=Noto+Kufi+Arabic:wght@400;500;600&family=Noto+Naskh+Arabic:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Aref+Ruqaa+Ink:wght@400;700&family=Cormorant+Garamond:ital,wght@1,600&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=Noto+Kufi+Arabic:wght@400;500;600&family=Noto+Naskh+Arabic:wght@400;500;600;700&display=swap');
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @plugin "@tailwindcss/typography";
@@ -128,9 +128,41 @@
 @layer utilities {
   .font-display { font-family: var(--app-font-serif); }
   .font-mono-ui { font-family: var(--app-font-mono); }
-  .brand-name { direction: ltr; line-height: 1; }
-  .brand-name-en { font-family: 'Instrument Serif', serif; letter-spacing: -.035em; }
-  .brand-name-ar { font-family: 'Noto Naskh Arabic', serif; line-height: 1; }
+  .brand-name {
+    position: relative;
+    direction: ltr;
+    line-height: 1;
+    filter: drop-shadow(0 1px 5px rgb(39 22 14 / .2));
+  }
+  .brand-name::after {
+    content: '';
+    position: absolute;
+    right: 9%;
+    bottom: -.23em;
+    width: 82%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, currentColor 20%, currentColor 80%, transparent);
+    opacity: .48;
+  }
+  .brand-name-en {
+    font-family: 'Cormorant Garamond', 'Instrument Serif', serif;
+    font-style: italic;
+    font-weight: 600;
+    letter-spacing: -.055em;
+  }
+  .brand-name-ornament {
+    font-family: serif;
+    font-size: .28em;
+    opacity: .7;
+    transform: translateY(.12em) rotate(45deg);
+  }
+  .brand-name-ar {
+    font-family: 'Aref Ruqaa Ink', 'Noto Naskh Arabic', serif;
+    font-weight: 700;
+    font-size: .9em;
+    line-height: 1;
+    transform: translateY(.03em);
+  }
   .hairline { height: 1px; background: hsl(var(--foreground) / 0.16); }
   .text-balance { text-wrap: balance; }
   .grain::after {

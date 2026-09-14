@@ -459,8 +459,8 @@ function BrandName({ compact = false }: { compact?: boolean }) {
       aria-label="Eleganza إليغانزا"
     >
       <span className="brand-name-en">Eleganza</span>
-      <span className="font-sans text-[.55em] font-light opacity-45" aria-hidden="true">|</span>
-      <span className="brand-name-ar" dir="rtl">إليغانزا</span>
+      <span className="brand-name-ornament" aria-hidden="true">✦</span>
+      <span className="brand-name-ar" dir="rtl">إِلِيغَانْزَا</span>
     </span>
   );
 }
