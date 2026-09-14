@@ -507,8 +507,8 @@ function Header({
             </summary>
             <div className="absolute end-0 top-full mt-3 min-w-[145px] border border-[#ded0c3] bg-[#f8f0e6] py-1 text-[#312b25] shadow-[0_12px_35px_rgba(31,24,20,.18)]">
               {([
-                ['ar', 'العربية'],
-                ['en', 'English'],
+                ['ar', 'AR'],
+                ['en', 'EN'],
               ] as const).map(([value, label]) => (
                 <button
                   key={value}
