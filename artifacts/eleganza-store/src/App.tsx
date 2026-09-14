@@ -451,6 +451,20 @@ const getProductCopy = (product: Product, language: Language) =>
 const money = (value: number) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value);
 
+function BrandName({ compact = false }: { compact?: boolean }) {
+  return (
+    <span
+      className={`brand-name inline-flex items-center whitespace-nowrap ${compact ? 'gap-1.5 text-[17px] sm:gap-2 sm:text-2xl' : 'gap-2 text-3xl sm:text-4xl'}`}
+      dir="ltr"
+      aria-label="Eleganza إليغانزا"
+    >
+      <span className="brand-name-en">Eleganza</span>
+      <span className="font-sans text-[.55em] font-light opacity-45" aria-hidden="true">|</span>
+      <span className="brand-name-ar" dir="rtl">إليغانزا</span>
+    </span>
+  );
+}
+
 function Header({
   bagCount,
   language,
@@ -487,8 +501,8 @@ function Header({
             {c.about}
           </button>
         </div>
-        <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="justify-self-center font-display text-3xl leading-none tracking-[-.04em] sm:text-4xl" data-testid="link-home">
-          Eleganza
+        <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="justify-self-center leading-none" data-testid="link-home">
+          <BrandName compact />
         </button>
         <div className="flex items-center justify-end gap-2 justify-self-end sm:gap-4 lg:w-[260px]">
           <button aria-label={c.search} onClick={onSearch} className="transition-opacity hover:opacity-60" data-testid="button-open-search">
@@ -800,7 +814,7 @@ function App() {
         <Hero onShop={jumpToShop} c={c} />
       </section>
 
-      {menuOpen && <div className="fixed inset-0 z-40 bg-[#f8f0e6] p-6 text-[#312b25] lg:hidden"><div className="flex items-center justify-between"><span className="font-display text-4xl">Eleganza</span><button onClick={() => setMenuOpen(false)} aria-label={c.close} data-testid="button-close-menu"><X size={21} /></button></div><nav className="mt-20 flex flex-col gap-6 font-display text-6xl"><button className="text-left" onClick={() => { setMenuOpen(false); jumpToShop(); }} data-testid="mobile-link-shop">{c.shop}</button><button className="text-left" onClick={() => { setMenuOpen(false); document.getElementById('journal')?.scrollIntoView({ behavior: 'smooth' }); }} data-testid="mobile-link-journal">{c.journal}</button><button className="text-left" onClick={() => { setMenuOpen(false); document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' }); }} data-testid="mobile-link-about">{c.about}</button></nav></div>}
+      {menuOpen && <div className="fixed inset-0 z-40 bg-[#f8f0e6] p-6 text-[#312b25] lg:hidden"><div className="flex items-center justify-between"><BrandName /><button onClick={() => setMenuOpen(false)} aria-label={c.close} data-testid="button-close-menu"><X size={21} /></button></div><nav className="mt-20 flex flex-col gap-6 font-display text-6xl"><button className="text-left" onClick={() => { setMenuOpen(false); jumpToShop(); }} data-testid="mobile-link-shop">{c.shop}</button><button className="text-left" onClick={() => { setMenuOpen(false); document.getElementById('journal')?.scrollIntoView({ behavior: 'smooth' }); }} data-testid="mobile-link-journal">{c.journal}</button><button className="text-left" onClick={() => { setMenuOpen(false); document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' }); }} data-testid="mobile-link-about">{c.about}</button></nav></div>}
 
       <main>
         <section id="shop" className="mx-auto max-w-[1440px] px-5 py-20 sm:px-8 sm:py-28 lg:px-12">

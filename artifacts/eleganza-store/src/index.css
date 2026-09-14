@@ -128,6 +128,9 @@
 @layer utilities {
   .font-display { font-family: var(--app-font-serif); }
   .font-mono-ui { font-family: var(--app-font-mono); }
+  .brand-name { direction: ltr; line-height: 1; }
+  .brand-name-en { font-family: 'Instrument Serif', serif; letter-spacing: -.035em; }
+  .brand-name-ar { font-family: 'Noto Naskh Arabic', serif; line-height: 1; }
   .hairline { height: 1px; background: hsl(var(--foreground) / 0.16); }
   .text-balance { text-wrap: balance; }
   .grain::after {
