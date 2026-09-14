@@ -70,6 +70,18 @@ type Product = {
 };
 
 type CartItem = Product & { quantity: number };
+type ArticleId = 'ritual' | 'scent' | 'five-minute-face';
+
+type Article = {
+  id: ArticleId;
+  category: string;
+  date: string;
+  title: string;
+  introduction: string;
+  sections: { heading: string; body: string }[];
+  closing: string;
+  image: string;
+};
 
 const products: Product[] = [
   {
@@ -373,6 +385,97 @@ const copy = {
 } as const;
 
 type Copy = typeof copy.en | typeof copy.ar;
+
+const articles: Record<Language, Article[]> = {
+  en: [
+    {
+      id: 'ritual',
+      category: 'Field notes',
+      date: '14.09.24',
+      title: 'The art of the ritual: on scent, skin and taking your time.',
+      introduction: 'A beauty ritual does not need to be complicated. It only needs enough attention to turn an ordinary moment into one that feels entirely your own.',
+      sections: [
+        { heading: 'Begin with the senses', body: 'Notice the temperature of the room, the light on the mirror and the texture of what you are applying. Moving slowly helps you understand what truly suits you instead of following every passing recommendation.' },
+        { heading: 'Let fragrance settle', body: 'Perfume changes as it meets warm skin. Apply it lightly to pulse points, then give it time. The first impression is only the opening; the scent that remains after an hour is the one you will actually live with.' },
+        { heading: 'Keep only what adds something', body: 'A considered ritual is often a short one. One beautiful scent, a color that brings life to the face and a small detail of gold can be more expressive than a crowded routine.' },
+      ],
+      closing: 'The pleasure is not in doing more. It is in noticing more.',
+      image: heroImage,
+    },
+    {
+      id: 'scent',
+      category: 'Scent',
+      date: '08.09.24',
+      title: 'How to choose a signature scent without rushing the decision.',
+      introduction: 'A signature scent should feel familiar without becoming predictable. Choosing one is less about finding the loudest perfume and more about discovering what feels natural on your skin.',
+      sections: [
+        { heading: 'Start with a feeling', body: 'Before reading a list of notes, decide what you want the fragrance to express: warmth, clarity, softness or mystery. This gives you a better direction than choosing by ingredient alone.' },
+        { heading: 'Try it on skin', body: 'Paper strips are useful for a first impression, but skin tells the complete story. Wear one fragrance at a time and notice how it develops through the day.' },
+        { heading: 'Return before deciding', body: 'A good choice still feels right on the second and third wear. Give yourself several days before buying. The fragrance you continue thinking about is usually the one worth keeping.' },
+      ],
+      closing: 'Choose the scent that feels like recognition, not performance.',
+      image: perfumeImage,
+    },
+    {
+      id: 'five-minute-face',
+      category: 'In practice',
+      date: '02.09.24',
+      title: 'The five-minute face: a few good things, applied with intention.',
+      introduction: 'Five minutes can be enough when each product has a clear purpose. The aim is not to hide the face, but to bring back light, warmth and definition.',
+      sections: [
+        { heading: 'Even only where needed', body: 'Use a small amount of complexion product around the center of the face and blend outward. Let natural skin remain visible wherever it already looks even.' },
+        { heading: 'Bring in one living color', body: 'A cream blush pressed into the cheeks can make the whole face feel awake. Use what remains on the fingertips across the lips for an easy sense of harmony.' },
+        { heading: 'Finish with definition', body: 'Brush the brows, curl the lashes and choose one deliberate finishing detail. A soft lip or a clean line around the eyes is enough.' },
+      ],
+      closing: 'A short routine works best when every gesture earns its place.',
+      image: makeupImage,
+    },
+  ],
+  ar: [
+    {
+      id: 'ritual',
+      category: 'ملاحظات ميدانية',
+      date: '14.09.24',
+      title: 'فن الطقس اليومي: عن العطر والبشرة وأخذ الوقت.',
+      introduction: 'لا يحتاج طقس الجمال إلى خطوات كثيرة. يكفي أن تمنحيه قليلًا من الانتباه حتى تتحول اللحظة العادية إلى وقت خاص بك.',
+      sections: [
+        { heading: 'ابدئي بالحواس', body: 'انتبهي إلى حرارة المكان، والضوء على المرآة، وملمس ما تضعينه على بشرتك. التمهّل يساعدك على معرفة ما يناسبك فعلًا بدل ملاحقة كل توصية عابرة.' },
+        { heading: 'اتركي العطر يستقر', body: 'يتغير العطر عندما يلامس دفء البشرة. ضعي كمية خفيفة على نقاط النبض ثم امنحيه وقتًا. الانطباع الأول مجرد بداية، أما الرائحة التي تبقى بعد ساعة فهي التي سترافقك.' },
+        { heading: 'احتفظي بما يضيف معنى', body: 'غالبًا ما يكون الطقس المدروس قصيرًا. عطر جميل، ولون يعيد الحيوية إلى الوجه، وتفصيل ذهبي صغير قد تكون أبلغ من روتين مزدحم.' },
+      ],
+      closing: 'المتعة ليست في فعل المزيد، بل في ملاحظة المزيد.',
+      image: heroImage,
+    },
+    {
+      id: 'scent',
+      category: 'عطور',
+      date: '08.09.24',
+      title: 'كيف تختار عطرك المميز دون استعجال القرار.',
+      introduction: 'يجب أن يبدو عطرك المميز مألوفًا دون أن يصبح متوقعًا. الاختيار لا يتعلق بأقوى رائحة، بل باكتشاف ما ينسجم طبيعيًا مع بشرتك.',
+      sections: [
+        { heading: 'ابدأ بالشعور', body: 'قبل قراءة قائمة المكونات، حدد ما تريد أن يقوله العطر: دفء، أو نقاء، أو نعومة، أو غموض. هذا يمنحك اتجاهًا أوضح من الاختيار حسب المكونات وحدها.' },
+        { heading: 'جرّبه على البشرة', body: 'الأوراق العطرية مفيدة للانطباع الأول، لكن البشرة تكشف القصة الكاملة. جرّب عطرًا واحدًا في كل مرة وراقب كيف يتطور خلال اليوم.' },
+        { heading: 'عُد إليه قبل القرار', body: 'الاختيار الجيد يبقى جميلًا في التجربة الثانية والثالثة. امنح نفسك عدة أيام قبل الشراء؛ فالعطر الذي يستمر في ذاكرتك غالبًا هو الذي يستحق البقاء.' },
+      ],
+      closing: 'اختر العطر الذي يشبه التعرف على نفسك، لا محاولة أداء دور.',
+      image: perfumeImage,
+    },
+    {
+      id: 'five-minute-face',
+      category: 'في التطبيق',
+      date: '02.09.24',
+      title: 'إطلالة الخمس دقائق: أشياء قليلة جيدة، بلمسة مقصودة.',
+      introduction: 'خمس دقائق قد تكون كافية عندما يكون لكل منتج دور واضح. الهدف ليس إخفاء الوجه، بل إعادة الضوء والدفء والتحديد إليه.',
+      sections: [
+        { heading: 'وحّدي ما يحتاج فقط', body: 'استخدمي كمية صغيرة من مستحضر البشرة في منتصف الوجه وادمجيها نحو الخارج. اتركي البشرة الطبيعية ظاهرة في المناطق التي لا تحتاج إلى تغطية.' },
+        { heading: 'أضيفي لونًا حيًا واحدًا', body: 'قليل من أحمر الخدود الكريمي يعيد الحيوية إلى الوجه كله. مرري ما تبقى على أطراف الأصابع فوق الشفاه لتحصلي على تناغم بسيط.' },
+        { heading: 'أنهي بقليل من التحديد', body: 'رتبي الحاجبين، وارفعي الرموش، ثم اختاري تفصيلًا أخيرًا واحدًا. لون شفاه هادئ أو خط نظيف حول العينين يكفي.' },
+      ],
+      closing: 'ينجح الروتين القصير عندما تكون لكل حركة فيه قيمة.',
+      image: makeupImage,
+    },
+  ],
+};
 
 const categoryLabels: Record<Language, Record<Category, string>> = {
   en: { All: copy.en.all, 'New in': copy.en.newIn, Perfume: copy.en.perfume, Makeup: copy.en.makeup, Accessories: copy.en.accessories },
@@ -767,6 +870,42 @@ function SearchPanel({ onClose, products: catalog, onSelect, c, language }: { on
   );
 }
 
+function ArticleReader({ article, onClose, c }: { article: Article; onClose: () => void; c: Copy }) {
+  return (
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-[#f8f0e6] text-[#312b25]" role="dialog" aria-modal="true" aria-label={article.title}>
+      <div className="sticky top-0 z-20 flex items-center justify-between border-b border-[#312b25]/15 bg-[#f8f0e6]/95 px-5 py-4 backdrop-blur sm:px-8 lg:px-12">
+        <BrandName compact />
+        <button onClick={onClose} className="flex items-center gap-2 font-mono-ui text-[10px] uppercase tracking-[.15em]" aria-label={c.close} data-testid="button-close-article">
+          {c.close} <X size={18} strokeWidth={1.3} />
+        </button>
+      </div>
+      <article className="mx-auto max-w-[1120px] px-5 pb-20 pt-10 sm:px-8 sm:pt-16 lg:px-12">
+        <div className="mx-auto max-w-[780px] text-center">
+          <p className="font-mono-ui text-[10px] uppercase tracking-[.2em] text-[#9f523d]">{article.category} / {article.date}</p>
+          <h1 className="arabic-feature-title mt-5 font-display text-[clamp(2.8rem,6vw,5.7rem)] leading-[.95] tracking-[-.04em]">{article.title}</h1>
+          <p className="mx-auto mt-7 max-w-[650px] text-base leading-8 text-[#706258] sm:text-lg">{article.introduction}</p>
+        </div>
+        <img src={article.image} alt="" className="mt-12 aspect-[16/8] w-full object-cover sm:mt-16" />
+        <div className="mx-auto mt-12 max-w-[680px] sm:mt-16">
+          {article.sections.map((section, index) => (
+            <section key={section.heading} className={index === 0 ? '' : 'mt-12 border-t border-[#312b25]/12 pt-12'}>
+              <p className="font-mono-ui text-[9px] tracking-[.16em] text-[#a85a43]">{String(index + 1).padStart(2, '0')}</p>
+              <h2 className="arabic-article-title mt-3 font-display text-3xl leading-tight sm:text-4xl">{section.heading}</h2>
+              <p className="mt-5 text-[15px] leading-8 text-[#66594f] sm:text-base">{section.body}</p>
+            </section>
+          ))}
+          <blockquote className="arabic-body-display mt-14 border-y border-[#312b25]/15 py-10 text-center font-display text-3xl leading-snug text-[#9f523d] sm:text-4xl">
+            {article.closing}
+          </blockquote>
+          <button onClick={onClose} className="mx-auto mt-10 flex items-center gap-3 border-b border-[#312b25]/50 pb-2 font-mono-ui text-[10px] uppercase tracking-[.16em]" data-testid="button-back-from-article">
+            <ArrowLeft size={15} /> {c.journal}
+          </button>
+        </div>
+      </article>
+    </div>
+  );
+}
+
 function App() {
   const [language, setLanguage] = useState<Language>(() => {
     const requestedLanguage = new URLSearchParams(window.location.search).get('lang');
@@ -781,8 +920,10 @@ function App() {
   const [bagOpen, setBagOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [selectedArticleId, setSelectedArticleId] = useState<ArticleId | null>(null);
   const [notice, setNotice] = useState('');
   const c = copy[language];
+  const selectedArticle = articles[language].find((article) => article.id === selectedArticleId) ?? null;
 
   useEffect(() => {
     document.documentElement.lang = language;
@@ -844,10 +985,10 @@ function App() {
         <section id="journal" className="mx-auto max-w-[1440px] px-5 py-20 sm:px-8 sm:py-28 lg:px-12">
            <div className="flex items-end justify-between"><div><SectionKicker>{c.theJournal}</SectionKicker><h2 className="arabic-section-title mt-4 font-display text-5xl leading-none tracking-[-.04em] sm:text-7xl">{c.journalTitle}</h2></div><button onClick={() => notify(language === 'ar' ? 'المزيد من المقالات قريبًا' : 'More journal entries are on their way')} className="hidden items-center gap-2 font-mono-ui text-[10px] uppercase tracking-[.16em] text-[#9f523d] sm:flex" data-testid="button-view-journal">{c.viewAll} <ArrowRight size={15} /></button></div>
           <div className="mt-12 grid gap-8 md:grid-cols-[1.3fr_.7fr]">
-             <button onClick={() => notify(language === 'ar' ? 'جارٍ فتح المقال' : 'Opening: The art of the everyday')} className="group text-left" data-testid="article-everyday"><div className="image-zoom relative aspect-[1.7/1] overflow-hidden bg-[#d3c4b4]"><img src={heroImage} alt="Eleganza beauty ritual in warm light" className="h-full w-full object-cover grayscale-[.1]" /><span className="absolute bottom-5 left-5 bg-[#f8f0e6] px-3 py-2 font-mono-ui text-[9px] uppercase tracking-[.15em]">{c.fieldNotes}</span></div><h3 className="arabic-article-title mt-5 max-w-[520px] font-display text-4xl leading-[.92] transition-colors group-hover:text-[#9f523d]">{c.ritualArticle}</h3></button>
+             <button onClick={() => setSelectedArticleId('ritual')} className="group text-left" data-testid="article-everyday"><div className="image-zoom relative aspect-[1.7/1] overflow-hidden bg-[#d3c4b4]"><img src={heroImage} alt="Eleganza beauty ritual in warm light" className="h-full w-full object-cover grayscale-[.1]" /><span className="absolute bottom-5 left-5 bg-[#f8f0e6] px-3 py-2 font-mono-ui text-[9px] uppercase tracking-[.15em]">{c.fieldNotes}</span></div><h3 className="arabic-article-title mt-5 max-w-[520px] font-display text-4xl leading-[.92] transition-colors group-hover:text-[#9f523d]">{c.ritualArticle}</h3></button>
             <div className="flex flex-col justify-between gap-8 border-t border-[#312b25]/15 pt-5 md:border-t-0 md:border-l md:pl-8">
-                <button onClick={() => notify(language === 'ar' ? 'جارٍ فتح المقال' : 'Opening: How to choose a signature scent')} className="group text-left" data-testid="article-room"><p className="font-mono-ui text-[9px] uppercase tracking-[.15em] text-[#9f523d]">{language === 'ar' ? 'عطور / 02' : 'Scent / 02'}</p><h3 className="arabic-article-title mt-3 font-display text-3xl leading-[.95] group-hover:text-[#9f523d]">{c.scentArticle}</h3><span className="mt-4 flex items-center gap-2 font-mono-ui text-[9px] uppercase tracking-[.15em] text-[#98887a]">{c.readStory} <ArrowRight size={13} /></span></button>
-                <button onClick={() => notify(language === 'ar' ? 'جارٍ فتح المقال' : 'Opening: The five-minute face')} className="group border-t border-[#312b25]/15 pt-5 text-left" data-testid="article-form"><p className="font-mono-ui text-[9px] uppercase tracking-[.15em] text-[#9f523d]">{language === 'ar' ? 'في التطبيق / 03' : 'In practice / 03'}</p><h3 className="arabic-article-title mt-3 font-display text-3xl leading-[.95] group-hover:text-[#9f523d]">{c.faceArticle}</h3><span className="mt-4 flex items-center gap-2 font-mono-ui text-[9px] uppercase tracking-[.15em] text-[#98887a]">{c.readStory} <ArrowRight size={13} /></span></button>
+                <button onClick={() => setSelectedArticleId('scent')} className="group text-left" data-testid="article-room"><p className="font-mono-ui text-[9px] uppercase tracking-[.15em] text-[#9f523d]">{language === 'ar' ? 'عطور / 02' : 'Scent / 02'}</p><h3 className="arabic-article-title mt-3 font-display text-3xl leading-[.95] group-hover:text-[#9f523d]">{c.scentArticle}</h3><span className="mt-4 flex items-center gap-2 font-mono-ui text-[9px] uppercase tracking-[.15em] text-[#98887a]">{c.readStory} <ArrowRight size={13} /></span></button>
+                <button onClick={() => setSelectedArticleId('five-minute-face')} className="group border-t border-[#312b25]/15 pt-5 text-left" data-testid="article-form"><p className="font-mono-ui text-[9px] uppercase tracking-[.15em] text-[#9f523d]">{language === 'ar' ? 'في التطبيق / 03' : 'In practice / 03'}</p><h3 className="arabic-article-title mt-3 font-display text-3xl leading-[.95] group-hover:text-[#9f523d]">{c.faceArticle}</h3><span className="mt-4 flex items-center gap-2 font-mono-ui text-[9px] uppercase tracking-[.15em] text-[#98887a]">{c.readStory} <ArrowRight size={13} /></span></button>
             </div>
           </div>
         </section>
@@ -871,6 +1012,7 @@ function App() {
       {bagOpen && <BagDrawer items={bag} language={language} c={c} onClose={() => setBagOpen(false)} onUpdate={updateQuantity} onRemove={(id) => setBag((current) => current.filter((item) => item.id !== id))} onCheckout={() => notify(language === 'ar' ? 'يتم تجهيز صفحة الدفع لك' : 'Checkout is being prepared for you')} />}
       {searchOpen && <SearchPanel products={products} c={c} language={language} onClose={() => setSearchOpen(false)} onSelect={(product) => { setSearchOpen(false); setSelectedProduct(product); }} />}
       {selectedProduct && <ProductDetail product={selectedProduct} language={language} c={c} favorite={favorites.includes(selectedProduct.id)} onFavorite={() => toggleFavorite(selectedProduct.id)} onAdd={() => { addToBag(selectedProduct); setSelectedProduct(null); }} onClose={() => setSelectedProduct(null)} />}
+      {selectedArticle && <ArticleReader article={selectedArticle} c={c} onClose={() => setSelectedArticleId(null)} />}
     </div>
   );
 }
