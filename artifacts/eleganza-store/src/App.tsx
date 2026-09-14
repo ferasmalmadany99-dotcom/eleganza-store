@@ -230,7 +230,7 @@ const copy = {
   },
 } as const;
 
-type Copy = typeof copy.en;
+type Copy = typeof copy.en | typeof copy.ar;
 
 const categoryLabels: Record<Language, Record<Category, string>> = {
   en: { All: copy.en.all, 'New in': copy.en.newIn, Perfume: copy.en.perfume, Makeup: copy.en.makeup, Accessories: copy.en.accessories },
@@ -239,6 +239,32 @@ const categoryLabels: Record<Language, Record<Category, string>> = {
 
 const getBadgeLabel = (badge: string | undefined, c: Copy) =>
   badge === 'Bestseller' ? c.bestseller : badge === 'New' ? c.new : badge === 'Edition 01' ? c.edition : badge;
+
+const arabicProductCopy: Record<string, Pick<Product, 'material' | 'color' | 'note'>> = {
+  p01: {
+    material: 'أو دو بارفان / 50 مل',
+    color: 'خشب الصندل / العنبر',
+    note: 'عطر دافئ بجاذبية هادئة، يترك أثرًا مميزًا يدوم طويلًا.',
+  },
+  m01: {
+    material: 'أحمر خدود كريمي / 7 غ',
+    color: 'وردي البتلات',
+    note: 'لمسة وردية شفافة تبدو كلون بشرتك الطبيعي، ولكن بنعومة أجمل.',
+  },
+  a01: {
+    material: 'فضة إسترلينية مطلية بالذهب',
+    color: 'ذهبي دافئ',
+    note: 'تفصيل ذهبي بسيط يضفي لمسة أنيقة على إطلالتك اليومية.',
+  },
+  m02: {
+    material: 'أحمر شفاه ساتان / 3.5 غ',
+    color: 'توتي داكن',
+    note: 'لون شفاه ناعم بتأثير ضبابي ولمسة أكثر وضوحًا وتميّزًا.',
+  },
+};
+
+const getProductCopy = (product: Product, language: Language) =>
+  language === 'ar' ? arabicProductCopy[product.id] ?? product : product;
 
 const money = (value: number) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value);
@@ -263,10 +289,10 @@ function Header({
   const jump = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
   return (
     <header className="absolute left-0 right-0 top-0 z-30 text-[#f7f0e6]">
-      <div className="mx-auto flex max-w-[1440px] items-center justify-between px-5 py-5 sm:px-8 lg:px-12">
-        <button className="flex items-center gap-2 lg:hidden" onClick={onMenu} aria-label="Open menu" data-testid="button-open-menu">
+      <div className="mx-auto grid max-w-[1440px] grid-cols-[1fr_auto_1fr] items-center px-5 py-5 sm:px-8 lg:grid-cols-[260px_1fr_260px] lg:px-12">
+        <button className="flex items-center gap-2 justify-self-start lg:hidden" onClick={onMenu} aria-label={c.openMenu} data-testid="button-open-menu">
           <Menu size={19} strokeWidth={1.5} />
-          <span className="font-mono-ui text-[10px] uppercase tracking-[.22em]">{c.menu}</span>
+          <span className="hidden font-mono-ui text-[10px] uppercase tracking-[.22em] sm:inline">{c.menu}</span>
         </button>
         <div className="hidden w-[260px] items-center gap-8 lg:flex">
           <button className="font-mono-ui text-[10px] uppercase tracking-[.22em] transition-opacity hover:opacity-60" onClick={() => jump('shop')} data-testid="link-shop">
@@ -279,20 +305,20 @@ function Header({
             {c.about}
           </button>
         </div>
-        <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="font-display text-4xl leading-none tracking-[-.04em]" data-testid="link-home">
+        <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="justify-self-center font-display text-3xl leading-none tracking-[-.04em] sm:text-4xl" data-testid="link-home">
           Eleganza
         </button>
-        <div className="flex w-[260px] items-center justify-end gap-4">
+        <div className="flex items-center justify-end gap-2 justify-self-end sm:gap-4 lg:w-[260px]">
           <button aria-label={c.search} onClick={onSearch} className="transition-opacity hover:opacity-60" data-testid="button-open-search">
             <Search size={19} strokeWidth={1.4} />
           </button>
           <button aria-label={c.openBag} onClick={onBag} className="group flex items-center gap-2 transition-opacity hover:opacity-60" data-testid="button-open-bag">
             <ShoppingBag size={19} strokeWidth={1.4} />
-            <span className="font-mono-ui text-[10px] uppercase tracking-[.18em]">
+            <span className="hidden font-mono-ui text-[10px] uppercase tracking-[.18em] sm:inline">
               {c.bag} <span className="opacity-60">({String(bagCount).padStart(2, '0')})</span>
             </span>
           </button>
-          <button onClick={onLanguageToggle} aria-label={c.ariaLanguage} className="border-s border-white/30 ps-4 font-mono-ui text-[10px] uppercase tracking-[.12em] transition-opacity hover:opacity-60" data-testid="button-language-toggle">
+          <button onClick={onLanguageToggle} aria-label={c.ariaLanguage} className="border-s border-white/30 ps-2 font-mono-ui text-[9px] uppercase tracking-[.08em] transition-opacity hover:opacity-60 sm:ps-4 sm:text-[10px] sm:tracking-[.12em]" data-testid="button-language-toggle">
             {c.languageLabel}
           </button>
         </div>
@@ -350,6 +376,8 @@ function ProductCard({
   onSelect: () => void;
   onAdd: () => void;
 }) {
+  const productText = getProductCopy(product, language);
+
   return (
     <article className="group" data-testid={`card-product-${product.id}`}>
       <div className="image-zoom relative aspect-[4/5] overflow-hidden bg-[#e3dbce]">
@@ -367,7 +395,8 @@ function ProductCard({
         <div className="flex items-start justify-between gap-3">
           <div>
             <h3 className="font-display text-[25px] leading-none text-[#312b25]">{product.name}</h3>
-            <p className="mt-2 font-mono-ui text-[9px] uppercase tracking-[.14em] text-[#87796d]">{language === 'ar' ? `${product.color} / ${product.material}` : `${product.color} / ${product.material}`}</p>
+            <p className="mt-2 font-mono-ui text-[9px] uppercase tracking-[.14em] text-[#87796d]">{productText.color} / {productText.material}</p>
+            <p className="mt-3 max-w-[280px] text-xs leading-5 text-[#786b60]">{productText.note}</p>
           </div>
           <span className="font-mono-ui text-[11px] text-[#312b25]">{money(product.price)}</span>
         </div>
@@ -393,6 +422,8 @@ function ProductDetail({
   onAdd: () => void;
   onClose: () => void;
 }) {
+  const productText = getProductCopy(product, language);
+
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-[#211b18]/55 p-0 backdrop-blur-[2px] sm:items-center sm:p-6" role="dialog" aria-modal="true" aria-label={`${product.name} details`}>
       <div className="relative max-h-[94dvh] w-full max-w-[980px] overflow-auto bg-[#f8f0e6] sm:grid sm:grid-cols-2">
@@ -404,10 +435,10 @@ function ProductDetail({
             <h2 className="mt-5 font-display text-5xl leading-[.9] tracking-[-.04em] text-[#312b25]">{product.name}</h2>
             <p className="mt-4 font-mono-ui text-sm text-[#6f6358]">{money(product.price)}</p>
             <div className="my-8 h-px bg-[#312b25]/15" />
-            <p className="font-display text-2xl leading-tight text-[#55473c]">{product.note}</p>
+            <p className="font-display text-2xl leading-tight text-[#55473c]">{productText.note}</p>
             <dl className="mt-8 space-y-4 border-t border-[#312b25]/15 pt-5 font-mono-ui text-[10px] uppercase tracking-[.13em] text-[#7d6d61]">
-              <div className="flex justify-between"><dt>{c.format}</dt><dd className="text-right text-[#312b25]">{product.material}</dd></div>
-              <div className="flex justify-between"><dt>{c.notes}</dt><dd className="text-right text-[#312b25]">{product.color}</dd></div>
+              <div className="flex justify-between"><dt>{c.format}</dt><dd className="text-right text-[#312b25]">{productText.material}</dd></div>
+              <div className="flex justify-between"><dt>{c.notes}</dt><dd className="text-right text-[#312b25]">{productText.color}</dd></div>
               <div className="flex justify-between"><dt>{c.dispatch}</dt><dd className="text-right text-[#312b25]">{c.dispatchTime}</dd></div>
             </dl>
           </div>
@@ -423,6 +454,7 @@ function ProductDetail({
 
 function BagDrawer({
   items,
+  language,
   c,
   onClose,
   onUpdate,
@@ -430,6 +462,7 @@ function BagDrawer({
   onCheckout,
 }: {
   items: CartItem[];
+  language: Language;
   c: Copy;
   onClose: () => void;
   onUpdate: (id: string, amount: number) => void;
@@ -454,15 +487,18 @@ function BagDrawer({
             </div>
           ) : (
             <div className="space-y-6">
-              {items.map((item) => (
+              {items.map((item) => {
+                const itemText = getProductCopy(item, language);
+                return (
                 <div key={item.id} className="flex gap-4 border-b border-[#312b25]/12 pb-6" data-testid={`row-bag-${item.id}`}>
                   <img src={item.image} alt={item.name} className="h-28 w-24 object-cover" />
                   <div className="flex min-w-0 flex-1 flex-col justify-between">
-                    <div className="flex items-start justify-between gap-2"><div><h3 className="font-display text-2xl leading-none">{item.name}</h3><p className="mt-2 font-mono-ui text-[9px] uppercase tracking-[.1em] text-[#87796d]">{item.color}</p></div><button onClick={() => onRemove(item.id)} className="text-[#98887b] hover:text-[#9f523d]" aria-label={`Remove ${item.name}`} data-testid={`button-remove-${item.id}`}><X size={14} /></button></div>
+                    <div className="flex items-start justify-between gap-2"><div><h3 className="font-display text-2xl leading-none">{item.name}</h3><p className="mt-2 font-mono-ui text-[9px] uppercase tracking-[.1em] text-[#87796d]">{itemText.color}</p></div><button onClick={() => onRemove(item.id)} className="text-[#98887b] hover:text-[#9f523d]" aria-label={`Remove ${item.name}`} data-testid={`button-remove-${item.id}`}><X size={14} /></button></div>
                     <div className="flex items-end justify-between"><div className="flex items-center border border-[#312b25]/20"><button className="grid h-7 w-7 place-items-center hover:bg-[#efe2d3]" onClick={() => onUpdate(item.id, -1)} aria-label={`Decrease ${item.name}`} data-testid={`button-decrease-${item.id}`}><Minus size={12} /></button><span className="w-7 text-center font-mono-ui text-[10px]" data-testid={`text-quantity-${item.id}`}>{item.quantity}</span><button className="grid h-7 w-7 place-items-center hover:bg-[#efe2d3]" onClick={() => onUpdate(item.id, 1)} aria-label={`Increase ${item.name}`} data-testid={`button-increase-${item.id}`}><Plus size={12} /></button></div><span className="font-mono-ui text-xs">{money(item.price * item.quantity)}</span></div>
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
@@ -474,7 +510,10 @@ function BagDrawer({
 
 function SearchPanel({ onClose, products: catalog, onSelect, c, language }: { onClose: () => void; products: Product[]; onSelect: (product: Product) => void; c: Copy; language: Language }) {
   const [query, setQuery] = useState('');
-  const results = catalog.filter((product) => `${product.name} ${product.category} ${product.material}`.toLowerCase().includes(query.toLowerCase()));
+  const results = catalog.filter((product) => {
+    const productText = getProductCopy(product, language);
+    return `${product.name} ${categoryLabels[language][product.category]} ${productText.material} ${productText.color} ${productText.note}`.toLowerCase().includes(query.toLowerCase());
+  });
   return (
     <div className="fixed inset-0 z-50 bg-[#f8f0e6] text-[#312b25]">
       <div className="mx-auto max-w-[980px] px-5 py-6 sm:px-8 lg:px-12">
@@ -487,6 +526,12 @@ function SearchPanel({ onClose, products: catalog, onSelect, c, language }: { on
 }
 
 function App() {
+  const [language, setLanguage] = useState<Language>(() => {
+    const requestedLanguage = new URLSearchParams(window.location.search).get('lang');
+    if (requestedLanguage === 'ar' || requestedLanguage === 'en') return requestedLanguage;
+    const savedLanguage = window.localStorage.getItem('eleganza-language');
+    return savedLanguage === 'ar' ? 'ar' : 'en';
+  });
   const [activeFilter, setActiveFilter] = useState<Category>('All');
   const [favorites, setFavorites] = useState<string[]>([]);
   const [bag, setBag] = useState<CartItem[]>([]);
@@ -495,6 +540,13 @@ function App() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [notice, setNotice] = useState('');
+  const c = copy[language];
+
+  useEffect(() => {
+    document.documentElement.lang = language;
+    document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr';
+    window.localStorage.setItem('eleganza-language', language);
+  }, [language]);
 
   const shownProducts = useMemo(() => {
     if (activeFilter === 'All') return products;
@@ -519,64 +571,64 @@ function App() {
   const jumpToShop = () => document.getElementById('shop')?.scrollIntoView({ behavior: 'smooth' });
 
   return (
-    <div className="grain min-h-[100dvh] bg-[#f8f0e6] text-[#312b25]">
+    <div className={`grain min-h-[100dvh] bg-[#f8f0e6] text-[#312b25] ${language === 'ar' ? 'rtl-ui' : ''}`}>
       <section className="relative">
-        <Header bagCount={bagCount} onBag={() => setBagOpen(true)} onSearch={() => setSearchOpen(true)} onMenu={() => setMenuOpen(true)} />
-        <Hero onShop={jumpToShop} />
+        <Header bagCount={bagCount} language={language} c={c} onBag={() => setBagOpen(true)} onSearch={() => setSearchOpen(true)} onMenu={() => setMenuOpen(true)} onLanguageToggle={() => setLanguage((current) => current === 'en' ? 'ar' : 'en')} />
+        <Hero onShop={jumpToShop} c={c} />
       </section>
 
-      {menuOpen && <div className="fixed inset-0 z-40 bg-[#f8f0e6] p-6 text-[#312b25] lg:hidden"><div className="flex items-center justify-between"><span className="font-display text-4xl">Eleganza</span><button onClick={() => setMenuOpen(false)} aria-label="Close menu" data-testid="button-close-menu"><X size={21} /></button></div><nav className="mt-20 flex flex-col gap-6 font-display text-6xl"><button className="text-left" onClick={() => { setMenuOpen(false); jumpToShop(); }} data-testid="mobile-link-shop">Shop</button><button className="text-left" onClick={() => { setMenuOpen(false); document.getElementById('journal')?.scrollIntoView({ behavior: 'smooth' }); }} data-testid="mobile-link-journal">Journal</button><button className="text-left" onClick={() => { setMenuOpen(false); document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' }); }} data-testid="mobile-link-about">About</button></nav></div>}
+      {menuOpen && <div className="fixed inset-0 z-40 bg-[#f8f0e6] p-6 text-[#312b25] lg:hidden"><div className="flex items-center justify-between"><span className="font-display text-4xl">Eleganza</span><button onClick={() => setMenuOpen(false)} aria-label={c.close} data-testid="button-close-menu"><X size={21} /></button></div><nav className="mt-20 flex flex-col gap-6 font-display text-6xl"><button className="text-left" onClick={() => { setMenuOpen(false); jumpToShop(); }} data-testid="mobile-link-shop">{c.shop}</button><button className="text-left" onClick={() => { setMenuOpen(false); document.getElementById('journal')?.scrollIntoView({ behavior: 'smooth' }); }} data-testid="mobile-link-journal">{c.journal}</button><button className="text-left" onClick={() => { setMenuOpen(false); document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' }); }} data-testid="mobile-link-about">{c.about}</button></nav></div>}
 
       <main>
         <section id="shop" className="mx-auto max-w-[1440px] px-5 py-20 sm:px-8 sm:py-28 lg:px-12">
           <div className="flex flex-col justify-between gap-8 sm:flex-row sm:items-end">
-            <div><SectionKicker>Selected for now</SectionKicker><h2 className="mt-4 max-w-[500px] font-display text-5xl leading-[.9] tracking-[-.04em] sm:text-7xl">The essentials<br /><em>in rotation.</em></h2></div>
-            <p className="max-w-[250px] text-sm leading-6 text-[#77695e]">A small, intentional edit of scent, color and adornment for the everyday.</p>
+            <div><SectionKicker>{c.selectedForNow}</SectionKicker><h2 className="mt-4 max-w-[500px] font-display text-5xl leading-[.9] tracking-[-.04em] sm:text-7xl">{c.essentials}</h2></div>
+            <p className="max-w-[250px] text-sm leading-6 text-[#77695e]">{c.essentialsDescription}</p>
           </div>
           <div className="mt-14 flex items-center justify-between border-y border-[#312b25]/15 py-4">
-            <div className="no-scrollbar flex gap-6 overflow-auto">{filters.map((filter) => <button key={filter} onClick={() => setActiveFilter(filter)} className={`whitespace-nowrap font-mono-ui text-[10px] uppercase tracking-[.16em] transition-colors ${activeFilter === filter ? 'text-[#9f523d]' : 'text-[#88796c] hover:text-[#312b25]'}`} data-testid={`button-filter-${filter.toLowerCase().replace(' ', '-')}`}>{filter}</button>)}</div>
+            <div className="no-scrollbar flex gap-6 overflow-auto">{filters.map((filter) => <button key={filter} onClick={() => setActiveFilter(filter)} className={`whitespace-nowrap font-mono-ui text-[10px] uppercase tracking-[.16em] transition-colors ${activeFilter === filter ? 'text-[#9f523d]' : 'text-[#88796c] hover:text-[#312b25]'}`} data-testid={`button-filter-${filter.toLowerCase().replace(' ', '-')}`}>{categoryLabels[language][filter]}</button>)}</div>
             <span className="hidden font-mono-ui text-[10px] uppercase tracking-[.14em] text-[#9b8b7e] sm:block">{shownProducts.length} / 04</span>
           </div>
-          <div className="mt-8 grid gap-x-5 gap-y-14 sm:grid-cols-2 lg:grid-cols-4">{shownProducts.map((product) => <ProductCard key={product.id} product={product} favorite={favorites.includes(product.id)} onFavorite={() => toggleFavorite(product.id)} onSelect={() => setSelectedProduct(product)} onAdd={() => addToBag(product)} />)}</div>
+          <div className="mt-8 grid gap-x-5 gap-y-14 sm:grid-cols-2 lg:grid-cols-4">{shownProducts.map((product) => <ProductCard key={product.id} product={product} language={language} c={c} favorite={favorites.includes(product.id)} onFavorite={() => toggleFavorite(product.id)} onSelect={() => setSelectedProduct(product)} onAdd={() => addToBag(product)} />)}</div>
         </section>
 
         <section id="about" className="bg-[#273b39] text-[#f5ede2]">
           <div className="mx-auto grid max-w-[1440px] lg:grid-cols-[1.15fr_.85fr]">
-            <div className="flex min-h-[530px] flex-col justify-between px-5 py-14 sm:px-8 sm:py-20 lg:px-12"><SectionKicker dark>Our point of view</SectionKicker><div><p className="max-w-[680px] font-display text-[clamp(3rem,6vw,6rem)] leading-[.88] tracking-[-.045em]">Beauty, but <em>better considered.</em></p><p className="mt-8 max-w-[360px] text-sm leading-6 text-[#d6d2c8]/70">Eleganza is a practice in editing. We look for the note that lingers, the color that feels like you, and the small detail that changes the whole ritual.</p></div><button onClick={() => notify('Our studio notes are coming soon')} className="flex w-fit items-center gap-3 border-b border-[#d6d2c8]/50 pb-2 font-mono-ui text-[10px] uppercase tracking-[.18em] hover:border-[#d18c6d] hover:text-[#d18c6d]" data-testid="button-read-about">Read our notes <ArrowRight size={15} strokeWidth={1.3} /></button></div>
-            <div className="relative min-h-[390px] overflow-hidden bg-[#b87555] lg:min-h-0"><img src={makeupImage} alt="Rose cream blush in warm editorial light" className="h-full w-full object-cover mix-blend-multiply opacity-80" /><div className="absolute inset-0 bg-[#b87555]/30" /><div className="absolute bottom-8 left-8 font-mono-ui text-[9px] uppercase tracking-[.2em] text-[#f5ede2]/80">Beauty study / 001</div></div>
+            <div className="flex min-h-[530px] flex-col justify-between px-5 py-14 sm:px-8 sm:py-20 lg:px-12"><SectionKicker dark>{c.ourPointOfView}</SectionKicker><div><p className="max-w-[680px] font-display text-[clamp(3rem,6vw,6rem)] leading-[.88] tracking-[-.045em]">{c.aboutTitle}</p><p className="mt-8 max-w-[360px] text-sm leading-6 text-[#d6d2c8]/70">{c.aboutDescription}</p></div><button onClick={() => notify(language === 'ar' ? 'ملاحظات الاستوديو ستتوفر قريبًا' : 'Our studio notes are coming soon')} className="flex w-fit items-center gap-3 border-b border-[#d6d2c8]/50 pb-2 font-mono-ui text-[10px] uppercase tracking-[.18em] hover:border-[#d18c6d] hover:text-[#d18c6d]" data-testid="button-read-about">{c.readNotes} <ArrowRight size={15} strokeWidth={1.3} /></button></div>
+            <div className="relative min-h-[390px] overflow-hidden bg-[#b87555] lg:min-h-0"><img src={makeupImage} alt="Rose cream blush in warm editorial light" className="h-full w-full object-cover mix-blend-multiply opacity-80" /><div className="absolute inset-0 bg-[#b87555]/30" /><div className="absolute bottom-8 left-8 font-mono-ui text-[9px] uppercase tracking-[.2em] text-[#f5ede2]/80">{c.beautyStudy}</div></div>
           </div>
         </section>
 
         <section id="journal" className="mx-auto max-w-[1440px] px-5 py-20 sm:px-8 sm:py-28 lg:px-12">
-          <div className="flex items-end justify-between"><div><SectionKicker>The journal</SectionKicker><h2 className="mt-4 font-display text-5xl leading-none tracking-[-.04em] sm:text-7xl">Notes on <em>living well.</em></h2></div><button onClick={() => notify('More journal entries are on their way')} className="hidden items-center gap-2 font-mono-ui text-[10px] uppercase tracking-[.16em] text-[#9f523d] sm:flex" data-testid="button-view-journal">View all <ArrowRight size={15} /></button></div>
+          <div className="flex items-end justify-between"><div><SectionKicker>{c.theJournal}</SectionKicker><h2 className="mt-4 font-display text-5xl leading-none tracking-[-.04em] sm:text-7xl">{c.journalTitle}</h2></div><button onClick={() => notify(language === 'ar' ? 'المزيد من المقالات قريبًا' : 'More journal entries are on their way')} className="hidden items-center gap-2 font-mono-ui text-[10px] uppercase tracking-[.16em] text-[#9f523d] sm:flex" data-testid="button-view-journal">{c.viewAll} <ArrowRight size={15} /></button></div>
           <div className="mt-12 grid gap-8 md:grid-cols-[1.3fr_.7fr]">
-            <button onClick={() => notify('Opening: The art of the everyday')} className="group text-left" data-testid="article-everyday"><div className="image-zoom relative aspect-[1.7/1] overflow-hidden bg-[#d3c4b4]"><img src={heroImage} alt="Eleganza beauty ritual in warm light" className="h-full w-full object-cover grayscale-[.1]" /><span className="absolute bottom-5 left-5 bg-[#f8f0e6] px-3 py-2 font-mono-ui text-[9px] uppercase tracking-[.15em]">Field notes / 14.09.24</span></div><h3 className="mt-5 max-w-[520px] font-display text-4xl leading-[.92] transition-colors group-hover:text-[#9f523d]">The art of the ritual: on scent, skin and taking your time.</h3></button>
+            <button onClick={() => notify(language === 'ar' ? 'جارٍ فتح المقال' : 'Opening: The art of the everyday')} className="group text-left" data-testid="article-everyday"><div className="image-zoom relative aspect-[1.7/1] overflow-hidden bg-[#d3c4b4]"><img src={heroImage} alt="Eleganza beauty ritual in warm light" className="h-full w-full object-cover grayscale-[.1]" /><span className="absolute bottom-5 left-5 bg-[#f8f0e6] px-3 py-2 font-mono-ui text-[9px] uppercase tracking-[.15em]">{c.fieldNotes}</span></div><h3 className="mt-5 max-w-[520px] font-display text-4xl leading-[.92] transition-colors group-hover:text-[#9f523d]">{c.ritualArticle}</h3></button>
             <div className="flex flex-col justify-between gap-8 border-t border-[#312b25]/15 pt-5 md:border-t-0 md:border-l md:pl-8">
-               <button onClick={() => notify('Opening: How to choose a signature scent')} className="group text-left" data-testid="article-room"><p className="font-mono-ui text-[9px] uppercase tracking-[.15em] text-[#9f523d]">Scent / 02</p><h3 className="mt-3 font-display text-3xl leading-[.95] group-hover:text-[#9f523d]">How to choose a signature scent without rushing the decision.</h3><span className="mt-4 flex items-center gap-2 font-mono-ui text-[9px] uppercase tracking-[.15em] text-[#98887a]">Read story <ArrowRight size={13} /></span></button>
-               <button onClick={() => notify('Opening: The five-minute face')} className="group border-t border-[#312b25]/15 pt-5 text-left" data-testid="article-form"><p className="font-mono-ui text-[9px] uppercase tracking-[.15em] text-[#9f523d]">In practice / 03</p><h3 className="mt-3 font-display text-3xl leading-[.95] group-hover:text-[#9f523d]">The five-minute face: a few good things, applied with intention.</h3><span className="mt-4 flex items-center gap-2 font-mono-ui text-[9px] uppercase tracking-[.15em] text-[#98887a]">Read story <ArrowRight size={13} /></span></button>
+               <button onClick={() => notify(language === 'ar' ? 'جارٍ فتح المقال' : 'Opening: How to choose a signature scent')} className="group text-left" data-testid="article-room"><p className="font-mono-ui text-[9px] uppercase tracking-[.15em] text-[#9f523d]">{language === 'ar' ? 'عطور / 02' : 'Scent / 02'}</p><h3 className="mt-3 font-display text-3xl leading-[.95] group-hover:text-[#9f523d]">{c.scentArticle}</h3><span className="mt-4 flex items-center gap-2 font-mono-ui text-[9px] uppercase tracking-[.15em] text-[#98887a]">{c.readStory} <ArrowRight size={13} /></span></button>
+               <button onClick={() => notify(language === 'ar' ? 'جارٍ فتح المقال' : 'Opening: The five-minute face')} className="group border-t border-[#312b25]/15 pt-5 text-left" data-testid="article-form"><p className="font-mono-ui text-[9px] uppercase tracking-[.15em] text-[#9f523d]">{language === 'ar' ? 'في التطبيق / 03' : 'In practice / 03'}</p><h3 className="mt-3 font-display text-3xl leading-[.95] group-hover:text-[#9f523d]">{c.faceArticle}</h3><span className="mt-4 flex items-center gap-2 font-mono-ui text-[9px] uppercase tracking-[.15em] text-[#98887a]">{c.readStory} <ArrowRight size={13} /></span></button>
             </div>
           </div>
         </section>
 
         <section className="border-y border-[#312b25]/15 bg-[#ece1d2]">
           <div className="mx-auto flex max-w-[1440px] flex-col gap-8 px-5 py-14 sm:px-8 sm:py-16 lg:flex-row lg:items-center lg:justify-between lg:px-12">
-            <div><SectionKicker>A slower inbox</SectionKicker><h2 className="mt-3 font-display text-4xl leading-none sm:text-5xl">A note when there’s something to say.</h2></div>
-            <form className="flex w-full max-w-[420px] border-b border-[#312b25]/45 py-3" onSubmit={(event) => { event.preventDefault(); notify('You’re on the list. Thank you.'); }}><input type="email" required placeholder="Your email address" className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-[#8b7c70]" data-testid="input-newsletter" /><button className="font-mono-ui text-[10px] uppercase tracking-[.18em] text-[#9f523d]" data-testid="button-subscribe">Subscribe</button></form>
+            <div><SectionKicker>{c.slowerInbox}</SectionKicker><h2 className="mt-3 font-display text-4xl leading-none sm:text-5xl">{c.inboxTitle}</h2></div>
+            <form className="flex w-full max-w-[420px] border-b border-[#312b25]/45 py-3" onSubmit={(event) => { event.preventDefault(); notify(language === 'ar' ? 'تم اشتراكك. شكرًا لك.' : 'You’re on the list. Thank you.'); }}><input type="email" required placeholder={c.email} className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-[#8b7c70]" data-testid="input-newsletter" /><button className="font-mono-ui text-[10px] uppercase tracking-[.18em] text-[#9f523d]" data-testid="button-subscribe">{c.subscribe}</button></form>
           </div>
         </section>
       </main>
 
       <footer className="bg-[#312b25] text-[#f5ede2]">
         <div className="mx-auto max-w-[1440px] px-5 py-14 sm:px-8 sm:py-18 lg:px-12">
-          <div className="flex flex-col justify-between gap-12 sm:flex-row"><div><p className="font-display text-6xl tracking-[-.05em]">Eleganza</p><p className="mt-4 max-w-[220px] text-sm leading-6 text-[#e2d6ca]/65">The quiet pleasure of finding the right thing.</p></div><div className="grid grid-cols-2 gap-x-16 gap-y-8 sm:grid-cols-3"><div><p className="font-mono-ui text-[9px] uppercase tracking-[.2em] text-[#d18c6d]">Explore</p><div className="mt-4 flex flex-col gap-3 text-sm text-[#e2d6ca]/70"><button className="text-left hover:text-[#fff8ed]" onClick={jumpToShop} data-testid="footer-shop">Shop</button><button className="text-left hover:text-[#fff8ed]" onClick={() => document.getElementById('journal')?.scrollIntoView({ behavior: 'smooth' })} data-testid="footer-journal">Journal</button></div></div><div><p className="font-mono-ui text-[9px] uppercase tracking-[.2em] text-[#d18c6d]">Help</p><div className="mt-4 flex flex-col gap-3 text-sm text-[#e2d6ca]/70"><button className="text-left hover:text-[#fff8ed]" onClick={() => notify('We’ll be in touch shortly')} data-testid="footer-contact">Contact</button><button className="text-left hover:text-[#fff8ed]" onClick={() => notify('Shipping is complimentary over $300')} data-testid="footer-shipping">Shipping</button></div></div><div className="col-span-2 sm:col-span-1"><p className="font-mono-ui text-[9px] uppercase tracking-[.2em] text-[#d18c6d]">Follow</p><div className="mt-4 flex gap-4 text-sm text-[#e2d6ca]/70"><button onClick={() => notify('Instagram is coming soon')} data-testid="footer-instagram">Instagram</button><button onClick={() => notify('Pinterest is coming soon')} data-testid="footer-pinterest">Pinterest</button></div></div></div></div>
-          <div className="mt-16 flex flex-col justify-between gap-3 border-t border-[#f5ede2]/15 pt-5 font-mono-ui text-[9px] uppercase tracking-[.16em] text-[#e2d6ca]/45 sm:flex-row"><span>© 2024 Eleganza Studio</span><span>Made with patience in London</span></div>
+          <div className="flex flex-col justify-between gap-12 sm:flex-row"><div><p className="font-display text-6xl tracking-[-.05em]">Eleganza</p><p className="mt-4 max-w-[220px] text-sm leading-6 text-[#e2d6ca]/65">{c.footerDescription}</p></div><div className="grid grid-cols-2 gap-x-16 gap-y-8 sm:grid-cols-3"><div><p className="font-mono-ui text-[9px] uppercase tracking-[.2em] text-[#d18c6d]">{c.explore}</p><div className="mt-4 flex flex-col gap-3 text-sm text-[#e2d6ca]/70"><button className="text-left hover:text-[#fff8ed]" onClick={jumpToShop} data-testid="footer-shop">{c.shop}</button><button className="text-left hover:text-[#fff8ed]" onClick={() => document.getElementById('journal')?.scrollIntoView({ behavior: 'smooth' })} data-testid="footer-journal">{c.journal}</button></div></div><div><p className="font-mono-ui text-[9px] uppercase tracking-[.2em] text-[#d18c6d]">{c.help}</p><div className="mt-4 flex flex-col gap-3 text-sm text-[#e2d6ca]/70"><button className="text-left hover:text-[#fff8ed]" onClick={() => notify(language === 'ar' ? 'سنتواصل معك قريبًا' : 'We’ll be in touch shortly')} data-testid="footer-contact">{c.contact}</button><button className="text-left hover:text-[#fff8ed]" onClick={() => notify(c.freeShipping)} data-testid="footer-shipping">{c.shipping}</button></div></div><div className="col-span-2 sm:col-span-1"><p className="font-mono-ui text-[9px] uppercase tracking-[.2em] text-[#d18c6d]">{c.follow}</p><div className="mt-4 flex gap-4 text-sm text-[#e2d6ca]/70"><button onClick={() => notify(language === 'ar' ? 'إنستغرام قريبًا' : 'Instagram is coming soon')} data-testid="footer-instagram">Instagram</button><button onClick={() => notify(language === 'ar' ? 'بنترست قريبًا' : 'Pinterest is coming soon')} data-testid="footer-pinterest">Pinterest</button></div></div></div></div>
+          <div className="mt-16 flex flex-col justify-between gap-3 border-t border-[#f5ede2]/15 pt-5 font-mono-ui text-[9px] uppercase tracking-[.16em] text-[#e2d6ca]/45 sm:flex-row"><span>© 2024 Eleganza Studio</span><span>{c.madeInLondon}</span></div>
         </div>
       </footer>
 
       {notice && <div className="fixed bottom-5 left-1/2 z-[60] -translate-x-1/2 bg-[#312b25] px-5 py-3 font-mono-ui text-[10px] uppercase tracking-[.12em] text-[#f8f0e6] shadow-xl" role="status" data-testid="status-notice"><Sparkles size={13} className="mr-2 inline-block text-[#d18c6d]" />{notice}</div>}
-      {bagOpen && <BagDrawer items={bag} onClose={() => setBagOpen(false)} onUpdate={updateQuantity} onRemove={(id) => setBag((current) => current.filter((item) => item.id !== id))} onCheckout={() => notify('Checkout is being prepared for you')} />}
-      {searchOpen && <SearchPanel products={products} onClose={() => setSearchOpen(false)} onSelect={(product) => { setSearchOpen(false); setSelectedProduct(product); }} />}
-      {selectedProduct && <ProductDetail product={selectedProduct} favorite={favorites.includes(selectedProduct.id)} onFavorite={() => toggleFavorite(selectedProduct.id)} onAdd={() => { addToBag(selectedProduct); setSelectedProduct(null); }} onClose={() => setSelectedProduct(null)} />}
+      {bagOpen && <BagDrawer items={bag} language={language} c={c} onClose={() => setBagOpen(false)} onUpdate={updateQuantity} onRemove={(id) => setBag((current) => current.filter((item) => item.id !== id))} onCheckout={() => notify(language === 'ar' ? 'يتم تجهيز صفحة الدفع لك' : 'Checkout is being prepared for you')} />}
+      {searchOpen && <SearchPanel products={products} c={c} language={language} onClose={() => setSearchOpen(false)} onSelect={(product) => { setSearchOpen(false); setSelectedProduct(product); }} />}
+      {selectedProduct && <ProductDetail product={selectedProduct} language={language} c={c} favorite={favorites.includes(selectedProduct.id)} onFavorite={() => toggleFavorite(selectedProduct.id)} onAdd={() => { addToBag(selectedProduct); setSelectedProduct(null); }} onClose={() => setSelectedProduct(null)} />}
     </div>
   );
 }
