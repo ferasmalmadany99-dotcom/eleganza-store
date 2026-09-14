@@ -81,6 +81,90 @@ const products: Product[] = [
     note: 'A soft-focus stain with a little more intention.',
     badge: 'Edition 01',
   },
+  {
+    id: 'p02',
+    name: 'Amber Reverie',
+    category: 'Perfume',
+    price: 168,
+    material: 'Eau de parfum / 75 ml',
+    color: 'Amber / vanilla',
+    image: perfumeImage,
+    note: 'A rich amber glow softened by smooth vanilla.',
+    badge: 'New',
+  },
+  {
+    id: 'm03',
+    name: 'Silk Petal',
+    category: 'Makeup',
+    price: 44,
+    material: 'Powder blush / 8 g',
+    color: 'Soft coral',
+    image: makeupImage,
+    note: 'A weightless wash of coral that brings warmth to the face.',
+  },
+  {
+    id: 'a02',
+    name: 'Solstice Chain',
+    category: 'Accessories',
+    price: 118,
+    material: 'Gold vermeil / 42 cm',
+    color: 'Polished gold',
+    image: jewelryImage,
+    note: 'A fine golden chain made to catch the light with every movement.',
+    badge: 'Bestseller',
+  },
+  {
+    id: 'm04',
+    name: 'Nocturne Rouge',
+    category: 'Makeup',
+    price: 39,
+    material: 'Matte lipstick / 3.5 g',
+    color: 'Burnished red',
+    image: lipImage,
+    note: 'A confident red with a soft matte finish that stays comfortable.',
+  },
+  {
+    id: 'p03',
+    name: 'Cedar Afterglow',
+    category: 'Perfume',
+    price: 152,
+    material: 'Eau de parfum / 50 ml',
+    color: 'Cedar / white musk',
+    image: perfumeImage,
+    note: 'Clean cedar and soft musk settle close to the skin.',
+  },
+  {
+    id: 'm05',
+    name: 'Dawn Flush',
+    category: 'Makeup',
+    price: 46,
+    material: 'Cream blush / 7 g',
+    color: 'Warm peach',
+    image: makeupImage,
+    note: 'A fresh peach tint that gives the complexion an easy glow.',
+    badge: 'New',
+  },
+  {
+    id: 'a03',
+    name: 'Aurelia Drops',
+    category: 'Accessories',
+    price: 105,
+    material: 'Gold vermeil',
+    color: 'Satin gold',
+    image: jewelryImage,
+    note: 'Light-catching drops with a refined shape and effortless movement.',
+  },
+  {
+    id: 'm06',
+    name: 'Plum Élan',
+    category: 'Makeup',
+    price: 38,
+    material: 'Satin lipstick / 3.5 g',
+    color: 'Muted plum',
+    image: lipImage,
+    note: 'A muted plum that adds depth while remaining easy to wear.',
+    badge: 'Edition 01',
+  },
 ];
 
 const filters: Category[] = ['All', 'New in', 'Perfume', 'Makeup', 'Accessories'];
@@ -260,6 +344,46 @@ const arabicProductCopy: Record<string, Pick<Product, 'material' | 'color' | 'no
     material: 'أحمر شفاه ساتان / 3.5 غ',
     color: 'توتي داكن',
     note: 'لون شفاه ناعم بتأثير ضبابي ولمسة أكثر وضوحًا وتميّزًا.',
+  },
+  p02: {
+    material: 'أو دو بارفان / 75 مل',
+    color: 'عنبر / فانيليا',
+    note: 'عبير عنبري غني تلطفه نفحات الفانيليا الناعمة.',
+  },
+  m03: {
+    material: 'أحمر خدود بودرة / 8 غ',
+    color: 'مرجاني ناعم',
+    note: 'طبقة خفيفة من اللون المرجاني تضفي دفئًا طبيعيًا على الوجه.',
+  },
+  a02: {
+    material: 'فضة مطلية بالذهب / 42 سم',
+    color: 'ذهبي لامع',
+    note: 'سلسلة ذهبية رفيعة تلتقط الضوء مع كل حركة.',
+  },
+  m04: {
+    material: 'أحمر شفاه مطفي / 3.5 غ',
+    color: 'أحمر معتّق',
+    note: 'أحمر واثق بلمسة مطفية ناعمة ومريحة تدوم طويلًا.',
+  },
+  p03: {
+    material: 'أو دو بارفان / 50 مل',
+    color: 'خشب الأرز / المسك الأبيض',
+    note: 'خشب أرز نقي ومسك ناعم يستقران برقة بالقرب من البشرة.',
+  },
+  m05: {
+    material: 'أحمر خدود كريمي / 7 غ',
+    color: 'خوخي دافئ',
+    note: 'لون خوخي منعش يمنح البشرة إشراقة طبيعية بلا تكلّف.',
+  },
+  a03: {
+    material: 'فضة مطلية بالذهب',
+    color: 'ذهبي ساتان',
+    note: 'أقراط متدلية تلتقط الضوء بتصميم راقٍ وحركة انسيابية.',
+  },
+  m06: {
+    material: 'أحمر شفاه ساتان / 3.5 غ',
+    color: 'برقوقي هادئ',
+    note: 'درجة برقوقية هادئة تمنح الشفاه عمقًا وتبقى سهلة للاستخدام اليومي.',
   },
 };
 
@@ -587,7 +711,7 @@ function App() {
           </div>
           <div className="mt-14 flex items-center justify-between border-y border-[#312b25]/15 py-4">
             <div className="no-scrollbar flex gap-6 overflow-auto">{filters.map((filter) => <button key={filter} onClick={() => setActiveFilter(filter)} className={`whitespace-nowrap font-mono-ui text-[10px] uppercase tracking-[.16em] transition-colors ${activeFilter === filter ? 'text-[#9f523d]' : 'text-[#88796c] hover:text-[#312b25]'}`} data-testid={`button-filter-${filter.toLowerCase().replace(' ', '-')}`}>{categoryLabels[language][filter]}</button>)}</div>
-            <span className="hidden font-mono-ui text-[10px] uppercase tracking-[.14em] text-[#9b8b7e] sm:block">{shownProducts.length} / 04</span>
+            <span className="hidden font-mono-ui text-[10px] uppercase tracking-[.14em] text-[#9b8b7e] sm:block">{String(shownProducts.length).padStart(2, '0')} / {String(products.length).padStart(2, '0')}</span>
           </div>
           <div className="mt-8 grid gap-x-5 gap-y-14 sm:grid-cols-2 lg:grid-cols-4">{shownProducts.map((product) => <ProductCard key={product.id} product={product} language={language} c={c} favorite={favorites.includes(product.id)} onFavorite={() => toggleFavorite(product.id)} onSelect={() => setSelectedProduct(product)} onAdd={() => addToBag(product)} />)}</div>
         </section>
