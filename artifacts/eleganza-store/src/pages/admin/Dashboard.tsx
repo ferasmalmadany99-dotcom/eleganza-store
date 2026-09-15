@@ -33,7 +33,7 @@ export default function Dashboard() {
       {summary.isError && <ErrorState error={summary.error} onRetry={() => summary.refetch()} />}
       {summary.data && <div className="grid gap-5">
         <div className="mb-3 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div><p className="font-mono-ui text-[10px] uppercase tracking-[.24em] text-primary">{isAr ? "مركز العمليات" : "Operations centre"}</p><h1 className="mt-2 font-display text-5xl leading-none">{isAr ? "نظرة عامة" : "Overview"}</h1></div>
+          <div><p className="font-mono-ui text-xs font-semibold uppercase tracking-[.24em] text-primary">{isAr ? "مركز العمليات" : "Operations centre"}</p><h1 className="mt-2 font-display text-5xl leading-none">{isAr ? "نظرة عامة" : "Overview"}</h1></div>
           {can(role, "manager") && <button className={buttonClass} onClick={syncShopify} disabled={sync.isPending}><RefreshCw className={`h-3.5 w-3.5 ${sync.isPending ? "animate-spin" : ""}`} />{isAr ? "مزامنة Shopify" : "Sync Shopify"}</button>}
         </div>
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
