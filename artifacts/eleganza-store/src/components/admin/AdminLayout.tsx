@@ -96,7 +96,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-border bg-background/90 px-5 backdrop-blur lg:px-10">
             <button className="lg:hidden" onClick={() => setMobileOpen(true)} aria-label="Open navigation"><Menu className="h-5 w-5" /></button>
             <div className="hidden font-mono-ui text-[10px] uppercase tracking-[.18em] text-muted-foreground lg:block">Inventory · commerce · care</div>
-            <div className="ms-auto flex items-center gap-4 text-xs text-muted-foreground"><span className="hidden sm:inline">{language === "ar" ? "بيئة التطوير" : "Development environment"}</span><span className="h-1.5 w-1.5 rounded-full bg-primary" /></div>
+            <div className="ms-auto flex items-center gap-3 text-xs text-muted-foreground">
+              <button
+                type="button"
+                onClick={() => setLanguage(language === "en" ? "ar" : "en")}
+                className="inline-flex h-9 items-center gap-2 border border-border px-3 font-semibold uppercase tracking-[.1em] transition hover:border-primary hover:text-primary"
+                aria-label={language === "ar" ? "Switch to English" : "التبديل إلى العربية"}
+              >
+                <Globe2 className="h-3.5 w-3.5" />
+                <span>{language === "ar" ? "English" : "العربية"}</span>
+              </button>
+              <span className="hidden h-1.5 w-1.5 rounded-full bg-primary sm:block" />
+              <span className="hidden sm:inline">{language === "ar" ? "بيئة التطوير" : "Development environment"}</span>
+            </div>
           </header>
           <div className="mx-auto max-w-[1500px] p-5 lg:p-10">{children}</div>
         </main>
