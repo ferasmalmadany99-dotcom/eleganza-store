@@ -827,7 +827,7 @@ function BagDrawer({
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   return (
     <div className="fixed inset-0 z-50 bg-[#211b18]/45 backdrop-blur-[2px]" onClick={onClose}>
-       <aside className="absolute bottom-0 right-0 top-0 flex w-full max-w-[480px] flex-col bg-[#f8f0e6] text-[#312b25] shadow-2xl" onClick={(event) => event.stopPropagation()} role="dialog" aria-label={c.bag}>
+       <aside className="absolute bottom-0 end-0 top-0 flex w-full max-w-[480px] flex-col bg-[#f8f0e6] text-[#312b25] shadow-2xl" onClick={(event) => event.stopPropagation()} role="dialog" aria-label={c.bag}>
         <div className="flex items-center justify-between border-b border-[#312b25]/15 px-6 py-5 sm:px-8">
            <div><p className="font-mono-ui text-[10px] uppercase tracking-[.2em] text-[#9f523d]">{c.yourEdit}</p><h2 className="mt-1 font-display text-4xl">{c.theBag} <span className="font-sans text-sm text-[#89796c]">({items.length})</span></h2></div>
            <button onClick={onClose} aria-label={c.close} className="grid h-10 w-10 place-items-center border border-[#312b25]/15 hover:bg-[#efe2d3]" data-testid="button-close-bag"><X size={18} strokeWidth={1.3} /></button>
