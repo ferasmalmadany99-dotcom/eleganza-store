@@ -18,7 +18,7 @@ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useClerk } from "@clerk/react";
 import { useGetSession } from "@workspace/api-client-react";
-import { AdminContext, type AdminLanguage, can, ErrorState, LoadingState } from "./AdminUI";
+import { AdminContext, can, ErrorState, LoadingState, usePersistentAdminLanguage } from "./AdminUI";
 
 const navigation = [
   { href: "/admin", label: "Overview", arabic: "نظرة عامة", icon: BarChart3, capability: null },
@@ -32,7 +32,7 @@ const navigation = [
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const [language, setLanguage] = useState<AdminLanguage>("en");
+  const { language, setLanguage } = usePersistentAdminLanguage();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [location, setLocation] = useLocation();
   const { signOut } = useClerk();

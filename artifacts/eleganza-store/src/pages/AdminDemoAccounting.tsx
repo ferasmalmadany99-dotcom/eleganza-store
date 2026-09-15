@@ -1,6 +1,7 @@
 import { ArrowLeft, BookOpen, ClipboardList, FileBarChart, FileText, Globe2, Landmark, PackageSearch, ReceiptText, Store, WalletCards } from "lucide-react";
 import { useState } from "react";
 import { Link } from "wouter";
+import { usePersistentAdminLanguage } from "@/components/admin/AdminUI";
 
 type AccountingSection = "journal" | "chart" | "ledger" | "inventory" | "statement";
 
@@ -36,7 +37,8 @@ const movements = [
 ];
 
 export default function AdminDemoAccounting() {
-  const [arabic, setArabic] = useState(false);
+  const { language, setLanguage } = usePersistentAdminLanguage();
+  const arabic = language === "ar";
   const [section, setSection] = useState<AccountingSection>("journal");
   const [selectedAccount, setSelectedAccount] = useState("1000");
   const isAr = arabic;
@@ -64,7 +66,7 @@ export default function AdminDemoAccounting() {
           <div className="mt-auto grid gap-2">
             <Link href="/admin-demo" className="flex items-center gap-3 px-3 py-3 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"><ArrowLeft className="h-4 w-4" />{isAr ? "العودة للوحة" : "Back to dashboard"}</Link>
             <Link href="/" className="flex items-center gap-3 px-3 py-3 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"><Store className="h-4 w-4" />{isAr ? "المتجر العام" : "Public storefront"}</Link>
-            <button onClick={() => setArabic(!arabic)} className="flex items-center gap-3 px-3 py-3 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"><Globe2 className="h-4 w-4" />{isAr ? "English" : "العربية"}</button>
+            <button onClick={() => setLanguage(isAr ? "en" : "ar")} className="flex items-center gap-3 px-3 py-3 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"><Globe2 className="h-4 w-4" />{isAr ? "English" : "العربية"}</button>
           </div>
         </div>
       </aside>

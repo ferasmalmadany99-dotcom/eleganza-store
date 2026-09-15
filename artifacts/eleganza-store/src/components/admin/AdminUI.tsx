@@ -1,7 +1,30 @@
 import { AlertCircle, Loader2, Search, X } from "lucide-react";
-import { createContext, useContext } from "react";
+import { createContext, useContext, useState } from "react";
 
 export type AdminLanguage = "en" | "ar";
+export const ADMIN_LANGUAGE_STORAGE_KEY = "eleganza-admin-language";
+
+function readStoredAdminLanguage(): AdminLanguage {
+  if (typeof window === "undefined") return "en";
+  try {
+    return window.localStorage.getItem(ADMIN_LANGUAGE_STORAGE_KEY) === "ar" ? "ar" : "en";
+  } catch {
+    return "en";
+  }
+}
+
+export function usePersistentAdminLanguage() {
+  const [language, setLanguageState] = useState<AdminLanguage>(readStoredAdminLanguage);
+  const setLanguage = (nextLanguage: AdminLanguage) => {
+    setLanguageState(nextLanguage);
+    try {
+      window.localStorage.setItem(ADMIN_LANGUAGE_STORAGE_KEY, nextLanguage);
+    } catch {
+      // The UI still works when browser storage is unavailable.
+    }
+  };
+  return { language, setLanguage };
+}
 
 export type AdminContextValue = {
   language: AdminLanguage;
