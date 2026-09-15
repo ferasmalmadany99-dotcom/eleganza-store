@@ -1,4 +1,4 @@
-import { ArrowLeft, BookOpen, ClipboardList, FileBarChart, FileText, Globe2, Landmark, PackageSearch, ReceiptText, Store, WalletCards } from "lucide-react";
+import { ArrowLeft, BookOpen, ClipboardList, FileBarChart, FileText, Globe2, Landmark, Menu, PackageSearch, ReceiptText, Store, WalletCards, X } from "lucide-react";
 import { useState } from "react";
 import { Link } from "wouter";
 import { usePersistentAdminLanguage } from "@/components/admin/AdminUI";
@@ -53,17 +53,15 @@ export default function AdminDemoAccounting() {
   const [section, setSection] = useState<AccountingSection>("journal");
   const [selectedAccount, setSelectedAccount] = useState("1000");
   const [accounts, setAccounts] = useState(defaultAccounts);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const isAr = arabic;
   const active = sections.find((item) => item.id === section) ?? sections[0];
 
   return (
     <div dir={isAr ? "rtl" : "ltr"} className="min-h-screen bg-background text-foreground">
-      <aside className="fixed inset-y-0 start-0 hidden w-72 border-e border-border bg-card lg:block">
+      <aside className={`fixed inset-y-0 start-0 z-40 w-72 border-e border-border bg-card transition-transform lg:translate-x-0 ${mobileOpen ? "translate-x-0" : "ltr:-translate-x-full rtl:translate-x-full"}`}>
         <div className="flex h-full flex-col p-6">
-          <Link href="/admin-demo" className="block">
-            <p className="font-mono-ui text-[9px] uppercase tracking-[.24em] text-primary">Eleganza</p>
-            <p className="mt-1 font-display text-3xl leading-none">Accounting desk</p>
-          </Link>
+          <div className="flex items-start justify-between"><Link href="/admin-demo" className="block" onClick={() => setMobileOpen(false)}><p className="font-mono-ui text-[9px] uppercase tracking-[.24em] text-primary">Eleganza</p><p className="mt-1 font-display text-3xl leading-none">Accounting desk</p></Link><button className="lg:hidden" onClick={() => setMobileOpen(false)} aria-label={isAr ? "إغلاق القائمة" : "Close menu"}><X className="h-5 w-5" /></button></div>
           <div className="mt-8 border-y border-border py-4">
             <p className="font-mono-ui text-[9px] uppercase tracking-[.2em] text-muted-foreground">{isAr ? "مساحة المحاسبة" : "Accounting workspace"}</p>
             <p className="mt-2 text-sm font-medium">{isAr ? "نسخة تجريبية" : "Demo workspace"}</p>
@@ -72,7 +70,7 @@ export default function AdminDemoAccounting() {
           <nav className="mt-6 grid gap-1">
             {sections.map((item) => {
               const Icon = item.icon;
-              return <button key={item.id} onClick={() => setSection(item.id)} className={`flex items-center gap-3 px-3 py-3 text-sm transition ${section === item.id ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}><Icon className="h-4 w-4" />{isAr ? item.arabic : item.label}</button>;
+              return <button key={item.id} onClick={() => { setSection(item.id); setMobileOpen(false); }} className={`flex items-center gap-3 px-3 py-3 text-sm transition ${section === item.id ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}><Icon className="h-4 w-4" />{isAr ? item.arabic : item.label}</button>;
             })}
           </nav>
           <div className="mt-auto grid gap-2">
@@ -82,9 +80,10 @@ export default function AdminDemoAccounting() {
           </div>
         </div>
       </aside>
+      {mobileOpen && <button aria-label={isAr ? "إغلاق القائمة" : "Close navigation"} className="fixed inset-0 z-30 bg-foreground/20 lg:hidden" onClick={() => setMobileOpen(false)} />}
       <main className="min-h-screen lg:ps-72">
         <header className="sticky top-0 z-20 flex min-h-16 items-center justify-between gap-4 border-b border-border bg-background/90 px-5 py-3 backdrop-blur lg:px-10">
-          <div><p className="font-mono-ui text-[10px] uppercase tracking-[.18em] text-primary">{isAr ? "المحاسبة" : "Accounting"}</p><p className="text-xs text-muted-foreground">{isAr ? "مساحة مستقلة للحسابات والتقارير" : "A dedicated space for accounts and reports"}</p></div>
+          <button className="lg:hidden" onClick={() => setMobileOpen(true)} aria-label={isAr ? "فتح القائمة" : "Open menu"}><Menu className="h-5 w-5" /></button><div><p className="font-mono-ui text-[10px] uppercase tracking-[.18em] text-primary">{isAr ? "المحاسبة" : "Accounting"}</p><p className="text-xs text-muted-foreground">{isAr ? "مساحة مستقلة للحسابات والتقارير" : "A dedicated space for accounts and reports"}</p></div>
           <span className="border border-primary/30 px-3 py-2 text-[10px] uppercase tracking-[.13em] text-primary">{isAr ? "بيانات تجريبية" : "Sample data"}</span>
         </header>
         <div className="mx-auto max-w-[1500px] p-5 lg:p-10">

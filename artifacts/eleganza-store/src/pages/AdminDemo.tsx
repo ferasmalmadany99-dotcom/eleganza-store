@@ -6,6 +6,7 @@ import {
   CreditCard,
   FileText,
   Globe2,
+  Menu,
   Package,
   ReceiptText,
   RotateCcw,
@@ -13,6 +14,7 @@ import {
   ShoppingBag,
   Store,
   Users,
+  X,
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Link } from "wouter";
@@ -57,24 +59,23 @@ export default function AdminDemo() {
   const { language, setLanguage } = usePersistentAdminLanguage();
   const arabic = language === "ar";
   const [query, setQuery] = useState("");
+  const [mobileOpen, setMobileOpen] = useState(false);
   const filteredProducts = useMemo(() => demoProducts.filter((product) => product.name.toLowerCase().includes(query.toLowerCase()) || product.sku.toLowerCase().includes(query.toLowerCase())), [query]);
   const title = navItems.find((item) => item.tab === tab)?.[language === "ar" ? "arabic" : "label"] ?? "Overview";
 
   return (
     <div dir={arabic ? "rtl" : "ltr"} className="min-h-screen bg-background text-foreground">
-      <aside className="fixed inset-y-0 start-0 hidden w-72 border-e border-border bg-card lg:block">
+      <aside className={`fixed inset-y-0 start-0 z-40 w-72 border-e border-border bg-card transition-transform lg:translate-x-0 ${mobileOpen ? "translate-x-0" : "ltr:-translate-x-full rtl:translate-x-full"}`}>
         <div className="flex h-full flex-col p-6">
-          <a href="/" className="block">
-            <p className="font-mono-ui text-[9px] uppercase tracking-[.24em] text-primary">Eleganza</p>
-            <p className="mt-1 font-display text-3xl leading-none">Atelier desk</p>
-          </a>
+          <div className="flex items-start justify-between"><a href="/" className="block"><p className="font-mono-ui text-[9px] uppercase tracking-[.24em] text-primary">Eleganza</p><p className="mt-1 font-display text-3xl leading-none">Atelier desk</p></a><button className="lg:hidden" onClick={() => setMobileOpen(false)} aria-label={arabic ? "إغلاق القائمة" : "Close menu"}><X className="h-5 w-5" /></button></div>
           <div className="mt-8 border-y border-border py-4"><p className="font-mono-ui text-[9px] uppercase tracking-[.2em] text-muted-foreground">Preview account</p><p className="mt-2 text-sm font-medium">demo@eleganza.local</p><p className="mt-1 font-mono-ui text-[10px] uppercase tracking-[.12em] text-primary">owner · demo</p></div>
-          <nav className="mt-6 grid gap-1">{navItems.map((item) => { const Icon = item.icon; const className = `flex items-center gap-3 px-3 py-3 text-sm transition ${tab === item.tab ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`; return item.tab === "accounting" ? <Link key={item.tab} href="/admin-demo/accounting" className={className}><Icon className="h-4 w-4" />{language === "ar" ? item.arabic : item.label}</Link> : <button key={item.tab} onClick={() => setTab(item.tab)} className={className}><Icon className="h-4 w-4" />{language === "ar" ? item.arabic : item.label}</button>; })}</nav>
+          <nav className="mt-6 grid gap-1">{navItems.map((item) => { const Icon = item.icon; const className = `flex items-center gap-3 px-3 py-3 text-sm transition ${tab === item.tab ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`; return item.tab === "accounting" ? <Link key={item.tab} href="/admin-demo/accounting" onClick={() => setMobileOpen(false)} className={className}><Icon className="h-4 w-4" />{language === "ar" ? item.arabic : item.label}</Link> : <button key={item.tab} onClick={() => { setTab(item.tab); setMobileOpen(false); }} className={className}><Icon className="h-4 w-4" />{language === "ar" ? item.arabic : item.label}</button>; })}</nav>
           <div className="mt-auto grid gap-2"><a href="/" className="flex items-center gap-3 px-3 py-3 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"><Store className="h-4 w-4" />{arabic ? "المتجر العام" : "Public storefront"}</a><button onClick={() => setLanguage(arabic ? "en" : "ar")} className="flex items-center gap-3 px-3 py-3 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"><Globe2 className="h-4 w-4" />{arabic ? "English" : "العربية"}</button></div>
         </div>
       </aside>
+      {mobileOpen && <button aria-label={arabic ? "إغلاق القائمة" : "Close navigation"} className="fixed inset-0 z-30 bg-foreground/20 lg:hidden" onClick={() => setMobileOpen(false)} />}
       <main className="min-h-screen lg:ps-72">
-        <header className="sticky top-0 z-20 flex min-h-16 items-center justify-between gap-4 border-b border-border bg-background/90 px-5 py-3 backdrop-blur lg:px-10"><div><p className="font-mono-ui text-[10px] uppercase tracking-[.18em] text-primary">Eleganza demo</p><p className="text-xs text-muted-foreground">{arabic ? "نسخة استعراضية — لا يتم حفظ أي تغيير" : "Preview only — no changes are saved"}</p></div><div className="flex items-center gap-3"><span className="hidden border border-primary/30 px-3 py-2 text-[10px] uppercase tracking-[.13em] text-primary sm:inline">{arabic ? "بيانات تجريبية" : "Sample data"}</span><a href="/admin" className="inline-flex h-9 items-center gap-2 border border-border px-3 text-xs font-semibold hover:border-primary hover:text-primary"><CreditCard className="h-3.5 w-3.5" />{arabic ? "الدخول الفعلي" : "Real sign in"}</a></div></header>
+        <header className="sticky top-0 z-20 flex min-h-16 items-center justify-between gap-4 border-b border-border bg-background/90 px-5 py-3 backdrop-blur lg:px-10"><button className="lg:hidden" onClick={() => setMobileOpen(true)} aria-label={arabic ? "فتح القائمة" : "Open menu"}><Menu className="h-5 w-5" /></button><div><p className="font-mono-ui text-[10px] uppercase tracking-[.18em] text-primary">Eleganza demo</p><p className="text-xs text-muted-foreground">{arabic ? "نسخة استعراضية — لا يتم حفظ أي تغيير" : "Preview only — no changes are saved"}</p></div><div className="flex items-center gap-3"><span className="hidden border border-primary/30 px-3 py-2 text-[10px] uppercase tracking-[.13em] text-primary sm:inline">{arabic ? "بيانات تجريبية" : "Sample data"}</span><a href="/admin" className="inline-flex h-9 items-center gap-2 border border-border px-3 text-xs font-semibold hover:border-primary hover:text-primary"><CreditCard className="h-3.5 w-3.5" />{arabic ? "الدخول الفعلي" : "Real sign in"}</a></div></header>
         <div className="mx-auto max-w-[1500px] p-5 lg:p-10">
           <div className="mb-8 border border-primary/25 bg-primary/5 px-5 py-4"><p className="font-mono-ui text-[10px] uppercase tracking-[.2em] text-primary">{arabic ? "نسخة استعراضية مفصلة" : "Detailed demo version"}</p><p className="mt-2 text-sm leading-6 text-muted-foreground">{arabic ? "هذه الأرقام والصلاحيات للتجربة البصرية فقط. لوحة الإدارة الفعلية تتطلب تسجيل الدخول لحماية بياناتك." : "These numbers and permissions are for visual exploration only. The live operations desk requires sign-in to protect your data."}</p></div>
           <div className="mb-8"><p className="font-mono-ui text-[10px] uppercase tracking-[.24em] text-primary">{arabic ? "مركز العمليات" : "Operations centre"}</p><h1 className="mt-2 font-display text-5xl leading-none">{title}</h1></div>
