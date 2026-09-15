@@ -50,6 +50,60 @@ function nextChildCode<T extends { id: number; code: string; parentId?: number |
   return String(Math.max(Number(parentCode), ...children) + 1);
 }
 
+type AccountPickerOption = { id: number; code: string; nameEn: string; nameAr: string };
+
+function AccountPicker({
+  id,
+  accounts,
+  value,
+  language,
+  onChange,
+}: {
+  id: string;
+  accounts: AccountPickerOption[];
+  value: string;
+  language: "en" | "ar";
+  onChange: (accountId: string) => void;
+}) {
+  const isAr = language === "ar";
+  const [text, setText] = useState("");
+
+  useMemo(() => {
+    const selected = accounts.find((account) => String(account.id) === value);
+    if (selected) setText(`${selected.code} · ${isAr ? selected.nameAr || selected.nameEn : selected.nameEn}`);
+    if (!value) setText("");
+  }, [accounts, isAr, value]);
+
+  function handleChange(nextText: string) {
+    setText(nextText);
+    const normalized = nextText.trim().toLocaleLowerCase();
+    const selected = accounts.find((account) => [
+      account.code,
+      account.nameEn,
+      account.nameAr,
+      `${account.code} · ${account.nameEn}`,
+      `${account.code} · ${account.nameAr}`,
+    ].some((option) => option.trim().toLocaleLowerCase() === normalized));
+    onChange(selected ? String(selected.id) : "");
+  }
+
+  return <div className="grid gap-2">
+    <input
+      className={inputClass}
+      required
+      value={text}
+      onChange={(event) => handleChange(event.target.value)}
+      list={id}
+      placeholder={isAr ? "اكتب اسم الحساب أو رمزه" : "Type an account name or code"}
+      autoComplete="off"
+    />
+    <datalist id={id}>
+      {accounts.map((account) => <option key={account.id} value={`${account.code} · ${account.nameEn}`}>{account.nameAr}</option>)}
+    </datalist>
+    {text && !value && <span className="text-xs text-destructive">{isAr ? "اختر حسابًا موجودًا من الاقتراحات." : "Choose an existing account from the suggestions."}</span>}
+  </div>;
+}
+
 export default function Accounting() {
   const { language } = useAdmin();
   const [section, setSection] = useState<AccountingSection>("journal");
@@ -134,6 +188,10 @@ function AccountingJournal() {
 
   async function submitJournal(event: React.FormEvent) {
     event.preventDefault();
+    if (!journalForm.debitAccountId || !journalForm.creditAccountId) {
+      setMessage(isAr ? "اختر حسابًا صحيحًا للمدين والدائن" : "Choose a valid debit and credit account");
+      return;
+    }
     const amountMinor = Math.round(Number(journalForm.amount) * 100);
     const payload: JournalEntryInput = {
       entryDate: journalForm.entryDate,
@@ -165,7 +223,7 @@ function AccountingJournal() {
       <Panel>
         <PanelTitle detail={<span className="font-mono-ui text-[10px] text-muted-foreground">{journal.data?.length ?? 0} entries</span>}>{isAr ? "قيد يومية جديد" : "New journal entry"}</PanelTitle>
         {!canWrite && <p className="mb-4 border border-border bg-muted/40 p-3 text-sm text-muted-foreground">{isAr ? "تحتاج إلى صلاحية مدير لإضافة قيود." : "Manager access is required to add journal entries."}</p>}
-        {canWrite && <form onSubmit={submitJournal} className="grid gap-4"><div className="grid gap-3 sm:grid-cols-2"><Field label={isAr ? "التاريخ" : "Date"}><input className={inputClass} type="date" required value={journalForm.entryDate} onChange={(event) => setJournalForm({ ...journalForm, entryDate: event.target.value })} /></Field><Field label={isAr ? "المبلغ بالدينار" : "Amount in LYD"}><input className={inputClass} type="number" min="0.01" step="0.01" required value={journalForm.amount} onChange={(event) => setJournalForm({ ...journalForm, amount: event.target.value })} /></Field></div><Field label={isAr ? "البيان" : "Description"}><input className={inputClass} required value={journalForm.description} onChange={(event) => setJournalForm({ ...journalForm, description: event.target.value })} placeholder={isAr ? "بيع عطر أو مصروف تشغيلي" : "Sale or operating expense"} /></Field><div className="grid gap-3 sm:grid-cols-2"><Field label={isAr ? "مدين" : "Debit"}><select className={inputClass} required value={journalForm.debitAccountId} onChange={(event) => setJournalForm({ ...journalForm, debitAccountId: event.target.value })}><option value="">Select account</option>{accounts.data?.map((account) => <option key={account.id} value={account.id}>{account.code} · {isAr ? account.nameAr || account.nameEn : account.nameEn}</option>)}</select></Field><Field label={isAr ? "دائن" : "Credit"}><select className={inputClass} required value={journalForm.creditAccountId} onChange={(event) => setJournalForm({ ...journalForm, creditAccountId: event.target.value })}><option value="">Select account</option>{accounts.data?.map((account) => <option key={account.id} value={account.id}>{account.code} · {isAr ? account.nameAr || account.nameEn : account.nameEn}</option>)}</select></Field></div><Field label={isAr ? "ملاحظة" : "Memo"}><input className={inputClass} value={journalForm.memo} onChange={(event) => setJournalForm({ ...journalForm, memo: event.target.value })} /></Field><button className={buttonClass} disabled={createJournal.isPending}><Save className="h-4 w-4" />{isAr ? "حفظ القيد المتوازن" : "Save balanced entry"}</button></form>}
+        {canWrite && <form onSubmit={submitJournal} className="grid gap-4"><div className="grid gap-3 sm:grid-cols-2"><Field label={isAr ? "التاريخ" : "Date"}><input className={inputClass} type="date" required value={journalForm.entryDate} onChange={(event) => setJournalForm({ ...journalForm, entryDate: event.target.value })} /></Field><Field label={isAr ? "المبلغ بالدينار" : "Amount in LYD"}><input className={inputClass} type="number" min="0.01" step="0.01" required value={journalForm.amount} onChange={(event) => setJournalForm({ ...journalForm, amount: event.target.value })} /></Field></div><Field label={isAr ? "البيان" : "Description"}><input className={inputClass} required value={journalForm.description} onChange={(event) => setJournalForm({ ...journalForm, description: event.target.value })} placeholder={isAr ? "بيع عطر أو مصروف تشغيلي" : "Sale or operating expense"} /></Field><div className="grid gap-3 sm:grid-cols-2"><Field label={isAr ? "المدين" : "Debit account"}><AccountPicker id="debit-account-options" accounts={accounts.data ?? []} value={journalForm.debitAccountId} language={language} onChange={(accountId) => setJournalForm({ ...journalForm, debitAccountId: accountId })} /></Field><Field label={isAr ? "الدائن" : "Credit account"}><AccountPicker id="credit-account-options" accounts={accounts.data ?? []} value={journalForm.creditAccountId} language={language} onChange={(accountId) => setJournalForm({ ...journalForm, creditAccountId: accountId })} /></Field></div><Field label={isAr ? "ملاحظة" : "Memo"}><input className={inputClass} value={journalForm.memo} onChange={(event) => setJournalForm({ ...journalForm, memo: event.target.value })} /></Field><button className={buttonClass} disabled={createJournal.isPending}><Save className="h-4 w-4" />{isAr ? "حفظ القيد المتوازن" : "Save balanced entry"}</button></form>}
       </Panel>
     </div>
     <Panel className="mt-5"><PanelTitle detail={<span className="font-mono-ui text-[10px] text-muted-foreground">Debit = Credit</span>}>{isAr ? "دفتر اليومية" : "Journal ledger"}</PanelTitle>{journal.isLoading && <LoadingState />}{journal.isError && <ErrorState error={journal.error} onRetry={() => journal.refetch()} />}{journal.data?.length === 0 && <EmptyState icon={<BookOpen className="h-5 w-5" />} title="No journal entries" detail="Completed sales, expenses, and manual entries will appear here." />}{journal.data && journal.data.length > 0 && <div className="grid gap-3">{journal.data.map((entry) => <article key={entry.id} className="border-b border-border pb-4 last:border-0 last:pb-0"><div className="flex flex-wrap items-center justify-between gap-3"><div><span className="font-mono-ui text-xs text-primary">{entry.entryNumber}</span><span className="ms-3 text-xs text-muted-foreground">{entry.entryDate}</span><p className="mt-2 font-medium">{entry.description}</p></div><span className="text-xs text-muted-foreground">{entry.referenceType ?? "manual"}</span></div><div className="mt-3 grid gap-2 sm:grid-cols-2">{entry.lines.map((line) => <div key={line.id} className="flex justify-between border-s-2 border-border bg-muted/30 px-3 py-2 text-xs"><span>{accountNames.get(line.accountId) ?? `#${line.accountId}`}</span><span className="font-mono-ui">{line.debitMinor > 0 ? `Dr ${money(line.debitMinor, language)}` : `Cr ${money(line.creditMinor, language)}`}</span></div>)}</div></article>)}</div>}</Panel>
