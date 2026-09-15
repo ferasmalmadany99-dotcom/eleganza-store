@@ -1,5 +1,6 @@
 import {
   BarChart3,
+  BookOpen,
   Boxes,
   ClipboardList,
   CreditCard,
@@ -7,13 +8,15 @@ import {
   Globe2,
   Package,
   ReceiptText,
+  RotateCcw,
+  Trash2,
   ShoppingBag,
   Store,
   Users,
 } from "lucide-react";
 import { useMemo, useState } from "react";
 
-type DemoTab = "overview" | "products" | "inventory" | "orders" | "expenses" | "team" | "audit";
+type DemoTab = "overview" | "products" | "inventory" | "orders" | "expenses" | "accounting" | "team" | "audit";
 
 const demoProducts = [
   { name: "Nocturne Rouge", category: "Fragrance", sku: "ELZ-FR-001", price: "د.ل 185.00", stock: 24, status: "Active" },
@@ -42,6 +45,7 @@ const navItems: { tab: DemoTab; label: string; arabic: string; icon: typeof BarC
   { tab: "inventory", label: "Inventory", arabic: "المخزون", icon: Boxes },
   { tab: "orders", label: "Orders", arabic: "الطلبات", icon: ShoppingBag },
   { tab: "expenses", label: "Expenses", arabic: "المصروفات", icon: ReceiptText },
+  { tab: "accounting", label: "Accounting", arabic: "المحاسبة", icon: BookOpen },
   { tab: "team", label: "Team", arabic: "الفريق", icon: Users },
   { tab: "audit", label: "Audit log", arabic: "سجل التدقيق", icon: ClipboardList },
 ];
@@ -77,6 +81,7 @@ export default function AdminDemo() {
           {tab === "inventory" && <Inventory arabic={arabic} />}
           {tab === "orders" && <Orders arabic={arabic} />}
           {tab === "expenses" && <Expenses arabic={arabic} />}
+          {tab === "accounting" && <Accounting arabic={arabic} />}
           {tab === "team" && <Team arabic={arabic} />}
           {tab === "audit" && <Audit arabic={arabic} />}
         </div>
@@ -95,7 +100,25 @@ function Products({ arabic, query, setQuery, products }: { arabic: boolean; quer
 }
 
 function Inventory({ arabic }: { arabic: boolean }) {
-  return <div className="grid gap-5 xl:grid-cols-[.8fr_1.2fr]"><section className="border border-border bg-card p-5"><h2 className="font-display text-2xl">{arabic ? "صحة المخزون" : "Stock health"}</h2><p className="mt-8 font-display text-7xl">3</p><p className="mt-2 text-sm text-muted-foreground">{arabic ? "منتجات تحت حد إعادة الطلب" : "products below reorder level"}</p><div className="mt-8 grid gap-2">{[["Aurelia Drops", "3 left"], ["Silk Petal", "Out of stock"], ["Dawn Flush", "8 left"]].map(([name, stock]) => <div key={name} className="flex justify-between border-t border-border py-3 text-sm"><span>{name}</span><span className="text-destructive">{stock}</span></div>)}</div></section><section className="border border-border bg-card p-5"><h2 className="mb-5 font-display text-2xl">{arabic ? "سجل الحركات" : "Movement ledger"}</h2>{[["Aurelia Drops", "Purchase", "+12", "Today · 09:20"], ["Silk Petal", "Sale", "-2", "Yesterday · 16:10"], ["Dawn Flush", "Return", "+1", "Yesterday · 12:45"], ["Amber Reverie", "Damage", "-1", "12 Sep · 14:30"]].map(([product, type, change, when]) => <div key={`${product}${when}`} className="grid grid-cols-[1fr_auto_auto] gap-4 border-t border-border py-4 text-sm"><div><p>{product}</p><p className="mt-1 text-xs text-muted-foreground">{type}</p></div><span className={change.startsWith("+") ? "text-primary" : "text-destructive"}>{change}</span><span className="text-end text-xs text-muted-foreground">{when}</span></div>)}</section></div>;
+  return <div className="grid gap-5 xl:grid-cols-[.8fr_1.2fr]"><section className="border border-border bg-card p-5"><h2 className="font-display text-2xl">{arabic ? "صحة المخزون" : "Stock health"}</h2><p className="mt-8 font-display text-7xl">3</p><p className="mt-2 text-sm text-muted-foreground">{arabic ? "منتجات تحت حد إعادة الطلب" : "products below reorder level"}</p><div className="mt-8 grid gap-2">{[["Aurelia Drops", "3 left"], ["Silk Petal", "Out of stock"], ["Dawn Flush", "8 left"]].map(([name, stock]) => <div key={name} className="flex justify-between border-t border-border py-3 text-sm"><span>{name}</span><span className="text-destructive">{stock}</span></div>)}</div></section><section className="border border-border bg-card p-5"><div className="mb-5 flex items-center justify-between"><h2 className="font-display text-2xl">{arabic ? "إدارة الحركات" : "Movement actions"}</h2><span className="text-[10px] uppercase tracking-[.14em] text-primary">{arabic ? "سجل آمن" : "Safe ledger"}</span></div><div className="grid gap-3 sm:grid-cols-3"><button className="border border-border p-4 text-start hover:border-primary"><Boxes className="h-4 w-4 text-primary" /><p className="mt-3 text-sm font-medium">{arabic ? "إضافة" : "Add stock"}</p><p className="mt-1 text-xs text-muted-foreground">{arabic ? "شراء أو مرتجع" : "Purchase or return"}</p></button><button className="border border-border p-4 text-start hover:border-primary"><RotateCcw className="h-4 w-4 text-primary" /><p className="mt-3 text-sm font-medium">{arabic ? "تسوية دقيقة" : "Reconcile"}</p><p className="mt-1 text-xs text-muted-foreground">{arabic ? "أدخل الرصيد المستهدف" : "Set target stock"}</p></button><button className="border border-border p-4 text-start hover:border-primary"><Trash2 className="h-4 w-4 text-primary" /><p className="mt-3 text-sm font-medium">{arabic ? "حذف آخر حركة" : "Delete latest"}</p><p className="mt-1 text-xs text-muted-foreground">{arabic ? "يعيد الرصيد السابق" : "Restores prior balance"}</p></button></div><div className="mt-8"><h2 className="mb-5 font-display text-2xl">{arabic ? "سجل الحركات" : "Movement ledger"}</h2>{[["Aurelia Drops", "Purchase", "+12", "Today · 09:20"], ["Silk Petal", "Sale", "-2", "Yesterday · 16:10"], ["Dawn Flush", "Return", "+1", "Yesterday · 12:45"], ["Amber Reverie", "Damage", "-1", "12 Sep · 14:30"]].map(([product, type, change, when]) => <div key={`${product}${when}`} className="grid grid-cols-[1fr_auto_auto] gap-4 border-t border-border py-4 text-sm"><div><p>{product}</p><p className="mt-1 text-xs text-muted-foreground">{type}</p></div><span className={change.startsWith("+") ? "text-primary" : "text-destructive"}>{change}</span><span className="text-end text-xs text-muted-foreground">{when}</span></div>)}</div></section></div>;
+}
+
+function Accounting({ arabic }: { arabic: boolean }) {
+  const accounts = [
+    ["1000", arabic ? "النقدية" : "Cash", "asset"],
+    ["1200", arabic ? "المخزون" : "Inventory", "asset"],
+    ["2000", arabic ? "ذمم دائنة" : "Accounts payable", "liability"],
+    ["3000", arabic ? "حقوق الملكية" : "Owner equity", "equity"],
+    ["4000", arabic ? "إيرادات المبيعات" : "Sales revenue", "revenue"],
+    ["5000", arabic ? "تكلفة البضاعة المباعة" : "Cost of goods sold", "expense"],
+    ["6000", arabic ? "المصروفات التشغيلية" : "Operating expenses", "expense"],
+  ];
+  const entries = [
+    { number: "JE-8F2A", date: "15 Sep 2026", description: arabic ? "بيع ELZ-9K3F" : "Sale ELZ-9K3F", lines: "Dr Cash · Cr Sales revenue", amount: "د.ل 257.00" },
+    { number: "JE-8F1C", date: "15 Sep 2026", description: arabic ? "مواد تغليف" : "Packaging materials", lines: "Dr Operating expenses · Cr Cash", amount: "د.ل 420.00" },
+    { number: "JE-8D91", date: "14 Sep 2026", description: arabic ? "تسوية مخزون" : "Inventory reconciliation", lines: "Dr Inventory adjustments · Cr Inventory", amount: "د.ل 68.00" },
+  ];
+  return <div className="grid gap-5 xl:grid-cols-[.8fr_1.2fr]"><section className="border border-border bg-card p-5"><div className="mb-5 flex items-center justify-between"><h2 className="font-display text-2xl">{arabic ? "شجرة الحسابات" : "Chart of accounts"}</h2><span className="font-mono-ui text-[10px] text-primary">7 accounts</span></div><div className="grid gap-2">{accounts.map(([code, name, type]) => <div key={code} className="grid grid-cols-[auto_1fr_auto] items-center gap-3 border-t border-border py-3 text-sm"><span className="font-mono-ui text-xs text-primary">{code}</span><span>{name}</span><span className="text-[10px] uppercase tracking-[.12em] text-muted-foreground">{type}</span></div>)}</div><button className="mt-5 inline-flex h-10 items-center gap-2 border border-border px-4 text-xs font-semibold uppercase tracking-[.12em] hover:border-primary"><BookOpen className="h-4 w-4" />{arabic ? "إضافة حساب" : "Add account"}</button></section><section className="border border-border bg-card p-5"><div className="mb-5 flex items-center justify-between"><h2 className="font-display text-2xl">{arabic ? "دفتر اليومية" : "Journal ledger"}</h2><span className="border border-primary/30 px-2 py-1 text-[10px] uppercase tracking-[.12em] text-primary">Debit = Credit</span></div><div className="mb-6 border border-primary/20 bg-primary/5 p-4"><p className="text-sm font-medium">{arabic ? "قيد يومية جديد" : "New journal entry"}</p><div className="mt-3 grid gap-2 sm:grid-cols-3"><div className="border border-border bg-background px-3 py-2 text-xs text-muted-foreground">{arabic ? "مدين: النقدية" : "Debit: Cash"}</div><div className="border border-border bg-background px-3 py-2 text-xs text-muted-foreground">{arabic ? "دائن: المبيعات" : "Credit: Sales"}</div><div className="border border-border bg-background px-3 py-2 text-xs text-muted-foreground">{arabic ? "المبلغ: 0.00" : "Amount: 0.00"}</div></div></div><div className="grid gap-4">{entries.map((entry) => <div key={entry.number} className="border-t border-border pt-4"><div className="flex flex-wrap items-center justify-between gap-2"><div><span className="font-mono-ui text-xs text-primary">{entry.number}</span><span className="ms-3 text-xs text-muted-foreground">{entry.date}</span><p className="mt-2 text-sm font-medium">{entry.description}</p></div><span className="font-display text-xl">{entry.amount}</span></div><p className="mt-3 text-xs text-muted-foreground">{entry.lines}</p></div>)}</div></section></div>;
 }
 
 function Orders({ arabic }: { arabic: boolean }) {
