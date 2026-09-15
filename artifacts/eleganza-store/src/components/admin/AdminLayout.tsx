@@ -65,8 +65,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <AdminContext.Provider value={{ language, setLanguage, dir, role }}>
       <div dir={dir} className="min-h-screen bg-background text-foreground">
-        <aside className={`fixed inset-y-0 start-0 z-40 w-72 border-e border-border bg-card transition-transform lg:!translate-x-0 ${mobileOpen ? "translate-x-0" : "ltr:-translate-x-full rtl:translate-x-full"}`}>
-          <div className="flex h-full flex-col p-6">
+        <aside className={`fixed inset-y-0 start-0 z-40 w-72 overscroll-contain border-e border-border bg-card transition-transform lg:!translate-x-0 ${mobileOpen ? "translate-x-0" : "ltr:-translate-x-full rtl:translate-x-full"}`}>
+          <div className="flex h-full min-h-0 flex-col p-6">
             <div className="flex items-start justify-between">
               <Link href="/" className="group" onClick={() => setMobileOpen(false)}>
                 <div className="font-mono-ui text-[9px] uppercase tracking-[.24em] text-primary">Eleganza</div>
@@ -79,14 +79,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <p className="mt-2 truncate text-sm font-medium">{session.data?.displayName}</p>
               <p className="mt-1 font-mono-ui text-[10px] uppercase tracking-[.12em] text-primary">{role}</p>
             </div>
-            <nav className="mt-6 grid gap-1">
+            <nav className="mt-6 min-h-0 flex-1 overflow-y-auto overscroll-contain">
               {visibleNavigation.map((item) => {
                 const Icon = item.icon;
                 const active = item.href === "/admin" ? location === "/admin" : location.startsWith(item.href);
                 return <button key={item.href} onClick={() => go(item.href)} className={`flex items-center gap-3 px-3 py-3 text-sm transition ${active ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}><Icon className="h-4 w-4" /><span>{language === "ar" ? item.arabic : item.label}</span></button>;
               })}
             </nav>
-            <div className="mt-auto grid gap-2">
+            <div className="mt-4 grid shrink-0 gap-2">
               <Link href="/" className="flex items-center gap-3 px-3 py-3 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"><Store className="h-4 w-4" />{language === "ar" ? "المتجر العام" : "Public storefront"}<ExternalLink className="ms-auto h-3.5 w-3.5" /></Link>
               <button className="flex items-center gap-3 px-3 py-3 text-sm text-muted-foreground hover:bg-muted hover:text-foreground" onClick={() => setLanguage(language === "en" ? "ar" : "en")}><Globe2 className="h-4 w-4" />{language === "en" ? "العربية" : "English"}</button>
               <button className="flex items-center gap-3 px-3 py-3 text-sm text-muted-foreground hover:bg-muted hover:text-foreground" onClick={() => signOut({ redirectUrl: "/" })}><LogOut className="h-4 w-4" />{language === "ar" ? "تسجيل الخروج" : "Sign out"}</button>
