@@ -1,11 +1,13 @@
-import { BookOpen, ClipboardList, FileBarChart, Landmark, PackageSearch, Plus, Scale, TrendingUp, X } from "lucide-react";
-import { useMemo, useState } from "react";
+import { BookOpen, ClipboardList, FileBarChart, Landmark, PackageSearch, Plus, Save, Scale, TrendingUp, X } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import {
   useCreateAccount,
+  useCreateJournalEntry,
   useListAccounts,
   useListJournalEntries,
   useListInventoryMovements,
   type AccountType,
+  type JournalEntryInput,
 } from "@workspace/api-client-react";
 import { queryClient } from "@/lib/queryClient";
 import {
@@ -13,6 +15,7 @@ import {
   EmptyState,
   ErrorState,
   Field,
+  getErrorMessage,
   inputClass,
   LoadingState,
   money,
@@ -20,6 +23,7 @@ import {
   Panel,
   PanelTitle,
   quietButtonClass,
+  Toast,
   useAdmin,
 } from "@/components/admin/AdminUI";
 
@@ -45,6 +49,79 @@ function nextChildCode<T extends { id: number; code: string; parentId?: number |
   const parentCode = parentAccount?.code ?? "1000";
   const children = accounts.filter((account) => account.parentId === parentId).map((account) => Number(account.code)).filter(Number.isFinite);
   return String(Math.max(Number(parentCode), ...children) + 1);
+}
+
+type AccountPickerOption = { id: number; code: string; nameEn: string; nameAr: string };
+
+function AccountPicker({
+  id,
+  accounts,
+  value,
+  language,
+  onChange,
+}: {
+  id: string;
+  accounts: AccountPickerOption[];
+  value: string;
+  language: "en" | "ar";
+  onChange: (accountId: string) => void;
+}) {
+  const isAr = language === "ar";
+  const [text, setText] = useState("");
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    const selected = accounts.find((account) => String(account.id) === value);
+    if (selected) setText(`${selected.code} · ${isAr ? selected.nameAr || selected.nameEn : selected.nameEn}`);
+    if (!value) setText("");
+  }, [accounts, isAr, value]);
+
+  const filteredAccounts = useMemo(() => {
+    const query = text.trim().toLocaleLowerCase();
+    if (!query) return accounts.slice(0, 12);
+    return accounts.filter((account) => [account.code, account.nameEn, account.nameAr].some((option) => option.toLocaleLowerCase().includes(query))).slice(0, 12);
+  }, [accounts, text]);
+
+  function handleChange(nextText: string) {
+    setText(nextText);
+    setOpen(true);
+    const normalized = nextText.trim().toLocaleLowerCase();
+    const selected = accounts.find((account) => [
+      account.code,
+      account.nameEn,
+      account.nameAr,
+      `${account.code} · ${account.nameEn}`,
+      `${account.code} · ${account.nameAr}`,
+    ].some((option) => option.trim().toLocaleLowerCase() === normalized));
+    onChange(selected ? String(selected.id) : "");
+  }
+
+  function selectAccount(account: AccountPickerOption) {
+    setText(`${account.code} · ${isAr ? account.nameAr || account.nameEn : account.nameEn}`);
+    onChange(String(account.id));
+    setOpen(false);
+  }
+
+  return <div className="relative grid gap-2">
+    <input
+      id={id}
+      className={inputClass}
+      required
+      value={text}
+      onChange={(event) => handleChange(event.target.value)}
+      onFocus={() => setOpen(true)}
+      onBlur={() => window.setTimeout(() => setOpen(false), 150)}
+      placeholder={isAr ? "اكتب اسم الحساب أو رمزه" : "Type an account name or code"}
+      autoComplete="off"
+    />
+    {open && <div className="absolute inset-x-0 top-11 z-[60] max-h-60 overflow-y-auto border border-border bg-card p-1 shadow-xl">
+      {filteredAccounts.length > 0 ? filteredAccounts.map((account) => <button key={account.id} type="button" className="flex w-full items-start justify-between gap-3 px-3 py-2 text-start text-sm transition hover:bg-muted" onMouseDown={(event) => event.preventDefault()} onClick={() => selectAccount(account)}>
+        <span><span className="font-mono-ui text-xs text-primary">{account.code}</span><span className="ms-2">{isAr ? account.nameAr || account.nameEn : account.nameEn}</span></span>
+        <span className="text-[10px] text-muted-foreground">{isAr ? account.nameEn : account.nameAr}</span>
+      </button>) : <p className="px-3 py-3 text-xs text-muted-foreground">{isAr ? "لا يوجد حساب مطابق." : "No matching account."}</p>}
+    </div>}
+    {text && !value && <span className="text-xs text-destructive">{isAr ? "اختر حسابًا موجودًا من الاقتراحات." : "Choose an existing account from the suggestions."}</span>}
+  </div>;
 }
 
 export default function Accounting() {
@@ -129,27 +206,95 @@ function AccountingSectionPage({ section }: { section: AccountingSection }) {
 }
 
 function AccountingJournal() {
-  const { language } = useAdmin();
+  const { language, role } = useAdmin();
   const isAr = language === "ar";
   const accounts = useListAccounts();
   const journal = useListJournalEntries({ limit: 100 });
+  const createJournal = useCreateJournalEntry();
+  const [createOpen, setCreateOpen] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
   const [selectedEntryId, setSelectedEntryId] = useState<number | null>(null);
+  const [journalForm, setJournalForm] = useState({ entryDate: new Date().toISOString().slice(0, 10), description: "", debitAccountId: "", creditAccountId: "", amount: "", memo: "" });
   const accountNames = useMemo(() => new Map((accounts.data ?? []).map((account) => [account.id, isAr ? account.nameAr || account.nameEn : account.nameEn])), [accounts.data, isAr]);
+  const canWrite = role === "owner" || role === "manager";
   const selectedEntry = selectedEntryId === null ? undefined : journal.data?.find((entry) => entry.id === selectedEntryId);
 
   function entryAmount(entry: NonNullable<typeof journal.data>[number]) {
     return entry.lines.reduce((total, line) => total + line.debitMinor, 0);
   }
 
+  function resetJournalForm() {
+    setJournalForm({ entryDate: new Date().toISOString().slice(0, 10), description: "", debitAccountId: "", creditAccountId: "", amount: "", memo: "" });
+  }
+
+  async function submitJournal(event: React.FormEvent) {
+    event.preventDefault();
+    if (!journalForm.debitAccountId || !journalForm.creditAccountId) {
+      setMessage(isAr ? "اختر حسابًا صحيحًا للمدين والدائن" : "Choose a valid debit and credit account");
+      return;
+    }
+    const amountMinor = Math.round(Number(journalForm.amount) * 100);
+    if (!Number.isFinite(amountMinor) || amountMinor <= 0) {
+      setMessage(isAr ? "أدخل مبلغًا صحيحًا أكبر من صفر" : "Enter a valid amount greater than zero");
+      return;
+    }
+    const payload: JournalEntryInput = {
+      entryDate: journalForm.entryDate,
+      description: journalForm.description,
+      lines: [
+        { accountId: Number(journalForm.debitAccountId), debitMinor: amountMinor, memo: journalForm.memo || undefined },
+        { accountId: Number(journalForm.creditAccountId), creditMinor: amountMinor, memo: journalForm.memo || undefined },
+      ],
+    };
+    try {
+      await createJournal.mutateAsync({ data: payload });
+      await queryClient.invalidateQueries({ queryKey: ["/api/journal"] });
+      resetJournalForm();
+      setCreateOpen(false);
+      setMessage(isAr ? "تم حفظ قيد اليومية" : "Journal entry saved");
+    } catch (error) {
+      setMessage(getErrorMessage(error));
+    }
+  }
+
   return <div>
     <PageHeader eyebrow={isAr ? "المحاسبة" : "Accounting"} title={isAr ? "قيود اليومية" : "Journal entries"} description={isAr ? "قائمة القيود المسجلة مع عرض تفاصيل كل قيد في نافذة مستقلة." : "Recorded journal entries with each entry available in a separate detail window."} />
     <Panel>
-      <PanelTitle detail={<span className="font-mono-ui text-[10px] text-muted-foreground">{journal.data?.length ?? 0} {isAr ? "قيد" : "entries"}</span>}>{isAr ? "القيود المسجلة" : "Recorded entries"}</PanelTitle>
+      <div className="mb-5 flex items-center justify-between gap-3">
+        <PanelTitle detail={<span className="font-mono-ui text-[10px] text-muted-foreground">{journal.data?.length ?? 0} {isAr ? "قيد" : "entries"}</span>}>{isAr ? "القيود المسجلة" : "Recorded entries"}</PanelTitle>
+        {canWrite && <button type="button" className={buttonClass} onClick={() => setCreateOpen(true)}><Plus className="h-4 w-4" />{isAr ? "إنشاء قيد" : "Create entry"}</button>}
+      </div>
       {journal.isLoading && <LoadingState />}
       {journal.isError && <ErrorState error={journal.error} onRetry={() => journal.refetch()} />}
       {journal.data?.length === 0 && <EmptyState icon={<BookOpen className="h-5 w-5" />} title={isAr ? "لا توجد قيود مسجلة" : "No journal entries"} detail={isAr ? "ستظهر القيود الناتجة عن المبيعات والمصروفات والقيود اليدوية هنا." : "Sales, expenses, and manual entries will appear here."} />}
       {journal.data && journal.data.length > 0 && <div className="grid gap-2">{journal.data.map((entry) => <article key={entry.id} className="grid gap-4 border-b border-border p-4 last:border-0 sm:grid-cols-[1fr_auto_auto] sm:items-center"><div><div className="flex flex-wrap items-center gap-3"><span className="font-mono-ui text-xs text-primary">{entry.entryNumber}</span><span className="text-xs text-muted-foreground">{entry.entryDate}</span></div><p className="mt-2 font-medium">{entry.description}</p><p className="mt-1 text-xs text-muted-foreground">{entry.referenceType ?? (isAr ? "قيد يدوي" : "Manual entry")}</p></div><div className="sm:text-end"><p className="text-[10px] uppercase tracking-[.14em] text-muted-foreground">{isAr ? "القيمة" : "Amount"}</p><p className="mt-1 font-display text-2xl">{money(entryAmount(entry), language)}</p></div><button type="button" className={quietButtonClass} onClick={() => setSelectedEntryId(entry.id)}>{isAr ? "عرض" : "View"}</button></article>)}</div>}
     </Panel>
+    {createOpen && <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 p-4" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setCreateOpen(false); }}>
+      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto border border-border bg-card p-5 shadow-2xl" role="dialog" aria-modal="true" aria-labelledby="create-journal-dialog-title">
+        <div className="flex items-start justify-between gap-4 border-b border-border pb-4">
+          <div><p className="font-mono-ui text-[10px] uppercase tracking-[.16em] text-primary">{isAr ? "قيد يومية جديد" : "New journal entry"}</p><h2 id="create-journal-dialog-title" className="mt-2 font-display text-2xl">{isAr ? "إنشاء قيد" : "Create journal entry"}</h2></div>
+          <button type="button" className={quietButtonClass} aria-label={isAr ? "إغلاق" : "Close"} onClick={() => setCreateOpen(false)}><X className="h-4 w-4" /></button>
+        </div>
+        {accounts.isLoading && <LoadingState label={isAr ? "جاري تحميل الحسابات..." : "Loading accounts..."} />}
+        {accounts.isError && <ErrorState error={accounts.error} onRetry={() => accounts.refetch()} />}
+        {accounts.data && <form onSubmit={submitJournal} className="mt-5 grid gap-4">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Field label={isAr ? "التاريخ" : "Date"}><input className={inputClass} type="date" required value={journalForm.entryDate} onChange={(event) => setJournalForm({ ...journalForm, entryDate: event.target.value })} /></Field>
+            <Field label={isAr ? "المبلغ بالدينار" : "Amount in LYD"}><input className={inputClass} type="number" min="0.01" step="0.01" required value={journalForm.amount} onChange={(event) => setJournalForm({ ...journalForm, amount: event.target.value })} /></Field>
+          </div>
+          <Field label={isAr ? "البيان" : "Description"}><input className={inputClass} required value={journalForm.description} onChange={(event) => setJournalForm({ ...journalForm, description: event.target.value })} placeholder={isAr ? "بيع عطر أو مصروف تشغيلي" : "Sale or operating expense"} /></Field>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Field label={isAr ? "المدين" : "Debit account"}><AccountPicker id="create-debit-account" accounts={accounts.data} value={journalForm.debitAccountId} language={language} onChange={(accountId) => setJournalForm({ ...journalForm, debitAccountId: accountId })} /></Field>
+            <Field label={isAr ? "الدائن" : "Credit account"}><AccountPicker id="create-credit-account" accounts={accounts.data} value={journalForm.creditAccountId} language={language} onChange={(accountId) => setJournalForm({ ...journalForm, creditAccountId: accountId })} /></Field>
+          </div>
+          <Field label={isAr ? "ملاحظة" : "Memo"}><input className={inputClass} value={journalForm.memo} onChange={(event) => setJournalForm({ ...journalForm, memo: event.target.value })} /></Field>
+          <div className="flex flex-wrap gap-2">
+            <button type="submit" className={buttonClass} disabled={createJournal.isPending}><Save className="h-4 w-4" />{isAr ? "حفظ القيد" : "Save entry"}</button>
+            <button type="button" className={quietButtonClass} onClick={() => { resetJournalForm(); setCreateOpen(false); }}>{isAr ? "إلغاء" : "Cancel"}</button>
+          </div>
+        </form>}
+      </div>
+    </div>}
     {selectedEntry && <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 p-4" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setSelectedEntryId(null); }}>
       <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto border border-border bg-card p-5 shadow-2xl" role="dialog" aria-modal="true" aria-labelledby="journal-entry-dialog-title">
         <div className="flex items-start justify-between gap-4 border-b border-border pb-4">
@@ -166,5 +311,6 @@ function AccountingJournal() {
         </div>
       </div>
     </div>}
+    <Toast message={message} onClose={() => setMessage(null)} />
    </div>;
 }
