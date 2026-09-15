@@ -26,9 +26,9 @@ const navigation = [
   { href: "/admin/inventory", label: "Inventory", arabic: "المخزون", icon: Boxes, capability: null },
   { href: "/admin/orders", label: "Orders", arabic: "الطلبات", icon: ShoppingBag, capability: null },
   { href: "/admin/expenses", label: "Expenses", arabic: "المصروفات", icon: ReceiptText, capability: null },
+  { href: "/admin/accounting", label: "Accounting", arabic: "المحاسبة", icon: BookOpen, capability: "manager" as const },
   { href: "/admin/team", label: "Team", arabic: "الفريق", icon: Users, capability: "owner" as const },
   { href: "/admin/audit", label: "Audit log", arabic: "سجل التدقيق", icon: ScrollText, capability: "manager" as const },
-  { href: "/admin/accounting", label: "Accounting", arabic: "المحاسبة", icon: BookOpen, capability: "manager" as const },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -74,8 +74,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               </Link>
               <button className="lg:hidden" onClick={() => setMobileOpen(false)} aria-label="Close menu"><X className="h-5 w-5" /></button>
             </div>
-            <div className="mt-10 border-y border-border py-4">
-              <p className="font-mono-ui text-[9px] uppercase tracking-[.2em] text-muted-foreground">Signed in as</p>
+            <div className="mt-8 border-y border-border py-4">
+              <p className="font-mono-ui text-[9px] uppercase tracking-[.2em] text-muted-foreground">{language === "ar" ? "الحساب الحالي" : "Workspace account"}</p>
               <p className="mt-2 truncate text-sm font-medium">{session.data?.displayName}</p>
               <p className="mt-1 font-mono-ui text-[10px] uppercase tracking-[.12em] text-primary">{role}</p>
             </div>
@@ -95,10 +95,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </aside>
         {mobileOpen && <button aria-label="Close navigation" className="fixed inset-0 z-30 bg-foreground/20 lg:hidden" onClick={() => setMobileOpen(false)} />}
         <main className="min-h-screen lg:ps-72">
-          <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-border bg-background/90 px-5 backdrop-blur lg:px-10">
+          <header className="sticky top-0 z-20 flex min-h-16 items-center justify-between gap-4 border-b border-border bg-background/90 px-5 py-3 backdrop-blur lg:px-10">
             <button className="lg:hidden" onClick={() => setMobileOpen(true)} aria-label="Open navigation"><Menu className="h-5 w-5" /></button>
-            <div className="hidden font-mono-ui text-[10px] uppercase tracking-[.18em] text-muted-foreground lg:block">Inventory · commerce · care</div>
+            <div><p className="font-mono-ui text-[10px] uppercase tracking-[.18em] text-primary">{language === "ar" ? "عمليات Eleganza" : "Eleganza operations"}</p><p className="text-xs text-muted-foreground">{language === "ar" ? "مساحة العمل الفعلية — التغييرات محفوظة" : "Live workspace — changes are saved"}</p></div>
             <div className="ms-auto flex items-center gap-3 text-xs text-muted-foreground">
+              <span className="hidden border border-primary/30 px-3 py-2 text-[10px] uppercase tracking-[.13em] text-primary sm:inline">{language === "ar" ? "بيانات فعلية" : "Live data"}</span>
               <button
                 type="button"
                 onClick={() => setLanguage(language === "en" ? "ar" : "en")}
@@ -112,7 +113,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <span className="hidden sm:inline">{language === "ar" ? "بيئة التطوير" : "Development environment"}</span>
             </div>
           </header>
-          <div className="mx-auto max-w-[1500px] p-5 lg:p-10">{children}</div>
+          <div className="mx-auto max-w-[1500px] p-5 lg:p-10">
+            <div className="mb-8 border border-primary/25 bg-primary/5 px-5 py-4">
+              <p className="font-mono-ui text-[10px] uppercase tracking-[.2em] text-primary">{language === "ar" ? "مساحة الإدارة الفعلية" : "Live operations desk"}</p>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">{language === "ar" ? "هذه المساحة محمية بتسجيل الدخول، وكل التغييرات تحفظ في قاعدة البيانات بحسب صلاحياتك." : "This workspace is protected by sign-in, and changes are saved to the database according to your permissions."}</p>
+            </div>
+            {children}
+          </div>
         </main>
       </div>
     </AdminContext.Provider>
