@@ -44,6 +44,17 @@ function sortAccountsByCode<T extends { code: string }>(left: T, right: T) {
   return Number(left.code) - Number(right.code) || left.code.localeCompare(right.code);
 }
 
+function accountTypeLabel(type: AccountType | undefined, isAr: boolean) {
+  const labels: Record<AccountType, { en: string; ar: string }> = {
+    asset: { en: "Asset", ar: "أصل" },
+    liability: { en: "Liability", ar: "التزام" },
+    equity: { en: "Equity", ar: "حقوق ملكية" },
+    revenue: { en: "Revenue", ar: "إيراد" },
+    expense: { en: "Expense", ar: "مصروف" },
+  };
+  return type ? labels[type][isAr ? "ar" : "en"] : (isAr ? "غير محدد" : "Unclassified");
+}
+
 function nextChildCode<T extends { id: number; code: string; parentId?: number | null }>(accounts: T[], parentId: number) {
   const parentAccount = accounts.find((account) => account.id === parentId);
   const parentCode = parentAccount?.code ?? "1000";
@@ -216,6 +227,7 @@ function AccountingJournal() {
   const [selectedEntryId, setSelectedEntryId] = useState<number | null>(null);
   const [journalForm, setJournalForm] = useState({ entryDate: new Date().toISOString().slice(0, 10), description: "", debitAccountId: "", creditAccountId: "", amount: "", memo: "" });
   const accountNames = useMemo(() => new Map((accounts.data ?? []).map((account) => [account.id, isAr ? account.nameAr || account.nameEn : account.nameEn])), [accounts.data, isAr]);
+  const accountDetails = useMemo(() => new Map((accounts.data ?? []).map((account) => [account.id, account])), [accounts.data]);
   const canWrite = role === "owner" || role === "manager";
   const selectedEntry = selectedEntryId === null ? undefined : journal.data?.find((entry) => entry.id === selectedEntryId);
 
@@ -307,7 +319,7 @@ function AccountingJournal() {
           <div><p className="text-[10px] uppercase tracking-[.14em] text-muted-foreground">{isAr ? "القيمة" : "Amount"}</p><p className="mt-1 font-display text-2xl">{money(entryAmount(selectedEntry), language)}</p></div>
         </div>
         <div className="mt-5 grid gap-2 sm:grid-cols-2">
-          {selectedEntry.lines.map((line) => <div key={line.id} className="border border-border bg-muted/30 p-3"><div className="flex justify-between gap-3 text-sm"><span>{accountNames.get(line.accountId) ?? `#${line.accountId}`}</span><span className="font-mono-ui text-xs">{line.debitMinor > 0 ? `Dr ${money(line.debitMinor, language)}` : `Cr ${money(line.creditMinor, language)}`}</span></div><p className="mt-2 text-xs text-muted-foreground">{line.memo || (isAr ? "بدون ملاحظة" : "No memo")}</p></div>)}
+           {selectedEntry.lines.map((line) => { const account = accountDetails.get(line.accountId); return <div key={line.id} className="border border-border bg-muted/30 p-3"><div className="flex justify-between gap-3 text-sm"><span>{accountNames.get(line.accountId) ?? `#${line.accountId}`}</span><span className="font-mono-ui text-xs">{line.debitMinor > 0 ? `Dr ${money(line.debitMinor, language)}` : `Cr ${money(line.creditMinor, language)}`}</span></div><p className="mt-2 text-xs text-primary">{isAr ? "تصنيف الحساب" : "Account classification"}: {accountTypeLabel(account?.type, isAr)}</p>{line.memo && <p className="mt-1 text-xs text-muted-foreground">{isAr ? "الملاحظة" : "Memo"}: {line.memo}</p>}</div>; })}
         </div>
       </div>
     </div>}
