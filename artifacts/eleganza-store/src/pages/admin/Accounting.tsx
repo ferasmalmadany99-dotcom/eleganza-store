@@ -1,5 +1,5 @@
 import { BookOpen, ClipboardList, FileBarChart, Landmark, PackageSearch, Plus, Save } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   useCreateAccount,
   useCreateJournalEntry,
@@ -68,7 +68,7 @@ function AccountPicker({
   const isAr = language === "ar";
   const [text, setText] = useState("");
 
-  useMemo(() => {
+  useEffect(() => {
     const selected = accounts.find((account) => String(account.id) === value);
     if (selected) setText(`${selected.code} · ${isAr ? selected.nameAr || selected.nameEn : selected.nameEn}`);
     if (!value) setText("");
