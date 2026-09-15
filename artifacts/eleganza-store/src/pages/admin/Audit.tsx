@@ -1,0 +1,10 @@
+import { ClipboardList } from "lucide-react";
+import { useListAuditLogs } from "@workspace/api-client-react";
+import { EmptyState, ErrorState, LoadingState, PageHeader, Panel, PanelTitle, useAdmin, dateLabel } from "@/components/admin/AdminUI";
+
+export default function Audit() {
+  const { language } = useAdmin();
+  const isAr = language === "ar";
+  const logs = useListAuditLogs({ limit: 100 });
+  return <div><PageHeader eyebrow={isAr ? "الحوكمة" : "Governance"} title={isAr ? "سجل التدقيق" : "Audit log"} description={isAr ? "أثر قابل للمراجعة للعمليات التي تغيّر بيانات المتجر." : "A reviewable trail of operations that change store data."} /><Panel><PanelTitle detail={<span className="font-mono-ui text-[10px] text-muted-foreground">{logs.data?.length ?? 0} events</span>}>{isAr ? "النشاط الإداري" : "Administrative activity"}</PanelTitle>{logs.isLoading && <LoadingState />}{logs.isError && <ErrorState error={logs.error} onRetry={() => logs.refetch()} />}{logs.data?.length === 0 && <EmptyState icon={<ClipboardList className="h-5 w-5" />} title="No audit events" detail="Changes made through the operations desk will appear here." />}{logs.data && logs.data.length > 0 && <div className="grid gap-3">{logs.data.map((log) => <article key={log.id} className="grid gap-3 border-b border-border pb-4 last:border-0 last:pb-0 sm:grid-cols-[1fr_auto]"><div><div className="flex flex-wrap items-center gap-2"><span className="font-mono-ui text-xs uppercase tracking-[.12em] text-primary">{log.action}</span><span className="text-xs text-muted-foreground">{log.entityType}{log.entityId ? ` #${log.entityId}` : ""}</span></div><pre className="mt-2 max-w-full overflow-x-auto whitespace-pre-wrap text-xs leading-5 text-muted-foreground">{JSON.stringify(log.metadata, null, 2)}</pre></div><time className="text-xs text-muted-foreground sm:text-end">{dateLabel(log.createdAt, language)}</time></article>)}</div>}</Panel></div>;
+}
