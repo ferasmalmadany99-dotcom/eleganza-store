@@ -60,6 +60,7 @@ type Product = {
   name: string;
   category: Exclude<Category, 'All'>;
   price: number;
+  stock: number;
   material: string;
   color: string;
   image: string;
@@ -89,6 +90,7 @@ const products: Product[] = [
     name: 'Santal No. 03',
     category: 'Perfume',
     price: 145,
+    stock: 12,
     material: 'Eau de parfum / 50 ml',
     color: 'Sandalwood / amber',
     image: perfumeImage,
@@ -102,6 +104,7 @@ const products: Product[] = [
     name: 'Rose Veil',
     category: 'Makeup',
     price: 48,
+    stock: 7,
     material: 'Cream blush / 7 g',
     color: 'Petal',
     image: makeupImage,
@@ -115,6 +118,7 @@ const products: Product[] = [
     name: 'Lune Hoops',
     category: 'Accessories',
     price: 92,
+    stock: 5,
     material: 'Gold vermeil',
     color: 'Warm gold',
     image: jewelryImage,
@@ -127,6 +131,7 @@ const products: Product[] = [
     name: 'Velvet Muse',
     category: 'Makeup',
     price: 36,
+    stock: 10,
     material: 'Satin lipstick / 3.5 g',
     color: 'Deep berry',
     image: lipImage,
@@ -140,6 +145,7 @@ const products: Product[] = [
     name: 'Amber Reverie',
     category: 'Perfume',
     price: 168,
+    stock: 18,
     material: 'Eau de parfum / 75 ml',
     color: 'Amber / vanilla',
     image: amberReverieImage,
@@ -153,6 +159,7 @@ const products: Product[] = [
     name: 'Silk Petal',
     category: 'Makeup',
     price: 44,
+    stock: 0,
     material: 'Powder blush / 8 g',
     color: 'Soft coral',
     image: silkPetalImage,
@@ -165,6 +172,7 @@ const products: Product[] = [
     name: 'Solstice Chain',
     category: 'Accessories',
     price: 118,
+    stock: 4,
     material: 'Gold vermeil / 42 cm',
     color: 'Polished gold',
     image: solsticeChainImage,
@@ -178,6 +186,7 @@ const products: Product[] = [
     name: 'Nocturne Rouge',
     category: 'Makeup',
     price: 39,
+    stock: 24,
     material: 'Matte lipstick / 3.5 g',
     color: 'Burnished red',
     image: nocturneRougeImage,
@@ -190,6 +199,7 @@ const products: Product[] = [
     name: 'Cedar Afterglow',
     category: 'Perfume',
     price: 152,
+    stock: 6,
     material: 'Eau de parfum / 50 ml',
     color: 'Cedar / white musk',
     image: cedarAfterglowImage,
@@ -202,6 +212,7 @@ const products: Product[] = [
     name: 'Dawn Flush',
     category: 'Makeup',
     price: 46,
+    stock: 8,
     material: 'Cream blush / 7 g',
     color: 'Warm peach',
     image: dawnFlushImage,
@@ -215,6 +226,7 @@ const products: Product[] = [
     name: 'Aurelia Drops',
     category: 'Accessories',
     price: 105,
+    stock: 3,
     material: 'Gold vermeil',
     color: 'Satin gold',
     image: aureliaDropsImage,
@@ -227,6 +239,7 @@ const products: Product[] = [
     name: 'Plum Élan',
     category: 'Makeup',
     price: 38,
+    stock: 2,
     material: 'Satin lipstick / 3.5 g',
     color: 'Muted plum',
     image: plumElanImage,
@@ -305,6 +318,11 @@ const copy = {
     dispatch: 'Dispatch',
     dispatchTime: 'Within 2–3 days',
     addToBag: 'Add to bag',
+    stock: 'Stock',
+    pieces: 'pieces available',
+    outOfStock: 'Out of stock',
+    outOfStockReason: 'This item cannot be added because there are no pieces left in stock.',
+    stockLimitReason: 'This item cannot be added because you reached the available stock limit.',
     bestseller: 'Bestseller',
     new: 'New',
     edition: 'Edition 01',
@@ -376,6 +394,11 @@ const copy = {
     dispatch: 'التوصيل',
     dispatchTime: 'خلال 2–3 أيام',
     addToBag: 'أضف إلى السلة',
+    stock: 'المخزون',
+    pieces: 'قطعة متوفرة',
+    outOfStock: 'نفد المخزون',
+    outOfStockReason: 'تعذر إضافة هذا الصنف لأن عدد القطع المتوفرة في المخزون هو صفر.',
+    stockLimitReason: 'تعذر إضافة قطعة أخرى لأنك وصلت إلى الحد المتوفر في المخزون.',
     bestseller: 'الأكثر مبيعًا',
     new: 'جديد',
     edition: 'إصدار 01',
@@ -733,8 +756,8 @@ function ProductCard({
         <button onClick={onFavorite} aria-label={favorite ? `Remove ${product.name} from favorites` : `Add ${product.name} to favorites`} className={`absolute right-4 top-4 z-20 grid h-9 w-9 place-items-center bg-[#f8f0e6]/90 transition-all hover:bg-[#f8f0e6] ${favorite ? 'text-[#a64e3a]' : 'text-[#312b25]'}`} data-testid={`button-favorite-${product.id}`}>
           <Heart size={16} strokeWidth={1.4} fill={favorite ? 'currentColor' : 'none'} />
         </button>
-        <button onClick={onAdd} className="absolute bottom-0 left-0 right-0 z-20 translate-y-full bg-[#f8f0e6]/95 px-4 py-4 text-left font-mono-ui text-[10px] uppercase tracking-[.18em] text-[#322b25] transition-transform duration-300 group-hover:translate-y-0" data-testid={`button-add-${product.id}`}>
-          {c.addToBag} <Plus size={13} className="float-right" strokeWidth={1.5} />
+        <button onClick={onAdd} className={`absolute bottom-0 left-0 right-0 z-20 translate-y-full px-4 py-4 text-left font-mono-ui text-[10px] uppercase tracking-[.18em] transition-transform duration-300 group-hover:translate-y-0 ${product.stock === 0 ? 'bg-[#ead9d2] text-[#8b4037]' : 'bg-[#f8f0e6]/95 text-[#322b25]'}`} aria-label={product.stock === 0 ? `${product.name}: ${c.outOfStock}` : `${c.addToBag} ${product.name}`} data-testid={`button-add-${product.id}`}>
+          {product.stock === 0 ? c.outOfStock : c.addToBag} {product.stock > 0 && <Plus size={13} className="float-right" strokeWidth={1.5} />}
         </button>
       </div>
       <button onClick={onSelect} className="mt-4 block text-left" data-testid={`button-details-${product.id}`}>
@@ -743,6 +766,9 @@ function ProductCard({
             <h3 className="font-display text-[25px] leading-none text-[#312b25]">{product.name}</h3>
             <p className="mt-2 font-mono-ui text-[9px] uppercase tracking-[.14em] text-[#87796d]">{productText.color} / {productText.material}</p>
             <p className="mt-3 max-w-[280px] text-xs leading-5 text-[#786b60]">{productText.note}</p>
+            <p className={`mt-3 font-mono-ui text-[10px] uppercase tracking-[.1em] ${product.stock === 0 ? 'text-[#a64a3b]' : product.stock <= 3 ? 'text-[#a86d38]' : 'text-[#6f7c66]'}`}>
+              {product.stock === 0 ? c.outOfStock : `${c.stock}: ${product.stock} ${c.pieces}`}
+            </p>
           </div>
           <span className="font-mono-ui text-[11px] text-[#312b25]">{money(product.price)}</span>
         </div>
@@ -794,11 +820,12 @@ function ProductDetail({
             <dl className="mt-8 space-y-4 border-t border-[#312b25]/15 pt-5 font-mono-ui text-[10px] uppercase tracking-[.13em] text-[#7d6d61]">
               <div className="flex justify-between"><dt>{c.format}</dt><dd className="text-right text-[#312b25]">{productText.material}</dd></div>
               <div className="flex justify-between"><dt>{c.notes}</dt><dd className="text-right text-[#312b25]">{productText.color}</dd></div>
+              <div className="flex justify-between"><dt>{c.stock}</dt><dd className={`text-right ${product.stock === 0 ? 'text-[#a64a3b]' : 'text-[#312b25]'}`}>{product.stock === 0 ? c.outOfStock : `${product.stock} ${c.pieces}`}</dd></div>
               <div className="flex justify-between"><dt>{c.dispatch}</dt><dd className="text-right text-[#312b25]">{c.dispatchTime}</dd></div>
             </dl>
           </div>
           <div className="mt-10 flex gap-3">
-            <button onClick={onAdd} className="flex-1 bg-[#9f523d] px-5 py-4 font-mono-ui text-[10px] uppercase tracking-[.2em] text-[#fff5e8] transition-colors hover:bg-[#7f3f31]" data-testid={`button-detail-add-${product.id}`}>{c.addToBag}</button>
+            <button onClick={onAdd} className={`flex-1 px-5 py-4 font-mono-ui text-[10px] uppercase tracking-[.2em] text-[#fff5e8] transition-colors ${product.stock === 0 ? 'bg-[#8b4037] hover:bg-[#71332e]' : 'bg-[#9f523d] hover:bg-[#7f3f31]'}`} aria-label={product.stock === 0 ? `${product.name}: ${c.outOfStock}` : `${c.addToBag} ${product.name}`} data-testid={`button-detail-add-${product.id}`}>{product.stock === 0 ? c.outOfStock : c.addToBag}</button>
             <button onClick={onFavorite} className={`grid w-14 place-items-center border border-[#312b25]/20 transition-colors hover:bg-[#efe2d3] ${favorite ? 'text-[#a64e3a]' : 'text-[#312b25]'}`} aria-label={c.languageLabel === 'العربية' ? 'إضافة إلى المفضلة' : 'Toggle favorite'} data-testid={`button-detail-favorite-${product.id}`}><Heart size={18} strokeWidth={1.3} fill={favorite ? 'currentColor' : 'none'} /></button>
           </div>
         </div>
@@ -1036,13 +1063,30 @@ function Storefront() {
   };
   const toggleFavorite = (id: string) => setFavorites((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id]);
   const addToBag = (product: Product) => {
+    const existing = bag.find((item) => item.id === product.id);
+    if (product.stock === 0) {
+      notify(language === 'ar' ? `${product.name}: ${c.outOfStockReason}` : `${product.name}: ${c.outOfStockReason}`);
+      return false;
+    }
+    if (existing && existing.quantity >= product.stock) {
+      notify(language === 'ar' ? `${product.name}: ${c.stockLimitReason}` : `${product.name}: ${c.stockLimitReason}`);
+      return false;
+    }
     setBag((current) => {
-      const existing = current.find((item) => item.id === product.id);
-      return existing ? current.map((item) => item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item) : [...current, { ...product, quantity: 1 }];
+      const currentItem = current.find((item) => item.id === product.id);
+      return currentItem ? current.map((item) => item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item) : [...current, { ...product, quantity: 1 }];
     });
     notify(language === 'ar' ? `تمت إضافة ${product.name} إلى السلة بنجاح` : `${product.name} was added to your bag`);
+    return true;
   };
-  const updateQuantity = (id: string, amount: number) => setBag((current) => current.flatMap((item) => item.id === id ? (item.quantity + amount > 0 ? [{ ...item, quantity: item.quantity + amount }] : []) : [item]));
+  const updateQuantity = (id: string, amount: number) => {
+    const item = bag.find((entry) => entry.id === id);
+    if (item && amount > 0 && item.quantity + amount > item.stock) {
+      notify(language === 'ar' ? `${item.name}: ${c.stockLimitReason}` : `${item.name}: ${c.stockLimitReason}`);
+      return;
+    }
+    setBag((current) => current.flatMap((entry) => entry.id === id ? (entry.quantity + amount > 0 ? [{ ...entry, quantity: entry.quantity + amount }] : []) : [entry]));
+  };
   const jumpToShop = () => document.getElementById('shop')?.scrollIntoView({ behavior: 'smooth' });
 
   return (
@@ -1104,7 +1148,7 @@ function Storefront() {
       {bagOpen && <BagDrawer items={bag} language={language} c={c} onClose={() => setBagOpen(false)} onUpdate={updateQuantity} onRemove={(id) => setBag((current) => current.filter((item) => item.id !== id))} onCheckout={() => notify(language === 'ar' ? 'يتم تجهيز صفحة الدفع لك' : 'Checkout is being prepared for you')} />}
       {favoritesOpen && <FavoritesDrawer items={favoriteProducts} language={language} c={c} onClose={() => setFavoritesOpen(false)} onRemove={toggleFavorite} onSelect={(product) => { setFavoritesOpen(false); setSelectedProduct(product); }} />}
       {searchOpen && <SearchPanel products={products} c={c} language={language} onClose={() => setSearchOpen(false)} onSelect={(product) => { setSearchOpen(false); setSelectedProduct(product); }} />}
-      {selectedProduct && <ProductDetail product={selectedProduct} language={language} c={c} favorite={favorites.includes(selectedProduct.id)} onFavorite={() => toggleFavorite(selectedProduct.id)} onAdd={() => { addToBag(selectedProduct); setSelectedProduct(null); }} onClose={() => setSelectedProduct(null)} />}
+      {selectedProduct && <ProductDetail product={selectedProduct} language={language} c={c} favorite={favorites.includes(selectedProduct.id)} onFavorite={() => toggleFavorite(selectedProduct.id)} onAdd={() => { if (addToBag(selectedProduct)) setSelectedProduct(null); }} onClose={() => setSelectedProduct(null)} />}
       {journalIndexOpen && !selectedArticle && <JournalIndex entries={articles[language]} c={c} onClose={() => setJournalIndexOpen(false)} onSelect={setSelectedArticleId} />}
       {selectedArticle && <ArticleReader article={selectedArticle} c={c} onClose={() => setSelectedArticleId(null)} />}
     </div>
