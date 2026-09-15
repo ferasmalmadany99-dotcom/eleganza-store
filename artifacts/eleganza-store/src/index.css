@@ -230,6 +230,10 @@
   .rise-in-delay-3 { animation-delay: .36s; }
   .image-zoom img { transition: transform .8s cubic-bezier(.22,.8,.28,1); }
   .image-zoom:hover img { transform: scale(1.045); }
+  .admin-nav-scroll { scrollbar-width: thin; scrollbar-color: hsl(var(--primary) / .35) transparent; }
+  .admin-nav-scroll::-webkit-scrollbar { width: 5px; }
+  .admin-nav-scroll::-webkit-scrollbar-track { background: transparent; }
+  .admin-nav-scroll::-webkit-scrollbar-thumb { background: hsl(var(--primary) / .35); border-radius: 999px; }
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { scrollbar-width: none; }
   .rtl-ui { font-family: 'Noto Kufi Arabic', 'DM Sans', sans-serif; }
