@@ -13,6 +13,7 @@ import AdminOrders from './pages/admin/Orders';
 import AdminExpenses from './pages/admin/Expenses';
 import AdminTeam from './pages/admin/Team';
 import AdminAudit from './pages/admin/Audit';
+import AdminDemo from './pages/AdminDemo';
 import AdminLayout from './components/admin/AdminLayout';
 
 const clerkPubKey = publishableKeyFromHost(
@@ -180,6 +181,7 @@ function ClerkProviderWithRoutes() {
           <Route path="/" component={Storefront} />
           <Route path="/sign-in/*?" component={SignInPage} />
           <Route path="/sign-up/*?" component={SignUpPage} />
+          <Route path="/admin-demo" component={AdminDemo} />
           <Route path="/admin">
             {() => <AdminRoute component={AdminDashboard} />}
           </Route>
