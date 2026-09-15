@@ -6,7 +6,6 @@ import {
   useListAccounts,
   useListJournalEntries,
   useListInventoryMovements,
-  useUpdateAccount,
   type AccountType,
   type JournalEntryInput,
 } from "@workspace/api-client-react";
@@ -184,32 +183,13 @@ function AccountingJournal() {
   const isAr = language === "ar";
   const accounts = useListAccounts();
   const journal = useListJournalEntries({ limit: 100 });
-  const createAccount = useCreateAccount();
-  const updateAccount = useUpdateAccount();
   const createJournal = useCreateJournalEntry();
   const [message, setMessage] = useState<string | null>(null);
-  const [editingId, setEditingId] = useState<number | null>(null);
   const [selectedEntryId, setSelectedEntryId] = useState<number | null>(null);
-  const [accountForm, setAccountForm] = useState({ code: "", nameEn: "", nameAr: "", type: "expense" as AccountType });
   const [journalForm, setJournalForm] = useState({ entryDate: new Date().toISOString().slice(0, 10), description: "", debitAccountId: "", creditAccountId: "", amount: "", memo: "" });
   const accountNames = useMemo(() => new Map((accounts.data ?? []).map((account) => [account.id, isAr ? account.nameAr || account.nameEn : account.nameEn])), [accounts.data, isAr]);
   const canWrite = role === "owner" || role === "manager";
   const selectedEntry = journal.data?.find((entry) => entry.id === selectedEntryId) ?? journal.data?.[0];
-
-  async function submitAccount(event: React.FormEvent) {
-    event.preventDefault();
-    try {
-      if (editingId) {
-        await updateAccount.mutateAsync({ id: editingId, data: { ...accountForm, active: true } });
-      } else {
-        await createAccount.mutateAsync({ data: { ...accountForm, active: true } });
-      }
-      await queryClient.invalidateQueries({ queryKey: ["/api/accounts"] });
-      setEditingId(null);
-      setAccountForm({ code: "", nameEn: "", nameAr: "", type: "expense" });
-      setMessage(isAr ? (editingId ? "تم تحديث الحساب" : "تمت إضافة الحساب") : (editingId ? "Account updated" : "Account added"));
-    } catch (error) { setMessage(getErrorMessage(error)); }
-  }
 
   async function submitJournal(event: React.FormEvent) {
     event.preventDefault();
@@ -234,39 +214,21 @@ function AccountingJournal() {
     } catch (error) { setMessage(getErrorMessage(error)); }
   }
 
+  function entryAmount(entry: NonNullable<typeof journal.data>[number]) {
+    return entry.lines.reduce((total, line) => total + line.debitMinor, 0);
+  }
+
   return <div>
-    <PageHeader eyebrow={isAr ? "المحاسبة" : "Accounting"} title={isAr ? "الحسابات ودفتر اليومية" : "Accounts & journal"} description={isAr ? "شجرة الحسابات والقيود اليومية المتوازنة للمبيعات والمصروفات والتسويات." : "A structured chart of accounts and balanced journal entries for sales, expenses, and reconciliations."} />
-    <div className="grid gap-5 xl:grid-cols-[.8fr_1.2fr]">
-      <Panel>
-        <PanelTitle detail={<span className="font-mono-ui text-[10px] text-muted-foreground">{accounts.data?.length ?? 0} accounts</span>}>{isAr ? "شجرة الحسابات" : "Chart of accounts"}</PanelTitle>
-        {accounts.isLoading && <LoadingState />}
-        {accounts.isError && <ErrorState error={accounts.error} onRetry={() => accounts.refetch()} />}
-        {accounts.data?.length === 0 && <EmptyState icon={<BookOpen className="h-5 w-5" />} title="No accounts" detail="Default accounts will be created when this page loads." />}
-        {accounts.data && accounts.data.length > 0 && <div className="grid gap-2">{accounts.data.map((account) => <div key={account.id} className="grid grid-cols-[auto_1fr_auto] items-center gap-3 border-b border-border py-3 text-sm"><span className="font-mono-ui text-xs text-primary">{account.code}</span><div><p>{isAr ? account.nameAr || account.nameEn : account.nameEn}</p><p className="mt-1 text-[10px] uppercase tracking-[.12em] text-muted-foreground">{account.type}</p></div>{canWrite ? <button className="text-xs text-muted-foreground hover:text-primary" onClick={() => { setEditingId(account.id); setAccountForm({ code: account.code, nameEn: account.nameEn, nameAr: account.nameAr, type: account.type }); }}>{isAr ? "تعديل" : "Edit"}</button> : <span className="h-2 w-2 rounded-full bg-primary" />}</div>)}</div>}
-        {canWrite && <form onSubmit={submitAccount} className="mt-6 grid gap-3 border-t border-border pt-5"><p className="font-mono-ui text-[10px] uppercase tracking-[.15em] text-primary">{isAr ? (editingId ? "تعديل الحساب" : "حساب جديد") : (editingId ? "Edit account" : "New account")}</p><div className="grid gap-3 sm:grid-cols-2"><Field label={isAr ? "الرمز" : "Code"}><input className={inputClass} required value={accountForm.code} onChange={(event) => setAccountForm({ ...accountForm, code: event.target.value })} placeholder="6500" /></Field><Field label={isAr ? "النوع" : "Type"}><select className={inputClass} value={accountForm.type} onChange={(event) => setAccountForm({ ...accountForm, type: event.target.value as AccountType })}>{accountTypes.map((type) => <option key={type} value={type}>{type}</option>)}</select></Field></div><Field label={isAr ? "الاسم بالإنجليزية" : "English name"}><input className={inputClass} required value={accountForm.nameEn} onChange={(event) => setAccountForm({ ...accountForm, nameEn: event.target.value })} /></Field><Field label={isAr ? "الاسم بالعربية" : "Arabic name"}><input className={inputClass} value={accountForm.nameAr} onChange={(event) => setAccountForm({ ...accountForm, nameAr: event.target.value })} dir="rtl" /></Field><div className="flex gap-2"><button className={quietButtonClass} disabled={createAccount.isPending || updateAccount.isPending}><Plus className="h-4 w-4" />{isAr ? (editingId ? "حفظ التعديل" : "إضافة الحساب") : (editingId ? "Save changes" : "Add account")}</button>{editingId && <button type="button" className={quietButtonClass} onClick={() => { setEditingId(null); setAccountForm({ code: "", nameEn: "", nameAr: "", type: "expense" }); }}>{isAr ? "إلغاء" : "Cancel"}</button>}</div></form>}
-      </Panel>
-      <Panel>
-        <PanelTitle detail={<span className="font-mono-ui text-[10px] text-muted-foreground">{journal.data?.length ?? 0} entries</span>}>{isAr ? "قيد يومية جديد" : "New journal entry"}</PanelTitle>
-        {!canWrite && <p className="mb-4 border border-border bg-muted/40 p-3 text-sm text-muted-foreground">{isAr ? "تحتاج إلى صلاحية مدير لإضافة قيود." : "Manager access is required to add journal entries."}</p>}
-        {canWrite && <form onSubmit={submitJournal} className="grid gap-4"><div className="grid gap-3 sm:grid-cols-2"><Field label={isAr ? "التاريخ" : "Date"}><input className={inputClass} type="date" required value={journalForm.entryDate} onChange={(event) => setJournalForm({ ...journalForm, entryDate: event.target.value })} /></Field><Field label={isAr ? "المبلغ بالدينار" : "Amount in LYD"}><input className={inputClass} type="number" min="0.01" step="0.01" required value={journalForm.amount} onChange={(event) => setJournalForm({ ...journalForm, amount: event.target.value })} /></Field></div><Field label={isAr ? "البيان" : "Description"}><input className={inputClass} required value={journalForm.description} onChange={(event) => setJournalForm({ ...journalForm, description: event.target.value })} placeholder={isAr ? "بيع عطر أو مصروف تشغيلي" : "Sale or operating expense"} /></Field><div className="grid gap-3 sm:grid-cols-2"><Field label={isAr ? "المدين" : "Debit account"}><AccountPicker id="debit-account-options" accounts={accounts.data ?? []} value={journalForm.debitAccountId} language={language} onChange={(accountId) => setJournalForm({ ...journalForm, debitAccountId: accountId })} /></Field><Field label={isAr ? "الدائن" : "Credit account"}><AccountPicker id="credit-account-options" accounts={accounts.data ?? []} value={journalForm.creditAccountId} language={language} onChange={(accountId) => setJournalForm({ ...journalForm, creditAccountId: accountId })} /></Field></div><Field label={isAr ? "ملاحظة" : "Memo"}><input className={inputClass} value={journalForm.memo} onChange={(event) => setJournalForm({ ...journalForm, memo: event.target.value })} /></Field><button className={buttonClass} disabled={createJournal.isPending}><Save className="h-4 w-4" />{isAr ? "حفظ القيد المتوازن" : "Save balanced entry"}</button></form>}
-      </Panel>
-    </div>
-    <Panel className="mt-5"><PanelTitle detail={<span className="font-mono-ui text-[10px] text-muted-foreground">Debit = Credit</span>}>{isAr ? "دفتر اليومية" : "Journal ledger"}</PanelTitle>{journal.isLoading && <LoadingState />}{journal.isError && <ErrorState error={journal.error} onRetry={() => journal.refetch()} />}{journal.data?.length === 0 && <EmptyState icon={<BookOpen className="h-5 w-5" />} title="No journal entries" detail="Completed sales, expenses, and manual entries will appear here." />}{journal.data && journal.data.length > 0 && <div className="grid gap-3">{journal.data.map((entry) => <article key={entry.id} className="border-b border-border pb-4 last:border-0 last:pb-0"><div className="flex flex-wrap items-center justify-between gap-3"><div><span className="font-mono-ui text-xs text-primary">{entry.entryNumber}</span><span className="ms-3 text-xs text-muted-foreground">{entry.entryDate}</span><p className="mt-2 font-medium">{entry.description}</p></div><span className="text-xs text-muted-foreground">{entry.referenceType ?? "manual"}</span></div><div className="mt-3 grid gap-2 sm:grid-cols-2">{entry.lines.map((line) => <div key={line.id} className="flex justify-between border-s-2 border-border bg-muted/30 px-3 py-2 text-xs"><span>{accountNames.get(line.accountId) ?? `#${line.accountId}`}</span><span className="font-mono-ui">{line.debitMinor > 0 ? `Dr ${money(line.debitMinor, language)}` : `Cr ${money(line.creditMinor, language)}`}</span></div>)}</div></article>)}</div>}</Panel>
-     <Panel className="mt-5">
-       <PanelTitle>{isAr ? "عرض القيد وأطرافه" : "Journal entry details"}</PanelTitle>
-       <select className={inputClass} value={selectedEntry?.id ?? ""} onChange={(event) => setSelectedEntryId(Number(event.target.value))}>
-         {journal.data?.map((entry) => <option key={entry.id} value={entry.id}>{entry.entryNumber} · {entry.description}</option>)}
-       </select>
-       {selectedEntry && <div className="mt-5 grid gap-4">
-         <div className="grid gap-3 sm:grid-cols-3">
-           <div><p className="text-[10px] uppercase tracking-[.14em] text-muted-foreground">{isAr ? "رقم القيد" : "Entry number"}</p><p className="mt-1 font-mono-ui text-sm text-primary">{selectedEntry.entryNumber}</p></div>
-           <div><p className="text-[10px] uppercase tracking-[.14em] text-muted-foreground">{isAr ? "التاريخ" : "Date"}</p><p className="mt-1 text-sm">{selectedEntry.entryDate}</p></div>
-           <div><p className="text-[10px] uppercase tracking-[.14em] text-muted-foreground">{isAr ? "المرجع" : "Reference"}</p><p className="mt-1 text-sm">{selectedEntry.referenceType ?? (isAr ? "يدوي" : "Manual")}{selectedEntry.referenceId ? ` · ${selectedEntry.referenceId}` : ""}</p></div>
-         </div>
-         <div className="border-t border-border pt-4"><p className="text-[10px] uppercase tracking-[.14em] text-muted-foreground">{isAr ? "البيان" : "Description"}</p><p className="mt-2 text-sm font-medium">{selectedEntry.description}</p></div>
-         <div className="grid gap-2 sm:grid-cols-2">{selectedEntry.lines.map((line) => <div key={line.id} className="border border-border bg-muted/30 p-3"><div className="flex justify-between gap-3 text-sm"><span>{accountNames.get(line.accountId) ?? `#${line.accountId}`}</span><span className="font-mono-ui text-xs">{line.debitMinor > 0 ? `Dr ${money(line.debitMinor, language)}` : `Cr ${money(line.creditMinor, language)}`}</span></div><p className="mt-2 text-xs text-muted-foreground">{line.memo || (isAr ? "بدون ملاحظة" : "No memo")}</p></div>)}</div>
-       </div>}
-     </Panel>
-     <Toast message={message} onClose={() => setMessage(null)} />
-  </div>;
+    <PageHeader eyebrow={isAr ? "المحاسبة" : "Accounting"} title={isAr ? "قيود اليومية" : "Journal entries"} description={isAr ? "أنشئ قيودًا متوازنة وراجع القيود المسجلة. شجرة الحسابات موجودة في قسمها المستقل." : "Create balanced entries and review recorded journal entries. The chart of accounts has its own section."} />
+    <Panel>
+      <PanelTitle detail={<span className="font-mono-ui text-[10px] text-muted-foreground">Debit = Credit</span>}>{isAr ? "قيد يومية جديد" : "New journal entry"}</PanelTitle>
+      {!canWrite && <p className="mb-4 border border-border bg-muted/40 p-3 text-sm text-muted-foreground">{isAr ? "تحتاج إلى صلاحية مدير لإضافة قيود." : "Manager access is required to add journal entries."}</p>}
+      {accounts.isLoading && <LoadingState label={isAr ? "جاري تحميل الحسابات..." : "Loading accounts..."} />}
+      {accounts.isError && <ErrorState error={accounts.error} onRetry={() => accounts.refetch()} />}
+      {canWrite && accounts.data && <form onSubmit={submitJournal} className="grid gap-4"><div className="grid gap-3 sm:grid-cols-2"><Field label={isAr ? "التاريخ" : "Date"}><input className={inputClass} type="date" required value={journalForm.entryDate} onChange={(event) => setJournalForm({ ...journalForm, entryDate: event.target.value })} /></Field><Field label={isAr ? "المبلغ بالدينار" : "Amount in LYD"}><input className={inputClass} type="number" min="0.01" step="0.01" required value={journalForm.amount} onChange={(event) => setJournalForm({ ...journalForm, amount: event.target.value })} /></Field></div><Field label={isAr ? "البيان" : "Description"}><input className={inputClass} required value={journalForm.description} onChange={(event) => setJournalForm({ ...journalForm, description: event.target.value })} placeholder={isAr ? "بيع عطر أو مصروف تشغيلي" : "Sale or operating expense"} /></Field><div className="grid gap-3 sm:grid-cols-2"><Field label={isAr ? "المدين" : "Debit account"}><AccountPicker id="debit-account-options" accounts={accounts.data} value={journalForm.debitAccountId} language={language} onChange={(accountId) => setJournalForm({ ...journalForm, debitAccountId: accountId })} /></Field><Field label={isAr ? "الدائن" : "Credit account"}><AccountPicker id="credit-account-options" accounts={accounts.data} value={journalForm.creditAccountId} language={language} onChange={(accountId) => setJournalForm({ ...journalForm, creditAccountId: accountId })} /></Field></div><Field label={isAr ? "ملاحظة" : "Memo"}><input className={inputClass} value={journalForm.memo} onChange={(event) => setJournalForm({ ...journalForm, memo: event.target.value })} /></Field><button className={buttonClass} disabled={createJournal.isPending}><Save className="h-4 w-4" />{isAr ? "حفظ القيد المتوازن" : "Save balanced entry"}</button></form>}
+    </Panel>
+    <Panel className="mt-5"><PanelTitle detail={<span className="font-mono-ui text-[10px] text-muted-foreground">{journal.data?.length ?? 0} {isAr ? "قيد" : "entries"}</span>}>{isAr ? "القيود المسجلة" : "Recorded entries"}</PanelTitle>{journal.isLoading && <LoadingState />}{journal.isError && <ErrorState error={journal.error} onRetry={() => journal.refetch()} />}{journal.data?.length === 0 && <EmptyState icon={<BookOpen className="h-5 w-5" />} title={isAr ? "لا توجد قيود مسجلة" : "No journal entries"} detail={isAr ? "ستظهر القيود الناتجة عن المبيعات والمصروفات والقيود اليدوية هنا." : "Sales, expenses, and manual entries will appear here."} />}{journal.data && journal.data.length > 0 && <div className="grid gap-3">{journal.data.map((entry) => <article key={entry.id} className="border border-border p-4"><div className="grid gap-4 sm:grid-cols-[1fr_auto_auto] sm:items-center"><div><div className="flex flex-wrap items-center gap-3"><span className="font-mono-ui text-xs text-primary">{entry.entryNumber}</span><span className="text-xs text-muted-foreground">{entry.entryDate}</span></div><p className="mt-2 font-medium">{entry.description}</p><p className="mt-1 text-xs text-muted-foreground">{entry.referenceType ?? (isAr ? "قيد يدوي" : "Manual entry")}</p></div><div className="sm:text-end"><p className="text-[10px] uppercase tracking-[.14em] text-muted-foreground">{isAr ? "القيمة" : "Amount"}</p><p className="mt-1 font-display text-2xl">{money(entryAmount(entry), language)}</p></div><button type="button" className={quietButtonClass} onClick={() => setSelectedEntryId(entry.id)}>{isAr ? "عرض" : "View"}</button></div></article>)}</div>}</Panel>
+    {selectedEntry && <Panel className="mt-5"><PanelTitle>{isAr ? "تفاصيل القيد" : "Journal entry details"}</PanelTitle><div className="grid gap-3 sm:grid-cols-3"><div><p className="text-[10px] uppercase tracking-[.14em] text-muted-foreground">{isAr ? "رقم القيد" : "Entry number"}</p><p className="mt-1 font-mono-ui text-sm text-primary">{selectedEntry.entryNumber}</p></div><div><p className="text-[10px] uppercase tracking-[.14em] text-muted-foreground">{isAr ? "التاريخ" : "Date"}</p><p className="mt-1 text-sm">{selectedEntry.entryDate}</p></div><div><p className="text-[10px] uppercase tracking-[.14em] text-muted-foreground">{isAr ? "القيمة" : "Amount"}</p><p className="mt-1 font-display text-2xl">{money(entryAmount(selectedEntry), language)}</p></div></div><div className="mt-5 border-t border-border pt-4"><p className="text-[10px] uppercase tracking-[.14em] text-muted-foreground">{isAr ? "البيان" : "Description"}</p><p className="mt-2 text-sm font-medium">{selectedEntry.description}</p></div><div className="mt-4 grid gap-2 sm:grid-cols-2">{selectedEntry.lines.map((line) => <div key={line.id} className="border border-border bg-muted/30 p-3"><div className="flex justify-between gap-3 text-sm"><span>{accountNames.get(line.accountId) ?? `#${line.accountId}`}</span><span className="font-mono-ui text-xs">{line.debitMinor > 0 ? `Dr ${money(line.debitMinor, language)}` : `Cr ${money(line.creditMinor, language)}`}</span></div><p className="mt-2 text-xs text-muted-foreground">{line.memo || (isAr ? "بدون ملاحظة" : "No memo")}</p></div>)}</div></Panel>}
+    <Toast message={message} onClose={() => setMessage(null)} />
+   </div>;
 }
