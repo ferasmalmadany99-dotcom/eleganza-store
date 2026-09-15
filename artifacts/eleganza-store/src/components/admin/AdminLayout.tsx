@@ -1,5 +1,6 @@
 import {
   BarChart3,
+  BookOpen,
   Boxes,
   ExternalLink,
   Globe2,
@@ -27,6 +28,7 @@ const navigation = [
   { href: "/admin/expenses", label: "Expenses", arabic: "المصروفات", icon: ReceiptText, capability: null },
   { href: "/admin/team", label: "Team", arabic: "الفريق", icon: Users, capability: "owner" as const },
   { href: "/admin/audit", label: "Audit log", arabic: "سجل التدقيق", icon: ScrollText, capability: "manager" as const },
+  { href: "/admin/accounting", label: "Accounting", arabic: "المحاسبة", icon: BookOpen, capability: "manager" as const },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

@@ -12,6 +12,7 @@ import {
 } from "@workspace/api-zod";
 import { requireAuth, requireManager, requireSales } from "../middlewares/auth";
 import { writeAudit } from "../lib/audit";
+import { postOrderJournal, postOrderReturnJournal } from "../lib/accounting";
 
 const router: IRouter = Router();
 router.use(requireAuth);
@@ -86,6 +87,9 @@ router.post("/orders", requireSales, async (req, res): Promise<void> => {
   if (result === "missing") { res.status(404).json({ error: "Product not found" }); return; }
   if (result === "negative") { res.status(409).json({ error: "Insufficient stock" }); return; }
   await writeAudit(req.staff?.id, "create", "order", result.order.id, { status: initialStatus });
+  if (initialStatus === "confirmed" || initialStatus === "processing" || initialStatus === "completed") {
+    await postOrderJournal(result.order.id, req.staff?.id);
+  }
   res.status(201).json(CreateOrderResponse.parse({ ...result.order, items: result.items }));
 });
 
@@ -141,6 +145,9 @@ router.patch("/orders/:id/status", requireManager, async (req, res): Promise<voi
   if (result === "missing") { res.status(404).json({ error: "Order not found" }); return; }
   if (result === "negative") { res.status(409).json({ error: "Insufficient stock" }); return; }
   await writeAudit(req.staff?.id, "update_status", "order", result.order.id, { status: parsed.data.status });
+  const enteredSoldState = parsed.data.status === "confirmed" || parsed.data.status === "processing" || parsed.data.status === "completed";
+  if (enteredSoldState) await postOrderJournal(result.order.id, req.staff?.id);
+  if (parsed.data.status === "returned") await postOrderReturnJournal(result.order.id, req.staff?.id);
   res.json(UpdateOrderStatusResponse.parse({ ...result.order, items: result.items }));
 });
 

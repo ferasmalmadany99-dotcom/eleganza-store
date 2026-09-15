@@ -44,6 +44,8 @@ export const GetDashboardSummaryResponse = zod.object({
   "recentMovements": zod.array(zod.object({
   "id": zod.number().int(),
   "productId": zod.number().int(),
+  "productNameEn": zod.string().nullish(),
+  "productNameAr": zod.string().nullish(),
   "type": zod.enum(['purchase', 'sale', 'return', 'damage', 'adjustment']),
   "quantity": zod.number().int(),
   "quantityBefore": zod.number().int(),
@@ -223,6 +225,8 @@ export const ListInventoryMovementsQueryParams = zod.object({
 export const ListInventoryMovementsResponseItem = zod.object({
   "id": zod.number().int(),
   "productId": zod.number().int(),
+  "productNameEn": zod.string().nullish(),
+  "productNameAr": zod.string().nullish(),
   "type": zod.enum(['purchase', 'sale', 'return', 'damage', 'adjustment']),
   "quantity": zod.number().int(),
   "quantityBefore": zod.number().int(),
@@ -249,6 +253,8 @@ export const CreateInventoryMovementBody = zod.object({
 export const CreateInventoryMovementResponse = zod.object({
   "id": zod.number().int(),
   "productId": zod.number().int(),
+  "productNameEn": zod.string().nullish(),
+  "productNameAr": zod.string().nullish(),
   "type": zod.enum(['purchase', 'sale', 'return', 'damage', 'adjustment']),
   "quantity": zod.number().int(),
   "quantityBefore": zod.number().int(),
@@ -258,6 +264,16 @@ export const CreateInventoryMovementResponse = zod.object({
   "createdByStaffId": zod.number().int().nullish(),
   "createdAt": zod.coerce.date()
 })
+
+
+/**
+ * @summary Delete the latest inventory movement and reverse its stock effect
+ */
+export const DeleteInventoryMovementParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const DeleteInventoryMovementResponse = zod.void()
 
 
 /**
@@ -527,6 +543,167 @@ export const ListAuditLogsResponse = zod.array(ListAuditLogsResponseItem)
 export const SyncShopifyResponse = zod.object({
   "syncedProducts": zod.number().int(),
   "syncedOrders": zod.number().int()
+})
+
+
+/**
+ * @summary List chart of accounts
+ */
+export const ListAccountsResponseItem = zod.object({
+  "id": zod.number().int(),
+  "code": zod.string(),
+  "nameEn": zod.string(),
+  "nameAr": zod.string(),
+  "type": zod.enum(['asset', 'liability', 'equity', 'revenue', 'expense']),
+  "parentId": zod.number().int().nullish(),
+  "active": zod.boolean(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+export const ListAccountsResponse = zod.array(ListAccountsResponseItem)
+
+
+/**
+ * @summary Create a chart of accounts entry
+ */
+
+
+export const createAccountBodyActiveDefault = true;
+
+export const CreateAccountBody = zod.object({
+  "code": zod.string().min(1),
+  "nameEn": zod.string().min(1),
+  "nameAr": zod.string(),
+  "type": zod.enum(['asset', 'liability', 'equity', 'revenue', 'expense']),
+  "parentId": zod.number().int().optional(),
+  "active": zod.boolean().default(createAccountBodyActiveDefault)
+})
+
+export const CreateAccountResponse = zod.object({
+  "id": zod.number().int(),
+  "code": zod.string(),
+  "nameEn": zod.string(),
+  "nameAr": zod.string(),
+  "type": zod.enum(['asset', 'liability', 'equity', 'revenue', 'expense']),
+  "parentId": zod.number().int().nullish(),
+  "active": zod.boolean(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Update a chart of accounts entry
+ */
+export const UpdateAccountParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+
+
+
+
+export const UpdateAccountBody = zod.object({
+  "code": zod.string().min(1).optional(),
+  "nameEn": zod.string().min(1).optional(),
+  "nameAr": zod.string().optional(),
+  "type": zod.enum(['asset', 'liability', 'equity', 'revenue', 'expense']).optional(),
+  "parentId": zod.number().int().optional(),
+  "active": zod.boolean().optional()
+})
+
+export const UpdateAccountResponse = zod.object({
+  "id": zod.number().int(),
+  "code": zod.string(),
+  "nameEn": zod.string(),
+  "nameAr": zod.string(),
+  "type": zod.enum(['asset', 'liability', 'equity', 'revenue', 'expense']),
+  "parentId": zod.number().int().nullish(),
+  "active": zod.boolean(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary List journal entries
+ */
+export const listJournalEntriesQueryLimitDefault = 50;
+export const listJournalEntriesQueryLimitMax = 100;
+
+export const listJournalEntriesQueryOffsetDefault = 0;
+export const listJournalEntriesQueryOffsetMin = 0;
+
+
+
+export const ListJournalEntriesQueryParams = zod.object({
+  "limit": zod.coerce.number().int().min(1).max(listJournalEntriesQueryLimitMax).default(listJournalEntriesQueryLimitDefault),
+  "offset": zod.coerce.number().int().min(listJournalEntriesQueryOffsetMin).default(listJournalEntriesQueryOffsetDefault)
+})
+
+export const ListJournalEntriesResponseItem = zod.object({
+  "id": zod.number().int(),
+  "entryNumber": zod.string(),
+  "entryDate": zod.coerce.date(),
+  "description": zod.string(),
+  "referenceType": zod.string().nullish(),
+  "referenceId": zod.string().nullish(),
+  "createdByStaffId": zod.number().int().nullish(),
+  "createdAt": zod.coerce.date(),
+  "lines": zod.array(zod.object({
+  "id": zod.number().int(),
+  "accountId": zod.number().int(),
+  "debitMinor": zod.number().int(),
+  "creditMinor": zod.number().int(),
+  "memo": zod.string().nullish()
+}))
+})
+export const ListJournalEntriesResponse = zod.array(ListJournalEntriesResponseItem)
+
+
+/**
+ * @summary Create a balanced journal entry
+ */
+
+export const createJournalEntryBodyLinesItemDebitMinorDefault = 0;
+export const createJournalEntryBodyLinesItemDebitMinorMin = 0;
+
+export const createJournalEntryBodyLinesItemCreditMinorDefault = 0;
+export const createJournalEntryBodyLinesItemCreditMinorMin = 0;
+
+export const createJournalEntryBodyLinesMin = 2;
+
+
+
+export const CreateJournalEntryBody = zod.object({
+  "entryDate": zod.coerce.date(),
+  "description": zod.string().min(1),
+  "referenceType": zod.string().optional(),
+  "referenceId": zod.string().optional(),
+  "lines": zod.array(zod.object({
+  "accountId": zod.number().int(),
+  "debitMinor": zod.number().int().min(createJournalEntryBodyLinesItemDebitMinorMin).default(createJournalEntryBodyLinesItemDebitMinorDefault),
+  "creditMinor": zod.number().int().min(createJournalEntryBodyLinesItemCreditMinorMin).default(createJournalEntryBodyLinesItemCreditMinorDefault),
+  "memo": zod.string().optional()
+})).min(createJournalEntryBodyLinesMin)
+})
+
+export const CreateJournalEntryResponse = zod.object({
+  "id": zod.number().int(),
+  "entryNumber": zod.string(),
+  "entryDate": zod.coerce.date(),
+  "description": zod.string(),
+  "referenceType": zod.string().nullish(),
+  "referenceId": zod.string().nullish(),
+  "createdByStaffId": zod.number().int().nullish(),
+  "createdAt": zod.coerce.date(),
+  "lines": zod.array(zod.object({
+  "id": zod.number().int(),
+  "accountId": zod.number().int(),
+  "debitMinor": zod.number().int(),
+  "creditMinor": zod.number().int(),
+  "memo": zod.string().nullish()
+}))
 })
 
 

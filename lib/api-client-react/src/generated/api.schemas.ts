@@ -130,6 +130,10 @@ export const InventoryMovementType = {
 export interface InventoryMovement {
   id: number;
   productId: number;
+  /** @nullable */
+  productNameEn?: string | null;
+  /** @nullable */
+  productNameAr?: string | null;
   type: InventoryMovementType;
   quantity: number;
   quantityBefore: number;
@@ -149,6 +153,95 @@ export interface InventoryMovementInput {
   quantity: number;
   note?: string;
   orderId?: number;
+}
+
+export type AccountType = typeof AccountType[keyof typeof AccountType];
+
+
+export const AccountType = {
+  asset: 'asset',
+  liability: 'liability',
+  equity: 'equity',
+  revenue: 'revenue',
+  expense: 'expense',
+} as const;
+
+export interface Account {
+  id: number;
+  code: string;
+  nameEn: string;
+  nameAr: string;
+  type: AccountType;
+  /** @nullable */
+  parentId?: number | null;
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AccountInput {
+  /** @minLength 1 */
+  code: string;
+  /** @minLength 1 */
+  nameEn: string;
+  nameAr: string;
+  type: AccountType;
+  parentId?: number;
+  active?: boolean;
+}
+
+export interface AccountUpdate {
+  /** @minLength 1 */
+  code?: string;
+  /** @minLength 1 */
+  nameEn?: string;
+  nameAr?: string;
+  type?: AccountType;
+  parentId?: number;
+  active?: boolean;
+}
+
+export interface JournalLine {
+  id: number;
+  accountId: number;
+  debitMinor: number;
+  creditMinor: number;
+  /** @nullable */
+  memo?: string | null;
+}
+
+export interface JournalEntry {
+  id: number;
+  entryNumber: string;
+  entryDate: string;
+  description: string;
+  /** @nullable */
+  referenceType?: string | null;
+  /** @nullable */
+  referenceId?: string | null;
+  /** @nullable */
+  createdByStaffId?: number | null;
+  createdAt: string;
+  lines: JournalLine[];
+}
+
+export interface JournalLineInput {
+  accountId: number;
+  /** @minimum 0 */
+  debitMinor?: number;
+  /** @minimum 0 */
+  creditMinor?: number;
+  memo?: string;
+}
+
+export interface JournalEntryInput {
+  entryDate: string;
+  /** @minLength 1 */
+  description: string;
+  referenceType?: string;
+  referenceId?: string;
+  /** @minItems 2 */
+  lines: JournalLineInput[];
 }
 
 export type OrderStatus = typeof OrderStatus[keyof typeof OrderStatus];
@@ -338,6 +431,18 @@ offset?: OffsetParameter;
 };
 
 export type ListAuditLogsParams = {
+/**
+ * @minimum 1
+ * @maximum 100
+ */
+limit?: LimitParameter;
+/**
+ * @minimum 0
+ */
+offset?: OffsetParameter;
+};
+
+export type ListJournalEntriesParams = {
 /**
  * @minimum 1
  * @maximum 100

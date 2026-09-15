@@ -6,6 +6,10 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from './account';
+export * from './accountInput';
+export * from './accountType';
+export * from './accountUpdate';
 export * from './auditLog';
 export * from './auditLogMetadata';
 export * from './dashboardSummary';
@@ -16,10 +20,15 @@ export * from './healthStatus';
 export * from './inventoryMovement';
 export * from './inventoryMovementInput';
 export * from './inventoryMovementType';
+export * from './journalEntry';
+export * from './journalEntryInput';
+export * from './journalLine';
+export * from './journalLineInput';
 export * from './limitParameter';
 export * from './listAuditLogsParams';
 export * from './listExpensesParams';
 export * from './listInventoryMovementsParams';
+export * from './listJournalEntriesParams';
 export * from './listOrdersParams';
 export * from './listProductsParams';
 export * from './offsetParameter';

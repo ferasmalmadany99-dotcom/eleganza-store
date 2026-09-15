@@ -4,6 +4,7 @@ import { db, expensesTable } from "@workspace/db";
 import { CreateExpenseBody, CreateExpenseResponse, ListExpensesQueryParams, ListExpensesResponse } from "@workspace/api-zod";
 import { requireAuth, requireManager } from "../middlewares/auth";
 import { writeAudit } from "../lib/audit";
+import { postExpenseJournal } from "../lib/accounting";
 
 const router: IRouter = Router();
 router.use(requireAuth);
@@ -25,6 +26,7 @@ router.post("/expenses", requireManager, async (req, res): Promise<void> => {
     expenseDate: parsed.data.expenseDate.toISOString().slice(0, 10),
   }).returning();
   await writeAudit(req.staff?.id, "create", "expense", expense.id, { amountMinor: expense.amountMinor });
+  await postExpenseJournal(expense, req.staff?.id);
   res.status(201).json(CreateExpenseResponse.parse(expense));
 });
 

@@ -9,6 +9,7 @@ import expensesRouter from "./expenses";
 import staffRouter from "./staff";
 import auditRouter from "./audit";
 import shopifyRouter from "./shopify";
+import accountingRouter from "./accounting";
 
 const router: IRouter = Router();
 
@@ -22,5 +23,6 @@ router.use(expensesRouter);
 router.use(staffRouter);
 router.use(auditRouter);
 router.use(shopifyRouter);
+router.use(accountingRouter);
 
 export default router;

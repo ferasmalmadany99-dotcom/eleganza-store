@@ -10,6 +10,10 @@ import type { InventoryMovementType } from './inventoryMovementType';
 export interface InventoryMovement {
   id: number;
   productId: number;
+  /** @nullable */
+  productNameEn?: string | null;
+  /** @nullable */
+  productNameAr?: string | null;
   type: InventoryMovementType;
   quantity: number;
   quantityBefore: number;

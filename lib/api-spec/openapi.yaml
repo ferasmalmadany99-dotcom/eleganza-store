@@ -145,6 +145,16 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/InventoryMovement" }
+  /inventory/movements/{id}:
+    delete:
+      operationId: deleteInventoryMovement
+      tags: [inventory]
+      summary: Delete the latest inventory movement and reverse its stock effect
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "204":
+          description: Movement deleted
   /orders:
     get:
       operationId: listOrders
@@ -286,6 +296,83 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/SyncResult" }
+  /accounts:
+    get:
+      operationId: listAccounts
+      tags: [accounting]
+      summary: List chart of accounts
+      responses:
+        "200":
+          description: Chart of accounts
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Account" }
+    post:
+      operationId: createAccount
+      tags: [accounting]
+      summary: Create a chart of accounts entry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AccountInput" }
+      responses:
+        "201":
+          description: Created account
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Account" }
+  /accounts/{id}:
+    patch:
+      operationId: updateAccount
+      tags: [accounting]
+      summary: Update a chart of accounts entry
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AccountUpdate" }
+      responses:
+        "200":
+          description: Updated account
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Account" }
+  /journal:
+    get:
+      operationId: listJournalEntries
+      tags: [accounting]
+      summary: List journal entries
+      parameters:
+        - $ref: "#/components/parameters/Limit"
+        - $ref: "#/components/parameters/Offset"
+      responses:
+        "200":
+          description: Journal entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/JournalEntry" }
+    post:
+      operationId: createJournalEntry
+      tags: [accounting]
+      summary: Create a balanced journal entry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/JournalEntryInput" }
+      responses:
+        "201":
+          description: Created journal entry
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/JournalEntry" }
 components:
   securitySchemes:
     clerkSession:
@@ -406,6 +493,8 @@ components:
       properties:
         id: { type: integer }
         productId: { type: integer }
+        productNameEn: { type: ["string", "null"] }
+        productNameAr: { type: ["string", "null"] }
         type: { $ref: "#/components/schemas/InventoryMovementType" }
         quantity: { type: integer }
         quantityBefore: { type: integer }
@@ -423,6 +512,80 @@ components:
         quantity: { type: integer }
         note: { type: string }
         orderId: { type: integer }
+    AccountType:
+      type: string
+      enum: [asset, liability, equity, revenue, expense]
+    Account:
+      type: object
+      required: [id, code, nameEn, nameAr, type, active, createdAt, updatedAt]
+      properties:
+        id: { type: integer }
+        code: { type: string }
+        nameEn: { type: string }
+        nameAr: { type: string }
+        type: { $ref: "#/components/schemas/AccountType" }
+        parentId: { type: ["integer", "null"] }
+        active: { type: boolean }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    AccountInput:
+      type: object
+      required: [code, nameEn, nameAr, type]
+      properties:
+        code: { type: string, minLength: 1 }
+        nameEn: { type: string, minLength: 1 }
+        nameAr: { type: string }
+        type: { $ref: "#/components/schemas/AccountType" }
+        parentId: { type: integer }
+        active: { type: boolean, default: true }
+    AccountUpdate:
+      type: object
+      properties:
+        code: { type: string, minLength: 1 }
+        nameEn: { type: string, minLength: 1 }
+        nameAr: { type: string }
+        type: { $ref: "#/components/schemas/AccountType" }
+        parentId: { type: integer }
+        active: { type: boolean }
+    JournalLine:
+      type: object
+      required: [id, accountId, debitMinor, creditMinor]
+      properties:
+        id: { type: integer }
+        accountId: { type: integer }
+        debitMinor: { type: integer }
+        creditMinor: { type: integer }
+        memo: { type: ["string", "null"] }
+    JournalEntry:
+      type: object
+      required: [id, entryNumber, entryDate, description, createdAt, lines]
+      properties:
+        id: { type: integer }
+        entryNumber: { type: string }
+        entryDate: { type: string, format: date }
+        description: { type: string }
+        referenceType: { type: ["string", "null"] }
+        referenceId: { type: ["string", "null"] }
+        createdByStaffId: { type: ["integer", "null"] }
+        createdAt: { type: string, format: date-time }
+        lines: { type: array, items: { $ref: "#/components/schemas/JournalLine" } }
+    JournalLineInput:
+      type: object
+      required: [accountId]
+      properties:
+        accountId: { type: integer }
+        debitMinor: { type: integer, minimum: 0, default: 0 }
+        creditMinor: { type: integer, minimum: 0, default: 0 }
+        memo: { type: string }
+    JournalEntryInput:
+      type: object
+      required: [entryDate, description, lines]
+      properties:
+        entryDate: { type: string, format: date }
+        description: { type: string, minLength: 1 }
+        referenceType: { type: string }
+        referenceId: { type: string }
+        lines: { type: array, minItems: 2, items: { $ref: "#/components/schemas/JournalLineInput" } }
     OrderStatus:
       type: string
       enum: [pending, confirmed, processing, completed, cancelled, returned]
