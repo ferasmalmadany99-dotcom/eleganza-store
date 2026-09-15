@@ -35,7 +35,6 @@ export async function syncShopifyCatalog(): Promise<{ syncedProducts: number; sy
       await db.update(productsTable).set({
         shopifyProductId: product.id,
         shopifyVariantId: variant.id,
-        quantityOnHand: variant.inventoryQuantity,
       }).where(eq(productsTable.id, local.id));
       syncedProducts += 1;
     }
