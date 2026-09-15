@@ -5,12 +5,12 @@
  * Eleganza administration API
  * OpenAPI spec version: 0.1.0
  */
-import type { InventoryMovement } from './inventoryMovement';
 import type { Product } from './product';
+import type { ProductReportMovement } from './productReportMovement';
 import type { ProductReportSummary } from './productReportSummary';
 
 export interface ProductReport {
   product: Product;
   summary: ProductReportSummary;
-  movements: InventoryMovement[];
+  movements: ProductReportMovement[];
 }

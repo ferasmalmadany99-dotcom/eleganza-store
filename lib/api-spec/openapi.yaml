@@ -521,7 +521,14 @@ components:
             currentInventoryValueMinor: { type: integer }
         movements:
           type: array
-          items: { $ref: "#/components/schemas/InventoryMovement" }
+          items: { $ref: "#/components/schemas/ProductReportMovement" }
+    ProductReportMovement:
+      allOf:
+        - $ref: "#/components/schemas/InventoryMovement"
+        - type: object
+          required: [totalValueMinor]
+          properties:
+            totalValueMinor: { type: integer, minimum: 0 }
     InventoryMovementType:
       type: string
       enum: [purchase, sale, return, damage, adjustment]

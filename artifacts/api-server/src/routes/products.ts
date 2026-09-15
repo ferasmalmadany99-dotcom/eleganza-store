@@ -44,6 +44,7 @@ router.get("/products/:id/report", requireAuth, async (req, res): Promise<void> 
     ...movement,
     productNameEn: product.nameEn,
     productNameAr: product.nameAr,
+    totalValueMinor: Math.abs(movement.quantity) * (movement.unitCostMinor ?? product.costMinor),
   }));
 
   let purchaseQuantity = 0;

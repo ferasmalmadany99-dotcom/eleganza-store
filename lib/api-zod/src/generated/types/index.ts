@@ -42,6 +42,7 @@ export * from './paymentMethod';
 export * from './product';
 export * from './productInput';
 export * from './productReport';
+export * from './productReportMovement';
 export * from './productReportSummary';
 export * from './productUpdate';
 export * from './session';

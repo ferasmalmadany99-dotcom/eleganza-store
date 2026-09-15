@@ -166,10 +166,15 @@ export interface InventoryMovement {
   createdAt: string;
 }
 
+export type ProductReportMovement = InventoryMovement & {
+  /** @minimum 0 */
+  totalValueMinor: number;
+};
+
 export interface ProductReport {
   product: Product;
   summary: ProductReportSummary;
-  movements: InventoryMovement[];
+  movements: ProductReportMovement[];
 }
 
 export interface InventoryMovementInput {

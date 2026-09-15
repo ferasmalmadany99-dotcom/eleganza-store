@@ -217,7 +217,9 @@ export const GetProductReportParams = zod.object({
   "id": zod.coerce.number().int()
 })
 
-export const getProductReportResponseMovementsItemUnitCostMinorMin = 0;
+export const getProductReportResponseMovementsItemOneUnitCostMinorMin = 0;
+
+export const getProductReportResponseMovementsItemTwoTotalValueMinorMin = 0;
 
 
 
@@ -261,14 +263,16 @@ export const GetProductReportResponse = zod.object({
   "productNameAr": zod.string().nullish(),
   "type": zod.enum(['purchase', 'sale', 'return', 'damage', 'adjustment']),
   "quantity": zod.number().int(),
-  "unitCostMinor": zod.number().int().min(getProductReportResponseMovementsItemUnitCostMinorMin).nullish(),
+  "unitCostMinor": zod.number().int().min(getProductReportResponseMovementsItemOneUnitCostMinorMin).nullish(),
   "quantityBefore": zod.number().int(),
   "quantityAfter": zod.number().int(),
   "note": zod.string().nullish(),
   "orderId": zod.number().int().nullish(),
   "createdByStaffId": zod.number().int().nullish(),
   "createdAt": zod.coerce.date()
-}))
+}).and(zod.object({
+  "totalValueMinor": zod.number().int().min(getProductReportResponseMovementsItemTwoTotalValueMinorMin)
+})))
 })
 
 
