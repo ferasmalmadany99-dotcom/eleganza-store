@@ -575,17 +575,21 @@ function BrandName({ compact = false }: { compact?: boolean }) {
 
 function Header({
   bagCount,
+  favoritesCount,
   language,
   c,
   onBag,
+  onFavorites,
   onSearch,
   onMenu,
   onLanguageChange,
 }: {
   bagCount: number;
+  favoritesCount: number;
   language: Language;
   c: Copy;
   onBag: () => void;
+  onFavorites: () => void;
   onSearch: () => void;
   onMenu: () => void;
   onLanguageChange: (language: Language) => void;
@@ -615,6 +619,12 @@ function Header({
         <div className="flex items-center justify-end gap-2 justify-self-end sm:gap-4 lg:w-[260px]">
           <button aria-label={c.search} onClick={onSearch} className="transition-opacity hover:opacity-60" data-testid="button-open-search">
             <Search size={19} strokeWidth={1.4} />
+          </button>
+          <button aria-label={language === 'ar' ? 'فتح المفضلة' : 'Open favorites'} onClick={onFavorites} className="group flex items-center gap-2 transition-opacity hover:opacity-60" data-testid="button-open-favorites">
+            <Heart size={19} strokeWidth={1.4} fill={favoritesCount > 0 ? 'currentColor' : 'none'} />
+            <span className="hidden font-mono-ui text-[10px] uppercase tracking-[.18em] xl:inline">
+              {language === 'ar' ? 'المفضلة' : 'Favorites'} <span className="opacity-60">({String(favoritesCount).padStart(2, '0')})</span>
+            </span>
           </button>
           <button aria-label={c.openBag} onClick={onBag} className="group flex items-center gap-2 transition-opacity hover:opacity-60" data-testid="button-open-bag">
             <ShoppingBag size={19} strokeWidth={1.4} />
@@ -853,6 +863,44 @@ function BagDrawer({
   );
 }
 
+function FavoritesDrawer({ items, language, c, onClose, onRemove, onSelect }: { items: Product[]; language: Language; c: Copy; onClose: () => void; onRemove: (id: string) => void; onSelect: (product: Product) => void }) {
+  return (
+    <div className="fixed inset-0 z-50 bg-[#211b18]/45 backdrop-blur-[2px]" onClick={onClose}>
+      <aside className="absolute bottom-0 end-0 top-0 flex w-full max-w-[480px] flex-col bg-[#f8f0e6] text-[#312b25] shadow-2xl" onClick={(event) => event.stopPropagation()} role="dialog" aria-label={language === 'ar' ? 'المفضلة' : 'Favorites'}>
+        <div className="flex items-center justify-between border-b border-[#312b25]/15 px-6 py-5 sm:px-8">
+          <div><p className="font-mono-ui text-[10px] uppercase tracking-[.2em] text-[#9f523d]">{language === 'ar' ? 'اختياراتك' : 'Your selection'}</p><h2 className="mt-1 font-display text-4xl">{language === 'ar' ? 'المفضلة' : 'Favorites'} <span className="font-sans text-sm text-[#89796c]">({items.length})</span></h2></div>
+          <button onClick={onClose} aria-label={c.close} className="grid h-10 w-10 place-items-center border border-[#312b25]/15 hover:bg-[#efe2d3]" data-testid="button-close-favorites"><X size={18} strokeWidth={1.3} /></button>
+        </div>
+        <div className="no-scrollbar flex-1 overflow-auto px-6 py-6 sm:px-8">
+          {items.length === 0 ? (
+            <div className="flex h-full min-h-[380px] flex-col items-center justify-center text-center">
+              <Heart size={30} strokeWidth={1} className="text-[#9f523d]" />
+              <p className="mt-5 font-display text-3xl">{language === 'ar' ? 'لا توجد مفضلات بعد.' : 'No favorites yet.'}</p>
+              <p className="mt-2 max-w-[250px] text-sm leading-6 text-[#75685d]">{language === 'ar' ? 'اضغط على رمز القلب لحفظ المنتجات التي أعجبتك هنا.' : 'Tap the heart on any product to save it here.'}</p>
+              <button onClick={onClose} className="mt-7 border-b border-[#9f523d] pb-1 font-mono-ui text-[10px] uppercase tracking-[.18em] text-[#9f523d]">{c.continueBrowsing}</button>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {items.map((item) => {
+                const itemText = getProductCopy(item, language);
+                return (
+                  <div key={item.id} className="flex gap-4 border-b border-[#312b25]/12 pb-6">
+                    <button onClick={() => onSelect(item)} className="shrink-0"><img src={item.image480} alt={item.name} width="96" height="112" loading="lazy" decoding="async" className="h-28 w-24 object-cover" /></button>
+                    <div className="flex min-w-0 flex-1 flex-col justify-between">
+                      <div className="flex items-start justify-between gap-2"><button onClick={() => onSelect(item)} className="text-start"><h3 className="font-display text-2xl leading-none">{item.name}</h3><p className="mt-2 font-mono-ui text-[9px] uppercase tracking-[.1em] text-[#87796d]">{itemText.color}</p></button><button onClick={() => onRemove(item.id)} className="text-[#a64e3a] hover:text-[#7f3f31]" aria-label={language === 'ar' ? `إزالة ${item.name} من المفضلة` : `Remove ${item.name} from favorites`}><Heart size={17} fill="currentColor" /></button></div>
+                      <div className="flex items-center justify-between"><button onClick={() => onSelect(item)} className="border-b border-[#312b25]/40 pb-1 font-mono-ui text-[9px] uppercase tracking-[.14em]">{language === 'ar' ? 'عرض المنتج' : 'View product'}</button><span className="font-mono-ui text-xs">{money(item.price)}</span></div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </aside>
+    </div>
+  );
+}
+
 function SearchPanel({ onClose, products: catalog, onSelect, c, language }: { onClose: () => void; products: Product[]; onSelect: (product: Product) => void; c: Copy; language: Language }) {
   const [query, setQuery] = useState('');
   const results = catalog.filter((product) => {
@@ -944,10 +992,18 @@ function App() {
     return savedLanguage === 'ar' ? 'ar' : 'en';
   });
   const [activeFilter, setActiveFilter] = useState<Category>('All');
-  const [favorites, setFavorites] = useState<string[]>([]);
+  const [favorites, setFavorites] = useState<string[]>(() => {
+    try {
+      const saved = JSON.parse(window.localStorage.getItem('eleganza-favorites') ?? '[]');
+      return Array.isArray(saved) ? saved.filter((id): id is string => typeof id === 'string') : [];
+    } catch {
+      return [];
+    }
+  });
   const [bag, setBag] = useState<CartItem[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [bagOpen, setBagOpen] = useState(false);
+  const [favoritesOpen, setFavoritesOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [journalIndexOpen, setJournalIndexOpen] = useState(false);
@@ -962,12 +1018,17 @@ function App() {
     window.localStorage.setItem('eleganza-language', language);
   }, [language]);
 
+  useEffect(() => {
+    window.localStorage.setItem('eleganza-favorites', JSON.stringify(favorites));
+  }, [favorites]);
+
   const shownProducts = useMemo(() => {
     if (activeFilter === 'All') return products;
     if (activeFilter === 'New in') return products.filter((product) => product.badge === 'New' || product.badge === 'Edition 01');
     return products.filter((product) => product.category === activeFilter);
   }, [activeFilter]);
   const bagCount = bag.reduce((sum, item) => sum + item.quantity, 0);
+  const favoriteProducts = products.filter((product) => favorites.includes(product.id));
 
   const notify = (message: string) => {
     setNotice(message);
@@ -987,7 +1048,7 @@ function App() {
   return (
     <div className={`grain min-h-[100dvh] bg-[#f8f0e6] text-[#312b25] ${language === 'ar' ? 'rtl-ui' : ''}`}>
       <section className="relative">
-        <Header bagCount={bagCount} language={language} c={c} onBag={() => setBagOpen(true)} onSearch={() => setSearchOpen(true)} onMenu={() => setMenuOpen(true)} onLanguageChange={setLanguage} />
+        <Header bagCount={bagCount} favoritesCount={favoriteProducts.length} language={language} c={c} onBag={() => setBagOpen(true)} onFavorites={() => setFavoritesOpen(true)} onSearch={() => setSearchOpen(true)} onMenu={() => setMenuOpen(true)} onLanguageChange={setLanguage} />
         <Hero onShop={jumpToShop} c={c} />
       </section>
 
@@ -1041,6 +1102,7 @@ function App() {
 
       {notice && <div className="fixed bottom-6 left-1/2 z-[60] flex w-[calc(100%-2rem)] max-w-md -translate-x-1/2 items-center justify-center gap-3 bg-[#312b25] px-6 py-4 text-center text-sm font-medium leading-6 text-[#fff8ed] shadow-2xl sm:w-auto sm:min-w-[360px] sm:text-base" role="status" aria-live="polite" data-testid="status-notice"><Sparkles size={18} className="shrink-0 text-[#d18c6d]" />{notice}</div>}
       {bagOpen && <BagDrawer items={bag} language={language} c={c} onClose={() => setBagOpen(false)} onUpdate={updateQuantity} onRemove={(id) => setBag((current) => current.filter((item) => item.id !== id))} onCheckout={() => notify(language === 'ar' ? 'يتم تجهيز صفحة الدفع لك' : 'Checkout is being prepared for you')} />}
+      {favoritesOpen && <FavoritesDrawer items={favoriteProducts} language={language} c={c} onClose={() => setFavoritesOpen(false)} onRemove={toggleFavorite} onSelect={(product) => { setFavoritesOpen(false); setSelectedProduct(product); }} />}
       {searchOpen && <SearchPanel products={products} c={c} language={language} onClose={() => setSearchOpen(false)} onSelect={(product) => { setSearchOpen(false); setSelectedProduct(product); }} />}
       {selectedProduct && <ProductDetail product={selectedProduct} language={language} c={c} favorite={favorites.includes(selectedProduct.id)} onFavorite={() => toggleFavorite(selectedProduct.id)} onAdd={() => { addToBag(selectedProduct); setSelectedProduct(null); }} onClose={() => setSelectedProduct(null)} />}
       {journalIndexOpen && !selectedArticle && <JournalIndex entries={articles[language]} c={c} onClose={() => setJournalIndexOpen(false)} onSelect={setSelectedArticleId} />}
