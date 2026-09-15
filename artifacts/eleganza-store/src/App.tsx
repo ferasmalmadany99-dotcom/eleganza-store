@@ -326,7 +326,7 @@ const copy = {
     shopEdit: 'تسوّق الاختيارات',
     scrollDiscover: 'مرّر للاستكشاف',
     selectedForNow: 'مختاراتنا الآن',
-    essentials: <>الأساسيات<br /><em>في دورتها.</em></>,
+    essentials: <>مختارات أساسية<br /><em>لكل يوم.</em></>,
     essentialsDescription: 'اختيارات صغيرة ومدروسة من العطور والألوان والإكسسوارات ليومك.',
     all: 'الكل',
     newIn: 'وصل حديثًا',
