@@ -1,0 +1,16 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "zFPIntDzEh7NMcniRbfmD"
+uri = "file://exports/eleganza-project-full.zip"
+type = "unspecified"
+title = "Eleganza project — full source ZIP"
+description = "Complete Eleganza project source, artifacts, libraries, scripts, assets, configuration, and project documentation. Generated files, dependencies, Replit tooling, Git history, and secret-like files were excluded."
+logical_id = "933a3c5c-1869-4674-84fc-b4beb71d9946"
+content_hash = "sha256:bed0c28fdd7dff320ad82590b46f1fa4e62c8ea235b35da793cac2e42183b82c"
+size = 26807253
+mtime_ms = 1789437392400
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:3821a01d-12d0-419b-8cdf-56b57c32cd74/933a3c5c-1869-4674-84fc-b4beb71d9946/7270a271-6339-4359-91b9-42eae8600cf1"
+storage_version_token = "1789437397247826"
+content_type = "application/octet-stream"
