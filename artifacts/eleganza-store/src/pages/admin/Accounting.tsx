@@ -102,7 +102,7 @@ function AccountingJournal() {
   const journal = useListJournalEntries({ limit: 100 });
   const [selectedEntryId, setSelectedEntryId] = useState<number | null>(null);
   const accountNames = useMemo(() => new Map((accounts.data ?? []).map((account) => [account.id, isAr ? account.nameAr || account.nameEn : account.nameEn])), [accounts.data, isAr]);
-  const selectedEntry = journal.data?.find((entry) => entry.id === selectedEntryId) ?? journal.data?.[0];
+  const selectedEntry = selectedEntryId === null ? undefined : journal.data?.find((entry) => entry.id === selectedEntryId);
 
   function entryAmount(entry: NonNullable<typeof journal.data>[number]) {
     return entry.lines.reduce((total, line) => total + line.debitMinor, 0);
