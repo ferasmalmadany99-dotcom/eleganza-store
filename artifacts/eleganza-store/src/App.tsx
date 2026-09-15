@@ -14,6 +14,7 @@ import AdminExpenses from './pages/admin/Expenses';
 import AdminTeam from './pages/admin/Team';
 import AdminAudit from './pages/admin/Audit';
 import AdminDemo from './pages/AdminDemo';
+import AdminDemoAccounting from './pages/AdminDemoAccounting';
 import AdminAccounting from './pages/admin/Accounting';
 import AdminLayout from './components/admin/AdminLayout';
 
@@ -183,6 +184,7 @@ function ClerkProviderWithRoutes() {
           <Route path="/sign-in/*?" component={SignInPage} />
           <Route path="/sign-up/*?" component={SignUpPage} />
           <Route path="/admin-demo" component={AdminDemo} />
+          <Route path="/admin-demo/accounting" component={AdminDemoAccounting} />
           <Route path="/admin">
             {() => <AdminRoute component={AdminDashboard} />}
           </Route>

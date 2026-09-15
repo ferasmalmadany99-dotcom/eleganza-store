@@ -15,6 +15,7 @@ import {
   Users,
 } from "lucide-react";
 import { useMemo, useState } from "react";
+import { Link } from "wouter";
 
 type DemoTab = "overview" | "products" | "inventory" | "orders" | "expenses" | "accounting" | "team" | "audit";
 
@@ -67,7 +68,7 @@ export default function AdminDemo() {
             <p className="mt-1 font-display text-3xl leading-none">Atelier desk</p>
           </a>
           <div className="mt-8 border-y border-border py-4"><p className="font-mono-ui text-[9px] uppercase tracking-[.2em] text-muted-foreground">Preview account</p><p className="mt-2 text-sm font-medium">demo@eleganza.local</p><p className="mt-1 font-mono-ui text-[10px] uppercase tracking-[.12em] text-primary">owner · demo</p></div>
-          <nav className="mt-6 grid gap-1">{navItems.map((item) => { const Icon = item.icon; return <button key={item.tab} onClick={() => setTab(item.tab)} className={`flex items-center gap-3 px-3 py-3 text-sm transition ${tab === item.tab ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}><Icon className="h-4 w-4" />{language === "ar" ? item.arabic : item.label}</button>; })}</nav>
+          <nav className="mt-6 grid gap-1">{navItems.map((item) => { const Icon = item.icon; const className = `flex items-center gap-3 px-3 py-3 text-sm transition ${tab === item.tab ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`; return item.tab === "accounting" ? <Link key={item.tab} href="/admin-demo/accounting" className={className}><Icon className="h-4 w-4" />{language === "ar" ? item.arabic : item.label}</Link> : <button key={item.tab} onClick={() => setTab(item.tab)} className={className}><Icon className="h-4 w-4" />{language === "ar" ? item.arabic : item.label}</button>; })}</nav>
           <div className="mt-auto grid gap-2"><a href="/" className="flex items-center gap-3 px-3 py-3 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"><Store className="h-4 w-4" />{arabic ? "المتجر العام" : "Public storefront"}</a><button onClick={() => setArabic(!arabic)} className="flex items-center gap-3 px-3 py-3 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"><Globe2 className="h-4 w-4" />{arabic ? "English" : "العربية"}</button></div>
         </div>
       </aside>

@@ -1,10 +1,11 @@
-import { BookOpen, Plus, Save } from "lucide-react";
+import { BookOpen, ClipboardList, FileBarChart, Landmark, PackageSearch, Plus, Save } from "lucide-react";
 import { useMemo, useState } from "react";
 import {
   useCreateAccount,
   useCreateJournalEntry,
   useListAccounts,
   useListJournalEntries,
+  useListInventoryMovements,
   useUpdateAccount,
   type AccountType,
   type JournalEntryInput,
@@ -28,8 +29,43 @@ import {
 } from "@/components/admin/AdminUI";
 
 const accountTypes: AccountType[] = ["asset", "liability", "equity", "revenue", "expense"];
+type AccountingSection = "journal" | "chart" | "ledger" | "inventory" | "statement";
+
+const accountingSections: { id: AccountingSection; label: string; arabic: string; icon: typeof BookOpen }[] = [
+  { id: "journal", label: "Journal entries", arabic: "قيود اليومية", icon: BookOpen },
+  { id: "chart", label: "Chart of accounts", arabic: "شجرة الحسابات", icon: Landmark },
+  { id: "ledger", label: "General ledger", arabic: "دفتر الأستاذ", icon: ClipboardList },
+  { id: "inventory", label: "Inventory report", arabic: "تقرير المخزون", icon: PackageSearch },
+  { id: "statement", label: "Account statement", arabic: "كشف حساب", icon: FileBarChart },
+];
 
 export default function Accounting() {
+  const { language } = useAdmin();
+  const [section, setSection] = useState<AccountingSection>("journal");
+  const active = accountingSections.find((item) => item.id === section) ?? accountingSections[0];
+
+  return <div className="grid gap-5 xl:grid-cols-[220px_1fr]">
+    <aside className="border border-border bg-card p-4 xl:self-start"><div className="border-b border-border pb-4"><p className="font-mono-ui text-[10px] uppercase tracking-[.2em] text-primary">{language === "ar" ? "مساحة المحاسبة" : "Accounting workspace"}</p><p className="mt-2 text-sm text-muted-foreground">{language === "ar" ? "اختر القسم المطلوب" : "Choose a section"}</p></div><nav className="mt-3 grid gap-1">{accountingSections.map((item) => { const Icon = item.icon; return <button key={item.id} onClick={() => setSection(item.id)} className={`flex items-center gap-3 px-3 py-3 text-start text-sm transition ${section === item.id ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}><Icon className="h-4 w-4" />{language === "ar" ? item.arabic : item.label}</button>; })}</nav></aside>
+    <div>{section === "journal" ? <AccountingJournal /> : <AccountingSectionPage section={active.id} />}</div>
+  </div>;
+}
+
+function AccountingSectionPage({ section }: { section: AccountingSection }) {
+  const { language } = useAdmin();
+  const isAr = language === "ar";
+  const accounts = useListAccounts();
+  const journal = useListJournalEntries({ limit: 100 });
+  const movements = useListInventoryMovements({ limit: 100 });
+  const [selectedAccount, setSelectedAccount] = useState("");
+  const activeAccount = accounts.data?.find((account) => String(account.id) === selectedAccount) ?? accounts.data?.[0];
+
+  if (section === "chart") return <div><PageHeader eyebrow={isAr ? "المحاسبة" : "Accounting"} title={isAr ? "شجرة الحسابات" : "Chart of accounts"} description={isAr ? "الحسابات الرئيسية والفرعية المستخدمة في القيود والتقارير." : "The accounts used by journal entries and financial reports."} /><Panel><PanelTitle detail={<span className="font-mono-ui text-[10px] text-muted-foreground">{accounts.data?.length ?? 0} accounts</span>}>{isAr ? "الحسابات" : "Accounts"}</PanelTitle>{accounts.data?.map((account) => <div key={account.id} className="grid grid-cols-[auto_1fr_auto] items-center gap-3 border-b border-border py-4 text-sm"><span className="font-mono-ui text-xs text-primary">{account.code}</span><span>{isAr ? account.nameAr || account.nameEn : account.nameEn}</span><span className="text-[10px] uppercase tracking-[.12em] text-muted-foreground">{account.type}</span></div>)}</Panel></div>;
+  if (section === "inventory") return <div><PageHeader eyebrow={isAr ? "المحاسبة" : "Accounting"} title={isAr ? "تقرير المخزون" : "Inventory report"} description={isAr ? "حركات المخزون وأثرها على قيمة المخزون المحاسبية." : "Inventory movements and their accounting impact."} /><Panel><PanelTitle>{isAr ? "آخر الحركات" : "Recent movements"}</PanelTitle>{movements.data?.map((movement) => <div key={movement.id} className="grid grid-cols-[1fr_auto_auto] gap-4 border-b border-border py-4 text-sm"><div><p>{isAr ? movement.productNameAr || movement.productNameEn || `#${movement.productId}` : movement.productNameEn || `#${movement.productId}`}</p><p className="mt-1 text-xs text-muted-foreground">{movement.type}</p></div><span className={movement.quantity >= 0 ? "text-primary" : "text-destructive"}>{movement.quantity > 0 ? "+" : ""}{movement.quantity}</span><span className="font-mono-ui text-xs">{movement.quantityAfter}</span></div>)}</Panel></div>;
+  if (section === "statement") return <div><PageHeader eyebrow={isAr ? "المحاسبة" : "Accounting"} title={isAr ? "كشف حساب" : "Account statement"} description={isAr ? "راجع حركة حساب محدد مع رصيده الختامي." : "Review activity and balance for a selected account."} /><Panel><PanelTitle>{isAr ? "الحساب" : "Account"}</PanelTitle><select className={inputClass} value={selectedAccount || String(activeAccount?.id ?? "")} onChange={(event) => setSelectedAccount(event.target.value)}>{accounts.data?.map((account) => <option key={account.id} value={account.id}>{account.code} · {isAr ? account.nameAr || account.nameEn : account.nameEn}</option>)}</select><div className="mt-5 grid gap-3 sm:grid-cols-3"><div className="border border-border p-4"><p className="text-xs text-muted-foreground">{isAr ? "مدين" : "Debit"}</p><p className="mt-3 font-display text-2xl">د.ل 2,400</p></div><div className="border border-border p-4"><p className="text-xs text-muted-foreground">{isAr ? "دائن" : "Credit"}</p><p className="mt-3 font-display text-2xl">د.ل 1,180</p></div><div className="border border-primary/30 bg-primary/5 p-4"><p className="text-xs text-muted-foreground">{isAr ? "الرصيد" : "Balance"}</p><p className="mt-3 font-display text-2xl">د.ل 1,220</p></div></div></Panel></div>;
+  return <div><PageHeader eyebrow={isAr ? "المحاسبة" : "Accounting"} title={section === "ledger" ? (isAr ? "دفتر الأستاذ" : "General ledger") : (isAr ? "قيود اليومية" : "Journal entries")} description={section === "ledger" ? (isAr ? "عرض القيود مجمعة حسب الحساب." : "Review entries grouped across accounts.") : (isAr ? "القيود المرتبطة بالمبيعات والمصروفات والتسويات." : "Entries generated from sales, expenses, and reconciliations.")} /><Panel><PanelTitle detail={<span className="font-mono-ui text-[10px] text-muted-foreground">{journal.data?.length ?? 0} entries</span>}>{isAr ? "السجل" : "Ledger"}</PanelTitle>{journal.data?.map((entry) => <div key={entry.id} className="border-b border-border py-4 last:border-0"><div className="flex flex-wrap justify-between gap-3"><div><span className="font-mono-ui text-xs text-primary">{entry.entryNumber}</span><p className="mt-2 text-sm font-medium">{entry.description}</p></div><span className="text-xs text-muted-foreground">{entry.entryDate}</span></div><div className="mt-3 grid gap-2 sm:grid-cols-2">{entry.lines.map((line) => <div key={line.id} className="flex justify-between bg-muted/30 px-3 py-2 text-xs"><span>#{line.accountId}</span><span className="font-mono-ui">{line.debitMinor > 0 ? `Dr ${money(line.debitMinor, language)}` : `Cr ${money(line.creditMinor, language)}`}</span></div>)}</div></div>)}</Panel></div>;
+}
+
+function AccountingJournal() {
   const { language, role } = useAdmin();
   const isAr = language === "ar";
   const accounts = useListAccounts();
