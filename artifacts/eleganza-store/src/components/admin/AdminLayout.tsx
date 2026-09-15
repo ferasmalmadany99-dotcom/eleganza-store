@@ -65,7 +65,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <AdminContext.Provider value={{ language, setLanguage, dir, role }}>
       <div dir={dir} className="min-h-screen bg-background text-foreground">
-        <aside className={`fixed inset-y-0 start-0 z-40 w-72 border-e border-border bg-card transition-transform lg:translate-x-0 ${mobileOpen ? "translate-x-0" : "ltr:-translate-x-full rtl:translate-x-full"}`}>
+        <aside className={`fixed inset-y-0 start-0 z-40 w-72 border-e border-border bg-card transition-transform lg:!translate-x-0 ${mobileOpen ? "translate-x-0" : "ltr:-translate-x-full rtl:translate-x-full"}`}>
           <div className="flex h-full flex-col p-6">
             <div className="flex items-start justify-between">
               <Link href="/" className="group" onClick={() => setMobileOpen(false)}>

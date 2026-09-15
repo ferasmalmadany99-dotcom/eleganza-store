@@ -65,7 +65,7 @@ export default function AdminDemo() {
 
   return (
     <div dir={arabic ? "rtl" : "ltr"} className="min-h-screen bg-background text-foreground">
-      <aside className={`fixed inset-y-0 start-0 z-40 w-72 border-e border-border bg-card transition-transform lg:translate-x-0 ${mobileOpen ? "translate-x-0" : "ltr:-translate-x-full rtl:translate-x-full"}`}>
+      <aside className={`fixed inset-y-0 start-0 z-40 w-72 border-e border-border bg-card transition-transform lg:!translate-x-0 ${mobileOpen ? "translate-x-0" : "ltr:-translate-x-full rtl:translate-x-full"}`}>
         <div className="flex h-full flex-col p-6">
           <div className="flex items-start justify-between"><a href="/" className="block"><p className="font-mono-ui text-[9px] uppercase tracking-[.24em] text-primary">Eleganza</p><p className="mt-1 font-display text-3xl leading-none">Atelier desk</p></a><button className="lg:hidden" onClick={() => setMobileOpen(false)} aria-label={arabic ? "إغلاق القائمة" : "Close menu"}><X className="h-5 w-5" /></button></div>
           <div className="mt-8 border-y border-border py-4"><p className="font-mono-ui text-[9px] uppercase tracking-[.2em] text-muted-foreground">Preview account</p><p className="mt-2 text-sm font-medium">demo@eleganza.local</p><p className="mt-1 font-mono-ui text-[10px] uppercase tracking-[.12em] text-primary">owner · demo</p></div>

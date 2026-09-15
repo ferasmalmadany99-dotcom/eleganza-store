@@ -59,7 +59,7 @@ export default function AdminDemoAccounting() {
 
   return (
     <div dir={isAr ? "rtl" : "ltr"} className="min-h-screen bg-background text-foreground">
-      <aside className={`fixed inset-y-0 start-0 z-40 w-72 border-e border-border bg-card transition-transform lg:translate-x-0 ${mobileOpen ? "translate-x-0" : "ltr:-translate-x-full rtl:translate-x-full"}`}>
+      <aside className={`fixed inset-y-0 start-0 z-40 w-72 border-e border-border bg-card transition-transform lg:!translate-x-0 ${mobileOpen ? "translate-x-0" : "ltr:-translate-x-full rtl:translate-x-full"}`}>
         <div className="flex h-full flex-col p-6">
           <div className="flex items-start justify-between"><Link href="/admin-demo" className="block" onClick={() => setMobileOpen(false)}><p className="font-mono-ui text-[9px] uppercase tracking-[.24em] text-primary">Eleganza</p><p className="mt-1 font-display text-3xl leading-none">Accounting desk</p></Link><button className="lg:hidden" onClick={() => setMobileOpen(false)} aria-label={isAr ? "إغلاق القائمة" : "Close menu"}><X className="h-5 w-5" /></button></div>
           <div className="mt-8 border-y border-border py-4">
