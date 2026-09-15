@@ -156,7 +156,7 @@ function AccountingSectionPage({ section }: { section: AccountingSection }) {
   const movements = useListInventoryMovements({ limit: 100 });
   const [selectedAccount, setSelectedAccount] = useState("");
   const [hasInitializedAccount, setHasInitializedAccount] = useState(false);
-  const [ledgerSearch, setLedgerSearch] = useState("");
+  const [selectedLedgerAccount, setSelectedLedgerAccount] = useState("");
   const activeAccount = accounts.data?.find((account) => String(account.id) === selectedAccount);
   const createAccount = useCreateAccount();
   const [showAccountForm, setShowAccountForm] = useState(false);
@@ -214,32 +214,26 @@ function AccountingSectionPage({ section }: { section: AccountingSection }) {
     return <div><PageHeader eyebrow={isAr ? "المحاسبة" : "Accounting"} title={isAr ? "شجرة الحسابات" : "Chart of accounts"} description={isAr ? "الحسابات مرتبة رقميًا مع حسابات فرعية متسلسلة تحت كل حساب رئيسي." : "Accounts are sorted numerically with sequential subaccounts under each parent."} /><Panel><div className="mb-5 flex items-center justify-between gap-3"><PanelTitle detail={<span className="font-mono-ui text-[10px] text-muted-foreground">{orderedAccounts.length} accounts</span>}>{isAr ? "الحسابات" : "Accounts"}</PanelTitle><button className={quietButtonClass} onClick={() => setShowAccountForm(!showAccountForm)}><Plus className="h-4 w-4" />{isAr ? "إضافة حساب" : "Add account"}</button></div>{showAccountForm && <form onSubmit={submitNewAccount} className="mb-5 grid gap-3 border border-primary/25 bg-primary/5 p-4 sm:grid-cols-2"><Field label={isAr ? "الحساب الرئيسي" : "Parent account"}><select className={inputClass} value={newAccount.parentId} onChange={(event) => { const parentId = event.target.value; const parent = accounts.data?.find((account) => String(account.id) === parentId); setNewAccount({ ...newAccount, parentId, code: parentId ? nextChildCode(accounts.data ?? [], Number(parentId)) : newAccount.code, type: parent?.type ?? newAccount.type }); }}><option value="">{isAr ? "حساب رئيسي جديد" : "New top-level account"}</option>{orderedAccounts.map((account) => <option key={account.id} value={account.id}>{account.code} · {isAr ? account.nameAr || account.nameEn : account.nameEn}</option>)}</select></Field><Field label={isAr ? "الرمز التسلسلي" : "Sequential code"}><input className={inputClass} required value={newAccount.code} onChange={(event) => setNewAccount({ ...newAccount, code: event.target.value })} /></Field><Field label={isAr ? "النوع" : "Type"}><select className={inputClass} value={newAccount.type} onChange={(event) => setNewAccount({ ...newAccount, type: event.target.value as AccountType })}>{accountTypes.map((type) => <option key={type} value={type}>{type}</option>)}</select></Field><Field label={isAr ? "الاسم بالإنجليزية" : "English name"}><input className={inputClass} required value={newAccount.nameEn} onChange={(event) => setNewAccount({ ...newAccount, nameEn: event.target.value })} /></Field><Field label={isAr ? "الاسم بالعربية" : "Arabic name"}><input className={inputClass} dir="rtl" value={newAccount.nameAr} onChange={(event) => setNewAccount({ ...newAccount, nameAr: event.target.value })} /></Field><button className={buttonClass} disabled={createAccount.isPending}>{isAr ? "حفظ الحساب" : "Save account"}</button></form>}<div className="grid gap-2">{orderedAccounts.map((account) => <div key={account.id} className={`grid grid-cols-[auto_1fr_auto_auto] items-center gap-3 border-b border-border py-4 text-sm ${account.parentId ? "ps-8" : ""}`}><span className="font-mono-ui text-xs text-primary">{account.code}</span><div><p>{isAr ? account.nameAr || account.nameEn : account.nameEn}</p><p className="mt-1 text-[10px] uppercase tracking-[.12em] text-muted-foreground">{account.parentId ? (isAr ? "حساب فرعي" : "Subaccount") : (isAr ? "حساب رئيسي" : "Main account")} · {account.type}</p></div><button className="text-xs text-muted-foreground hover:text-primary" onClick={() => { setShowAccountForm(true); setNewAccount({ code: nextChildCode(accounts.data ?? [], account.id), nameEn: "", nameAr: "", type: account.type, parentId: String(account.id) }); }}>{isAr ? "إضافة فرعي" : "Add child"}</button></div>)}</div></Panel></div>;
   }
   if (section === "ledger") {
-    const normalizedLedgerSearch = ledgerSearch.trim().toLocaleLowerCase();
-    const orderedAccounts = [...(accounts.data ?? [])]
-      .filter((account) => {
-        if (!normalizedLedgerSearch) return true;
-        return [account.code, account.nameEn, account.nameAr].some((value) => value.toLocaleLowerCase().includes(normalizedLedgerSearch));
-      })
-      .sort(sortAccountsByCode);
-    const ledgerGroups = orderedAccounts.map((account) => {
+    const ledgerAccount = accounts.data?.find((account) => String(account.id) === selectedLedgerAccount);
+    const ledgerGroups = ledgerAccount ? [ledgerAccount].map((account) => {
       const rows = (journal.data ?? []).flatMap((entry) => entry.lines
         .filter((line) => line.accountId === account.id)
         .map((line) => ({ entry, line })));
       const totals = journalTotals.get(account.id) ?? { debitMinor: 0, creditMinor: 0 };
       return { account, rows, totals, balance: totals.debitMinor - totals.creditMinor };
-    });
+    }) : [];
     const lineCount = ledgerGroups.reduce((total, group) => total + group.rows.length, 0);
 
     return <div>
       <PageHeader eyebrow={isAr ? "المحاسبة" : "Accounting"} title={isAr ? "دفتر الأستاذ" : "General ledger"} description={isAr ? "عرض حركة كل حساب مع إجماليات المدين والدائن والرصيد الحالي." : "Review every account's activity with debit, credit, and current balance totals."} />
       <Panel>
         <div className="mb-5 grid gap-2">
-          <label htmlFor="ledger-account-search" className="text-sm font-medium text-foreground">{isAr ? "بحث في الحسابات" : "Search accounts"}</label>
-          <input id="ledger-account-search" className={`${inputClass} h-12`} value={ledgerSearch} onChange={(event) => setLedgerSearch(event.target.value)} placeholder={isAr ? "ابحث برقم الحساب أو اسمه بالعربية أو الإنجليزية" : "Search by account code or Arabic or English name"} autoComplete="off" />
-          <p className="text-xs text-muted-foreground">{isAr ? "اكتب ما تريد لعرض الحسابات المطابقة فقط." : "Type anything to show only matching accounts."}</p>
+          <label htmlFor="ledger-account-picker" className="text-sm font-medium text-foreground">{isAr ? "اختر الحساب" : "Choose account"}</label>
+          <AccountPicker id="ledger-account-picker" accounts={accounts.data ?? []} value={selectedLedgerAccount} language={language} onChange={setSelectedLedgerAccount} />
+          <p className="text-xs text-muted-foreground">{isAr ? "اكتب اسم الحساب أو رقمه ثم اختره من القائمة." : "Type an account name or code, then choose it from the list."}</p>
         </div>
         <PanelTitle detail={<span className="font-mono-ui text-[10px] text-muted-foreground">{lineCount} {isAr ? "حركة" : "lines"}</span>}>{isAr ? "حركة الحسابات" : "Account activity"}</PanelTitle>
-        {journal.isLoading || accounts.isLoading ? <LoadingState label={isAr ? "جاري تحميل دفتر الأستاذ..." : "Loading general ledger..."} /> : journal.isError ? <ErrorState error={journal.error} onRetry={() => journal.refetch()} /> : accounts.isError ? <ErrorState error={accounts.error} onRetry={() => accounts.refetch()} /> : ledgerGroups.length === 0 ? <EmptyState icon={<ClipboardList className="h-5 w-5" />} title={isAr ? "لا توجد حركات" : "No ledger activity"} detail={isAr ? "ستظهر حركة الحسابات عند ترحيل قيود اليومية." : "Account activity will appear when journal entries are posted."} /> : <div className="grid gap-6">
+        {journal.isLoading || accounts.isLoading ? <LoadingState label={isAr ? "جاري تحميل دفتر الأستاذ..." : "Loading general ledger..."} /> : journal.isError ? <ErrorState error={journal.error} onRetry={() => journal.refetch()} /> : accounts.isError ? <ErrorState error={accounts.error} onRetry={() => accounts.refetch()} /> : !selectedLedgerAccount ? <EmptyState icon={<ClipboardList className="h-5 w-5" />} title={isAr ? "اختر حسابًا لعرض دفتر الأستاذ" : "Choose an account to view the ledger"} detail={isAr ? "استخدم خانة البحث أعلاه، وستظهر الحسابات المطابقة في قائمة الاختيار." : "Use the search field above to find and select an account."} /> : ledgerGroups.length === 0 ? <EmptyState icon={<ClipboardList className="h-5 w-5" />} title={isAr ? "الحساب غير موجود" : "Account not found"} detail={isAr ? "اختر حسابًا من القائمة المقترحة." : "Choose an account from the suggestions."} /> : <div className="grid gap-6">
           {ledgerGroups.map(({ account, rows, totals, balance }) => <section key={account.id} className="border border-border">
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border bg-muted/30 px-4 py-3">
               <div><p className="font-mono-ui text-xs text-primary">{account.code}</p><p className="mt-1 text-sm font-medium">{isAr ? account.nameAr || account.nameEn : account.nameEn}</p></div>
