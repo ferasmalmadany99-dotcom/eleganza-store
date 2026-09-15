@@ -28,13 +28,14 @@ import {
 } from "@/components/admin/AdminUI";
 
 const accountTypes: AccountType[] = ["asset", "liability", "equity", "revenue", "expense"];
-type AccountingSection = "journal" | "chart" | "ledger" | "trialBalance" | "incomeStatement" | "inventory" | "statement";
+type AccountingSection = "journal" | "chart" | "ledger" | "trialBalance" | "balanceSheet" | "incomeStatement" | "inventory" | "statement";
 
 const accountingSections: { id: AccountingSection; label: string; arabic: string; icon: typeof BookOpen }[] = [
   { id: "journal", label: "Journal entries", arabic: "قيود اليومية", icon: BookOpen },
   { id: "chart", label: "Chart of accounts", arabic: "شجرة الحسابات", icon: Landmark },
   { id: "ledger", label: "General ledger", arabic: "دفتر الأستاذ", icon: ClipboardList },
   { id: "trialBalance", label: "Trial balance", arabic: "ميزان المراجعة", icon: Scale },
+  { id: "balanceSheet", label: "Balance sheet", arabic: "الميزانية العمومية", icon: Scale },
   { id: "incomeStatement", label: "Income statement", arabic: "قائمة الدخل", icon: TrendingUp },
   { id: "inventory", label: "Inventory report", arabic: "تقرير المخزون", icon: PackageSearch },
   { id: "statement", label: "Account statement", arabic: "كشف حساب", icon: FileBarChart },
@@ -196,6 +197,38 @@ function AccountingSectionPage({ section }: { section: AccountingSection }) {
     const totalDebit = rows.reduce((total, row) => total + row.totals.debitMinor, 0);
     const totalCredit = rows.reduce((total, row) => total + row.totals.creditMinor, 0);
     return <div><PageHeader eyebrow={isAr ? "المحاسبة" : "Accounting"} title={isAr ? "ميزان المراجعة" : "Trial balance"} description={isAr ? "مقارنة إجماليات المدين والدائن لكل حساب للتأكد من توازن القيود." : "Compare debit and credit totals for every account to verify journal balance."} /><Panel><PanelTitle detail={<span className="font-mono-ui text-[10px] text-muted-foreground">{rows.length} {isAr ? "حساب" : "accounts"}</span>}>{isAr ? "أرصدة الحسابات" : "Account balances"}</PanelTitle>{journal.isLoading || accounts.isLoading ? <LoadingState /> : <div className="overflow-x-auto"><table className="w-full min-w-[650px] text-sm"><thead className="text-[10px] uppercase tracking-[.14em] text-muted-foreground"><tr><th className="pb-3 text-start">{isAr ? "الحساب" : "Account"}</th><th className="pb-3 text-end">{isAr ? "مدين" : "Debit"}</th><th className="pb-3 text-end">{isAr ? "دائن" : "Credit"}</th><th className="pb-3 text-end">{isAr ? "الرصيد" : "Balance"}</th></tr></thead><tbody>{rows.map(({ account, totals }) => <tr key={account.id} className="border-t border-border"><td className="py-3"><span className="font-mono-ui text-xs text-primary">{account.code}</span><span className="ms-3">{isAr ? account.nameAr || account.nameEn : account.nameEn}</span></td><td className="py-3 text-end">{totals.debitMinor ? money(totals.debitMinor, language) : "—"}</td><td className="py-3 text-end">{totals.creditMinor ? money(totals.creditMinor, language) : "—"}</td><td className="py-3 text-end font-medium">{money(Math.abs(totals.debitMinor - totals.creditMinor), language)}</td></tr>)}</tbody><tfoot><tr className="border-t-2 border-border font-semibold"><td className="py-4">{isAr ? "الإجمالي" : "Total"}</td><td className="py-4 text-end">{money(totalDebit, language)}</td><td className="py-4 text-end">{money(totalCredit, language)}</td><td className="py-4 text-end">{money(Math.abs(totalDebit - totalCredit), language)}</td></tr></tfoot></table></div>}</Panel></div>;
+  }
+  if (section === "balanceSheet") {
+    const accountRows = (type: AccountType) => (accounts.data ?? [])
+      .filter((account) => account.type === type)
+      .sort(sortAccountsByCode)
+      .map((account) => {
+        const totals = journalTotals.get(account.id) ?? { debitMinor: 0, creditMinor: 0 };
+        const amount = type === "asset" ? totals.debitMinor - totals.creditMinor : totals.creditMinor - totals.debitMinor;
+        return { account, amount };
+      })
+      .filter(({ amount }) => amount !== 0);
+    const assetRows = accountRows("asset");
+    const liabilityRows = accountRows("liability");
+    const equityRows = accountRows("equity");
+    const revenueTotal = (accounts.data ?? []).filter((account) => account.type === "revenue").reduce((total, account) => {
+      const totals = journalTotals.get(account.id) ?? { debitMinor: 0, creditMinor: 0 };
+      return total + totals.creditMinor - totals.debitMinor;
+    }, 0);
+    const expenseTotal = (accounts.data ?? []).filter((account) => account.type === "expense").reduce((total, account) => {
+      const totals = journalTotals.get(account.id) ?? { debitMinor: 0, creditMinor: 0 };
+      return total + totals.debitMinor - totals.creditMinor;
+    }, 0);
+    const netIncome = revenueTotal - expenseTotal;
+    const totalAssets = assetRows.reduce((total, row) => total + row.amount, 0);
+    const totalLiabilities = liabilityRows.reduce((total, row) => total + row.amount, 0);
+    const totalEquity = equityRows.reduce((total, row) => total + row.amount, 0) + netIncome;
+    const totalLiabilitiesAndEquity = totalLiabilities + totalEquity;
+    const balanceDifference = totalAssets - totalLiabilitiesAndEquity;
+    const AccountBalanceRows = ({ rows }: { rows: Array<{ account: { id: number; code: string; nameEn: string; nameAr: string }; amount: number }> }) => rows.length === 0
+      ? <p className="py-3 text-sm text-muted-foreground">{isAr ? "لا توجد أرصدة" : "No balances"}</p>
+      : <div>{rows.map(({ account, amount }) => <div key={account.id} className="flex items-center justify-between gap-4 border-b border-border py-3 text-sm last:border-0"><span><span className="font-mono-ui text-xs text-primary">{account.code}</span><span className="ms-3">{isAr ? account.nameAr || account.nameEn : account.nameEn}</span></span><span className="font-mono-ui">{money(amount, language)}</span></div>)}</div>;
+    return <div><PageHeader eyebrow={isAr ? "المحاسبة" : "Accounting"} title={isAr ? "الميزانية العمومية" : "Balance sheet"} description={isAr ? "عرض الأصول والالتزامات وحقوق الملكية للتحقق من المعادلة المحاسبية." : "Review assets, liabilities, and equity against the accounting equation."} />{journal.isLoading || accounts.isLoading ? <LoadingState /> : <div className="grid gap-5 xl:grid-cols-2"><Panel><PanelTitle detail={<span className="font-mono-ui text-[10px] text-muted-foreground">{isAr ? "الأصول" : "Assets"}</span>}>{isAr ? "الأصول" : "Assets"}</PanelTitle><AccountBalanceRows rows={assetRows} /><div className="mt-3 flex justify-between border-t-2 border-border pt-3 text-sm font-semibold"><span>{isAr ? "إجمالي الأصول" : "Total assets"}</span><span className="font-mono-ui">{money(totalAssets, language)}</span></div></Panel><div className="grid gap-5"><Panel><PanelTitle detail={<span className="font-mono-ui text-[10px] text-muted-foreground">{isAr ? "الالتزامات" : "Liabilities"}</span>}>{isAr ? "الالتزامات" : "Liabilities"}</PanelTitle><AccountBalanceRows rows={liabilityRows} /><div className="mt-3 flex justify-between border-t-2 border-border pt-3 text-sm font-semibold"><span>{isAr ? "إجمالي الالتزامات" : "Total liabilities"}</span><span className="font-mono-ui">{money(totalLiabilities, language)}</span></div></Panel><Panel><PanelTitle detail={<span className="font-mono-ui text-[10px] text-muted-foreground">{isAr ? "حقوق الملكية" : "Equity"}</span>}>{isAr ? "حقوق الملكية" : "Equity"}</PanelTitle><AccountBalanceRows rows={equityRows} /><div className="flex items-center justify-between gap-4 border-b border-border py-3 text-sm"><span>{isAr ? "صافي الربح / (الخسارة)" : "Net income / (loss)"}</span><span className="font-mono-ui">{money(netIncome, language)}</span></div><div className="mt-3 flex justify-between border-t-2 border-border pt-3 text-sm font-semibold"><span>{isAr ? "إجمالي الالتزامات وحقوق الملكية" : "Total liabilities & equity"}</span><span className="font-mono-ui">{money(totalLiabilitiesAndEquity, language)}</span></div></Panel></div></div>}<div className={`mt-5 border p-4 text-sm ${balanceDifference === 0 ? "border-primary/30 bg-primary/5" : "border-destructive/30 bg-destructive/5"}`}><div className="flex flex-wrap items-center justify-between gap-3"><span>{isAr ? "حالة الميزانية" : "Balance status"}</span><span className="font-medium">{balanceDifference === 0 ? (isAr ? "متوازنة" : "Balanced") : (isAr ? "تحتاج إلى مراجعة" : "Needs review")}</span></div>{balanceDifference !== 0 && <p className="mt-2 text-xs text-muted-foreground">{isAr ? `الفرق بين الأصول والالتزامات وحقوق الملكية: ${money(Math.abs(balanceDifference), language)}` : `Difference between assets and liabilities & equity: ${money(Math.abs(balanceDifference), language)}`}</p>}</div></div>;
   }
   if (section === "incomeStatement") {
     const revenueRows = (accounts.data ?? []).filter((account) => account.type === "revenue").sort(sortAccountsByCode).map((account) => {
