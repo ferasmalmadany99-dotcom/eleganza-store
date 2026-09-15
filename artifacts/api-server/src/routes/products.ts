@@ -14,9 +14,8 @@ import { requireAuth, requireManager } from "../middlewares/auth";
 import { writeAudit } from "../lib/audit";
 
 const router: IRouter = Router();
-router.use(requireAuth);
 
-router.get("/products", async (req, res): Promise<void> => {
+router.get("/products", requireAuth, async (req, res): Promise<void> => {
   const query = ListProductsQueryParams.safeParse(req.query);
   if (!query.success) { res.status(400).json({ error: query.error.message }); return; }
   const filters = [];
@@ -29,7 +28,7 @@ router.get("/products", async (req, res): Promise<void> => {
   res.json(ListProductsResponse.parse(products));
 });
 
-router.post("/products", requireManager, async (req, res): Promise<void> => {
+router.post("/products", requireAuth, requireManager, async (req, res): Promise<void> => {
   const parsed = CreateProductBody.safeParse(req.body);
   if (!parsed.success) { res.status(400).json({ error: parsed.error.message }); return; }
   const [product] = await db.insert(productsTable).values(parsed.data).returning();
@@ -37,7 +36,7 @@ router.post("/products", requireManager, async (req, res): Promise<void> => {
   res.status(201).json(CreateProductResponse.parse(product));
 });
 
-router.patch("/products/:id", requireManager, async (req, res): Promise<void> => {
+router.patch("/products/:id", requireAuth, requireManager, async (req, res): Promise<void> => {
   const params = UpdateProductParams.safeParse(req.params);
   const parsed = UpdateProductBody.safeParse(req.body);
   if (!params.success || !parsed.success) {

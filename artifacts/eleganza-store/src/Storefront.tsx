@@ -72,6 +72,11 @@ type Product = {
 
 type CartItem = Product & { quantity: number };
 type ArticleId = 'ritual' | 'scent' | 'five-minute-face';
+type StorefrontInventoryProduct = {
+  nameEn: string;
+  nameAr: string;
+  quantityOnHand: number;
+};
 
 type Article = {
   id: ArticleId;
@@ -577,6 +582,8 @@ const getProductCopy = (product: Product, language: Language) =>
 const money = (value: number) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value);
 
+const normalizeProductName = (name: string) => name.trim().toLocaleLowerCase();
+
 function BrandName({ compact = false }: { compact?: boolean }) {
   return (
     <span
@@ -1036,6 +1043,8 @@ function Storefront() {
   const [journalIndexOpen, setJournalIndexOpen] = useState(false);
   const [selectedArticleId, setSelectedArticleId] = useState<ArticleId | null>(null);
   const [notice, setNotice] = useState('');
+  const [inventoryByName, setInventoryByName] = useState<Record<string, number>>({});
+  const [inventoryLoaded, setInventoryLoaded] = useState(false);
   const c = copy[language];
   const selectedArticle = articles[language].find((article) => article.id === selectedArticleId) ?? null;
 
@@ -1049,13 +1058,58 @@ function Storefront() {
     window.localStorage.setItem('eleganza-favorites', JSON.stringify(favorites));
   }, [favorites]);
 
+  useEffect(() => {
+    let disposed = false;
+    const loadInventory = async () => {
+      try {
+        const response = await fetch('/api/storefront/products', { headers: { Accept: 'application/json' } });
+        if (!response.ok) throw new Error(`Inventory request failed with ${response.status}`);
+        const data = await response.json() as StorefrontInventoryProduct[];
+        if (disposed) return;
+        const next: Record<string, number> = {};
+        for (const product of data) {
+          const quantity = Math.max(0, Number(product.quantityOnHand) || 0);
+          if (product.nameEn) next[normalizeProductName(product.nameEn)] = quantity;
+          if (product.nameAr) next[normalizeProductName(product.nameAr)] = quantity;
+        }
+        setInventoryByName(next);
+        setInventoryLoaded(true);
+      } catch (error) {
+        console.error('Could not load storefront inventory', error);
+      }
+    };
+    loadInventory();
+    const interval = window.setInterval(loadInventory, 10_000);
+    window.addEventListener('focus', loadInventory);
+    return () => {
+      disposed = true;
+      window.clearInterval(interval);
+      window.removeEventListener('focus', loadInventory);
+    };
+  }, []);
+
+  const currentStockFor = (product: Pick<Product, 'name' | 'stock'>) =>
+    inventoryLoaded ? inventoryByName[normalizeProductName(product.name)] ?? 0 : product.stock;
+  const withCurrentStock = (product: Product): Product => ({
+    ...product,
+    stock: currentStockFor(product),
+  });
+  const withCurrentCartStock = (item: CartItem): CartItem => ({
+    ...item,
+    stock: currentStockFor(item),
+  });
+
   const shownProducts = useMemo(() => {
-    if (activeFilter === 'All') return products;
-    if (activeFilter === 'New in') return products.filter((product) => product.badge === 'New' || product.badge === 'Edition 01');
-    return products.filter((product) => product.category === activeFilter);
-  }, [activeFilter]);
+    const filtered = activeFilter === 'All'
+      ? products
+      : activeFilter === 'New in'
+        ? products.filter((product) => product.badge === 'New' || product.badge === 'Edition 01')
+        : products.filter((product) => product.category === activeFilter);
+    return filtered.map(withCurrentStock);
+  }, [activeFilter, inventoryByName, inventoryLoaded]);
   const bagCount = bag.reduce((sum, item) => sum + item.quantity, 0);
-  const favoriteProducts = products.filter((product) => favorites.includes(product.id));
+  const favoriteProducts = products.filter((product) => favorites.includes(product.id)).map(withCurrentStock);
+  const currentSelectedProduct = selectedProduct ? withCurrentStock(selectedProduct) : null;
 
   const notify = (message: string) => {
     setNotice(message);
@@ -1081,7 +1135,8 @@ function Storefront() {
   };
   const updateQuantity = (id: string, amount: number) => {
     const item = bag.find((entry) => entry.id === id);
-    if (item && amount > 0 && item.quantity + amount > item.stock) {
+    const availableStock = item && inventoryLoaded ? inventoryByName[normalizeProductName(item.name)] ?? 0 : item?.stock;
+    if (item && amount > 0 && item.quantity + amount > (availableStock ?? 0)) {
       notify(language === 'ar' ? `${item.name}: ${c.stockLimitReason}` : `${item.name}: ${c.stockLimitReason}`);
       return;
     }
@@ -1145,10 +1200,10 @@ function Storefront() {
       </footer>
 
       {notice && <div className="fixed bottom-6 left-1/2 z-[60] flex w-[calc(100%-2rem)] max-w-md -translate-x-1/2 items-center justify-center gap-3 bg-[#312b25] px-6 py-4 text-center text-sm font-medium leading-6 text-[#fff8ed] shadow-2xl sm:w-auto sm:min-w-[360px] sm:text-base" role="status" aria-live="polite" data-testid="status-notice"><Sparkles size={18} className="shrink-0 text-[#d18c6d]" />{notice}</div>}
-      {bagOpen && <BagDrawer items={bag} language={language} c={c} onClose={() => setBagOpen(false)} onUpdate={updateQuantity} onRemove={(id) => setBag((current) => current.filter((item) => item.id !== id))} onCheckout={() => notify(language === 'ar' ? 'يتم تجهيز صفحة الدفع لك' : 'Checkout is being prepared for you')} />}
+      {bagOpen && <BagDrawer items={bag.map(withCurrentCartStock)} language={language} c={c} onClose={() => setBagOpen(false)} onUpdate={updateQuantity} onRemove={(id) => setBag((current) => current.filter((item) => item.id !== id))} onCheckout={() => notify(language === 'ar' ? 'يتم تجهيز صفحة الدفع لك' : 'Checkout is being prepared for you')} />}
       {favoritesOpen && <FavoritesDrawer items={favoriteProducts} language={language} c={c} onClose={() => setFavoritesOpen(false)} onRemove={toggleFavorite} onSelect={(product) => { setFavoritesOpen(false); setSelectedProduct(product); }} />}
       {searchOpen && <SearchPanel products={products} c={c} language={language} onClose={() => setSearchOpen(false)} onSelect={(product) => { setSearchOpen(false); setSelectedProduct(product); }} />}
-      {selectedProduct && <ProductDetail product={selectedProduct} language={language} c={c} favorite={favorites.includes(selectedProduct.id)} onFavorite={() => toggleFavorite(selectedProduct.id)} onAdd={() => { if (addToBag(selectedProduct)) setSelectedProduct(null); }} onClose={() => setSelectedProduct(null)} />}
+      {currentSelectedProduct && <ProductDetail product={currentSelectedProduct} language={language} c={c} favorite={favorites.includes(currentSelectedProduct.id)} onFavorite={() => toggleFavorite(currentSelectedProduct.id)} onAdd={() => { if (addToBag(currentSelectedProduct)) setSelectedProduct(null); }} onClose={() => setSelectedProduct(null)} />}
       {journalIndexOpen && !selectedArticle && <JournalIndex entries={articles[language]} c={c} onClose={() => setJournalIndexOpen(false)} onSelect={setSelectedArticleId} />}
       {selectedArticle && <ArticleReader article={selectedArticle} c={c} onClose={() => setSelectedArticleId(null)} />}
     </div>
