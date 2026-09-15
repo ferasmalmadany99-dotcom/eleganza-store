@@ -44,7 +44,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     return (
       <div className="flex min-h-screen items-center justify-center bg-background px-5 text-center">
         <div className="max-w-md border border-border bg-card p-8">
-          <p className="font-mono-ui text-[10px] uppercase tracking-[.2em] text-primary">Eleganza operations</p>
+          <p className="font-mono-ui text-xs font-semibold uppercase tracking-[.2em] text-primary">Eleganza operations</p>
           <h1 className="mt-3 font-display text-4xl">{pending ? "Access is pending" : "Workspace unavailable"}</h1>
           <p className="mt-4 text-sm leading-6 text-muted-foreground">{pending ? "Your account was created, but an owner must activate it before you can access operations." : "We could not load your staff profile. Please try again or sign in with another account."}</p>
           <div className="mt-6 flex justify-center gap-2"><button className="h-10 border border-border px-4 text-xs font-semibold uppercase tracking-[.12em]" onClick={() => session.refetch()}>Retry</button><button className="h-10 bg-primary px-4 text-xs font-semibold uppercase tracking-[.12em] text-primary-foreground" onClick={() => signOut({ redirectUrl: "/" })}>Sign out</button></div>
@@ -69,20 +69,20 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <div className="flex h-full min-h-0 flex-col bg-card p-6">
             <div className="flex items-start justify-between">
               <Link href="/" className="group" onClick={() => setMobileOpen(false)}>
-                <div className="font-mono-ui text-[9px] uppercase tracking-[.24em] text-primary">Eleganza</div>
+                <div className="font-mono-ui text-xs font-semibold uppercase tracking-[.24em] text-primary">Eleganza</div>
                 <div className="mt-1 font-display text-3xl leading-none">Atelier desk</div>
               </Link>
               <button className="lg:hidden" onClick={() => setMobileOpen(false)} aria-label="Close menu"><X className="h-5 w-5" /></button>
             </div>
             <div className="mt-8 border-y border-border py-4">
-              <p className="font-mono-ui text-[9px] uppercase tracking-[.2em] text-muted-foreground">{language === "ar" ? "الحساب الحالي" : "Workspace account"}</p>
+              <p className="font-mono-ui text-xs font-medium uppercase tracking-[.2em] text-muted-foreground">{language === "ar" ? "الحساب الحالي" : "Workspace account"}</p>
               <p className="mt-2 truncate text-sm font-medium">{session.data?.displayName}</p>
-              <p className="mt-1 font-mono-ui text-[10px] uppercase tracking-[.12em] text-primary">{role}</p>
+              <p className="mt-1 font-mono-ui text-xs font-semibold uppercase tracking-[.12em] text-primary">{role}</p>
             </div>
             <div className="mt-6 flex min-h-0 min-w-0 flex-[1_1_220px] flex-col border border-primary/20 bg-background/60 p-2 shadow-[0_8px_24px_hsl(var(--foreground)/.03)]">
               <div className="flex shrink-0 items-center justify-between border-b border-primary/15 px-2 pb-3">
-                <p className="font-mono-ui text-[9px] uppercase tracking-[.16em] text-primary">{language === "ar" ? "القائمة الرئيسية" : "Main navigation"}</p>
-                <span className="font-mono-ui text-[9px] text-muted-foreground">{visibleNavigation.length}</span>
+                <p className="font-mono-ui text-xs font-semibold uppercase tracking-[.16em] text-primary">{language === "ar" ? "القائمة الرئيسية" : "Main navigation"}</p>
+                <span className="font-mono-ui text-xs font-medium text-muted-foreground">{visibleNavigation.length}</span>
               </div>
               <nav className="admin-nav-scroll mt-2 min-h-0 flex-1 overflow-y-scroll overscroll-contain pe-1">
                 <div className="grid gap-1">
@@ -95,7 +95,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               </nav>
             </div>
             <div className="mt-4 shrink-0 border-t border-primary/20 pt-4">
-              <p className="mb-2 px-2 font-mono-ui text-[9px] uppercase tracking-[.16em] text-muted-foreground">{language === "ar" ? "إجراءات ثابتة" : "Fixed actions"}</p>
+              <p className="mb-2 px-2 font-mono-ui text-xs font-semibold uppercase tracking-[.16em] text-muted-foreground">{language === "ar" ? "إجراءات ثابتة" : "Fixed actions"}</p>
               <div className="grid gap-1 border border-border bg-muted/20 p-2">
                 <Link href="/" className="flex w-full items-center gap-3 px-2 py-2.5 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"><Store className="h-4 w-4" />{language === "ar" ? "المتجر العام" : "Public storefront"}<ExternalLink className="ms-auto h-3.5 w-3.5" /></Link>
                 <button className="flex w-full items-center gap-3 px-2 py-2.5 text-sm text-muted-foreground hover:bg-muted hover:text-foreground" onClick={() => setLanguage(language === "en" ? "ar" : "en")}><Globe2 className="h-4 w-4" />{language === "en" ? "العربية" : "English"}</button>
@@ -108,9 +108,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <main className="min-h-screen lg:ps-72">
           <header className="sticky top-0 z-20 flex min-h-16 items-center justify-between gap-4 border-b border-border bg-background/90 px-5 py-3 backdrop-blur lg:px-10">
             <button className="lg:hidden" onClick={() => setMobileOpen(true)} aria-label="Open navigation"><Menu className="h-5 w-5" /></button>
-            <div><p className="font-mono-ui text-[10px] uppercase tracking-[.18em] text-primary">{language === "ar" ? "عمليات Eleganza" : "Eleganza operations"}</p><p className="text-xs text-muted-foreground">{language === "ar" ? "مساحة العمل الفعلية — التغييرات محفوظة" : "Live workspace — changes are saved"}</p></div>
+            <div><p className="font-mono-ui text-xs font-semibold uppercase tracking-[.18em] text-primary">{language === "ar" ? "عمليات Eleganza" : "Eleganza operations"}</p><p className="text-xs text-muted-foreground">{language === "ar" ? "مساحة العمل الفعلية — التغييرات محفوظة" : "Live workspace — changes are saved"}</p></div>
             <div className="ms-auto flex items-center gap-3 text-xs text-muted-foreground">
-              <span className="hidden border border-primary/30 px-3 py-2 text-[10px] uppercase tracking-[.13em] text-primary sm:inline">{language === "ar" ? "بيانات فعلية" : "Live data"}</span>
+              <span className="hidden border border-primary/30 px-3 py-2 text-xs font-semibold uppercase tracking-[.13em] text-primary sm:inline">{language === "ar" ? "بيانات فعلية" : "Live data"}</span>
               <button
                 type="button"
                 onClick={() => setLanguage(language === "en" ? "ar" : "en")}
@@ -126,7 +126,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </header>
           <div className="mx-auto max-w-[1500px] p-5 lg:p-10">
             <div className="mb-8 border border-primary/25 bg-primary/5 px-5 py-4">
-              <p className="font-mono-ui text-[10px] uppercase tracking-[.2em] text-primary">{language === "ar" ? "مساحة الإدارة الفعلية" : "Live operations desk"}</p>
+              <p className="font-mono-ui text-xs font-semibold uppercase tracking-[.2em] text-primary">{language === "ar" ? "مساحة الإدارة الفعلية" : "Live operations desk"}</p>
               <p className="mt-2 text-sm leading-6 text-muted-foreground">{language === "ar" ? "هذه المساحة محمية بتسجيل الدخول، وكل التغييرات تحفظ في قاعدة البيانات بحسب صلاحياتك." : "This workspace is protected by sign-in, and changes are saved to the database according to your permissions."}</p>
             </div>
             {children}
