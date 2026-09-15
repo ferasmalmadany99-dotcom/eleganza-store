@@ -79,7 +79,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <p className="mt-2 truncate text-sm font-medium">{session.data?.displayName}</p>
               <p className="mt-1 font-mono-ui text-[10px] uppercase tracking-[.12em] text-primary">{role}</p>
             </div>
-            <div className="mt-6 flex min-h-[250px] min-w-0 flex-1 flex-col border border-primary/20 bg-background/60 p-2 shadow-[0_8px_24px_hsl(var(--foreground)/.03)]">
+            <div className="mt-6 flex min-h-0 min-w-0 flex-[1_1_220px] flex-col border border-primary/20 bg-background/60 p-2 shadow-[0_8px_24px_hsl(var(--foreground)/.03)]">
               <div className="flex shrink-0 items-center justify-between border-b border-primary/15 px-2 pb-3">
                 <p className="font-mono-ui text-[9px] uppercase tracking-[.16em] text-primary">{language === "ar" ? "القائمة الرئيسية" : "Main navigation"}</p>
                 <span className="font-mono-ui text-[9px] text-muted-foreground">{visibleNavigation.length}</span>
