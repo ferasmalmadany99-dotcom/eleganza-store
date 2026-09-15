@@ -1,22 +1,30 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Eleganza administration API
 servers:
   - url: /api
     description: Base API path
+security:
+  - clerkSession: []
 tags:
   - name: health
-    description: Health operations
+  - name: session
+  - name: dashboard
+  - name: products
+  - name: inventory
+  - name: orders
+  - name: expenses
+  - name: staff
+  - name: audit
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
+      security: []
       responses:
         "200":
           description: Healthy
@@ -24,13 +32,500 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /session/me:
+    get:
+      operationId: getSession
+      tags: [session]
+      summary: Current authenticated staff profile
+      responses:
+        "200":
+          description: Session profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Session"
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [dashboard]
+      summary: Dashboard KPI summary
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+  /products:
+    get:
+      operationId: listProducts
+      tags: [products]
+      summary: List products
+      parameters:
+        - $ref: "#/components/parameters/Limit"
+        - $ref: "#/components/parameters/Offset"
+        - name: search
+          in: query
+          schema: { type: string }
+        - name: category
+          in: query
+          schema: { type: string }
+      responses:
+        "200":
+          description: Products
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Product" }
+    post:
+      operationId: createProduct
+      tags: [products]
+      summary: Create product
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ProductInput" }
+      responses:
+        "201":
+          description: Created product
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Product" }
+  /products/{id}:
+    patch:
+      operationId: updateProduct
+      tags: [products]
+      summary: Update product
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ProductUpdate" }
+      responses:
+        "200":
+          description: Updated product
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Product" }
+  /inventory/movements:
+    get:
+      operationId: listInventoryMovements
+      tags: [inventory]
+      summary: List inventory movements
+      parameters:
+        - $ref: "#/components/parameters/Limit"
+        - $ref: "#/components/parameters/Offset"
+        - name: productId
+          in: query
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Inventory movements
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/InventoryMovement" }
+    post:
+      operationId: createInventoryMovement
+      tags: [inventory]
+      summary: Record an inventory movement
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/InventoryMovementInput" }
+      responses:
+        "201":
+          description: Recorded movement
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/InventoryMovement" }
+  /orders:
+    get:
+      operationId: listOrders
+      tags: [orders]
+      summary: List orders
+      parameters:
+        - $ref: "#/components/parameters/Limit"
+        - $ref: "#/components/parameters/Offset"
+        - name: status
+          in: query
+          schema: { $ref: "#/components/schemas/OrderStatus" }
+      responses:
+        "200":
+          description: Orders
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Order" }
+    post:
+      operationId: createOrder
+      tags: [orders]
+      summary: Create a local order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/OrderInput" }
+      responses:
+        "201":
+          description: Created order
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Order" }
+  /orders/{id}/status:
+    patch:
+      operationId: updateOrderStatus
+      tags: [orders]
+      summary: Update order status
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/OrderStatusUpdate" }
+      responses:
+        "200":
+          description: Updated order
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Order" }
+  /expenses:
+    get:
+      operationId: listExpenses
+      tags: [expenses]
+      summary: List expenses
+      parameters:
+        - $ref: "#/components/parameters/Limit"
+        - $ref: "#/components/parameters/Offset"
+      responses:
+        "200":
+          description: Expenses
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Expense" }
+    post:
+      operationId: createExpense
+      tags: [expenses]
+      summary: Record an expense
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ExpenseInput" }
+      responses:
+        "201":
+          description: Created expense
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Expense" }
+  /staff:
+    get:
+      operationId: listStaff
+      tags: [staff]
+      summary: List staff
+      responses:
+        "200":
+          description: Staff
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Staff" }
+  /staff/{id}:
+    patch:
+      operationId: updateStaff
+      tags: [staff]
+      summary: Update staff role or status
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/StaffUpdate" }
+      responses:
+        "200":
+          description: Updated staff
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Staff" }
+  /audit:
+    get:
+      operationId: listAuditLogs
+      tags: [audit]
+      summary: List audit entries
+      parameters:
+        - $ref: "#/components/parameters/Limit"
+        - $ref: "#/components/parameters/Offset"
+      responses:
+        "200":
+          description: Audit entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/AuditLog" }
+  /shopify/sync:
+    post:
+      operationId: syncShopify
+      tags: [products]
+      summary: Pull Shopify catalog and inventory mappings
+      responses:
+        "200":
+          description: Sync result
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SyncResult" }
 components:
+  securitySchemes:
+    clerkSession:
+      type: apiKey
+      in: cookie
+      name: __session
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema: { type: integer }
+    Limit:
+      name: limit
+      in: query
+      schema: { type: integer, minimum: 1, maximum: 100, default: 50 }
+    Offset:
+      name: offset
+      in: query
+      schema: { type: integer, minimum: 0, default: 0 }
   schemas:
     HealthStatus:
       type: object
+      required: [status]
       properties:
-        status:
-          type: string
-      required:
-        - status
-
+        status: { type: string }
+    StaffRole:
+      type: string
+      enum: [owner, manager, inventory, sales, viewer]
+    StaffStatus:
+      type: string
+      enum: [active, inactive]
+    Staff:
+      type: object
+      required: [id, clerkUserId, displayName, role, status, createdAt, updatedAt]
+      properties:
+        id: { type: integer }
+        clerkUserId: { type: string }
+        displayName: { type: string }
+        email: { type: ["string", "null"] }
+        role: { $ref: "#/components/schemas/StaffRole" }
+        status: { $ref: "#/components/schemas/StaffStatus" }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    Session:
+      allOf:
+        - $ref: "#/components/schemas/Staff"
+    StaffUpdate:
+      type: object
+      properties:
+        role: { $ref: "#/components/schemas/StaffRole" }
+        status: { $ref: "#/components/schemas/StaffStatus" }
+        displayName: { type: string }
+        email: { type: string }
+    Product:
+      type: object
+      required: [id, sku, nameEn, nameAr, category, salePriceMinor, costMinor, quantityOnHand, reorderThreshold, imageUrls, active, createdAt, updatedAt]
+      properties:
+        id: { type: integer }
+        sku: { type: string }
+        nameEn: { type: string }
+        nameAr: { type: string }
+        descriptionEn: { type: ["string", "null"] }
+        descriptionAr: { type: ["string", "null"] }
+        category: { type: string }
+        salePriceMinor: { type: integer }
+        costMinor: { type: integer }
+        quantityOnHand: { type: integer }
+        reorderThreshold: { type: integer }
+        imageUrls:
+          type: array
+          items: { type: string }
+        shopifyProductId: { type: ["string", "null"] }
+        shopifyVariantId: { type: ["string", "null"] }
+        active: { type: boolean }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    ProductInput:
+      type: object
+      required: [sku, nameEn, nameAr, category, salePriceMinor, costMinor, reorderThreshold]
+      properties:
+        sku: { type: string, minLength: 1 }
+        nameEn: { type: string, minLength: 1 }
+        nameAr: { type: string }
+        descriptionEn: { type: string }
+        descriptionAr: { type: string }
+        category: { type: string, minLength: 1 }
+        salePriceMinor: { type: integer, minimum: 0 }
+        costMinor: { type: integer, minimum: 0 }
+        quantityOnHand: { type: integer, minimum: 0, default: 0 }
+        reorderThreshold: { type: integer, minimum: 0 }
+        imageUrls: { type: array, items: { type: string, format: uri } }
+        shopifyProductId: { type: string }
+        shopifyVariantId: { type: string }
+        active: { type: boolean, default: true }
+    ProductUpdate:
+      type: object
+      properties:
+        sku: { type: string }
+        nameEn: { type: string }
+        nameAr: { type: string }
+        descriptionEn: { type: string }
+        descriptionAr: { type: string }
+        category: { type: string }
+        salePriceMinor: { type: integer, minimum: 0 }
+        costMinor: { type: integer, minimum: 0 }
+        reorderThreshold: { type: integer, minimum: 0 }
+        imageUrls: { type: array, items: { type: string, format: uri } }
+        shopifyProductId: { type: string }
+        shopifyVariantId: { type: string }
+        active: { type: boolean }
+    InventoryMovementType:
+      type: string
+      enum: [purchase, sale, return, damage, adjustment]
+    InventoryMovement:
+      type: object
+      required: [id, productId, type, quantity, quantityBefore, quantityAfter, createdAt]
+      properties:
+        id: { type: integer }
+        productId: { type: integer }
+        type: { $ref: "#/components/schemas/InventoryMovementType" }
+        quantity: { type: integer }
+        quantityBefore: { type: integer }
+        quantityAfter: { type: integer }
+        note: { type: ["string", "null"] }
+        orderId: { type: ["integer", "null"] }
+        createdByStaffId: { type: ["integer", "null"] }
+        createdAt: { type: string, format: date-time }
+    InventoryMovementInput:
+      type: object
+      required: [productId, type, quantity]
+      properties:
+        productId: { type: integer }
+        type: { $ref: "#/components/schemas/InventoryMovementType" }
+        quantity: { type: integer }
+        note: { type: string }
+        orderId: { type: integer }
+    OrderStatus:
+      type: string
+      enum: [pending, confirmed, processing, completed, cancelled, returned]
+    PaymentMethod:
+      type: string
+      enum: [cod, shopify, electronic]
+    OrderItemInput:
+      type: object
+      required: [productId, quantity]
+      properties:
+        productId: { type: integer }
+        quantity: { type: integer, minimum: 1 }
+        unitPriceMinor: { type: integer, minimum: 0 }
+    OrderItem:
+      type: object
+      required: [id, orderId, productId, quantity, unitPriceMinor, unitCostMinor]
+      properties:
+        id: { type: integer }
+        orderId: { type: integer }
+        productId: { type: integer }
+        quantity: { type: integer }
+        unitPriceMinor: { type: integer }
+        unitCostMinor: { type: integer }
+    OrderInput:
+      type: object
+      required: [customerName, paymentMethod, items]
+      properties:
+        customerName: { type: string, minLength: 1 }
+        customerPhone: { type: string }
+        customerAddress: { type: string }
+        paymentMethod: { $ref: "#/components/schemas/PaymentMethod" }
+        shippingMinor: { type: integer, minimum: 0, default: 0 }
+        status: { $ref: "#/components/schemas/OrderStatus" }
+        items: { type: array, minItems: 1, items: { $ref: "#/components/schemas/OrderItemInput" } }
+    OrderStatusUpdate:
+      type: object
+      required: [status]
+      properties:
+        status: { $ref: "#/components/schemas/OrderStatus" }
+    Order:
+      type: object
+      required: [id, orderNumber, status, paymentMethod, customerName, subtotalMinor, shippingMinor, totalMinor, createdAt, updatedAt, items]
+      properties:
+        id: { type: integer }
+        orderNumber: { type: string }
+        status: { $ref: "#/components/schemas/OrderStatus" }
+        paymentMethod: { $ref: "#/components/schemas/PaymentMethod" }
+        customerName: { type: string }
+        customerPhone: { type: ["string", "null"] }
+        customerAddress: { type: ["string", "null"] }
+        subtotalMinor: { type: integer }
+        shippingMinor: { type: integer }
+        totalMinor: { type: integer }
+        shopifyOrderId: { type: ["string", "null"] }
+        createdByStaffId: { type: ["integer", "null"] }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+        items: { type: array, items: { $ref: "#/components/schemas/OrderItem" } }
+    Expense:
+      type: object
+      required: [id, description, category, amountMinor, expenseDate, createdAt, updatedAt]
+      properties:
+        id: { type: integer }
+        description: { type: string }
+        category: { type: string }
+        amountMinor: { type: integer }
+        expenseDate: { type: string, format: date }
+        createdByStaffId: { type: ["integer", "null"] }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    ExpenseInput:
+      type: object
+      required: [description, category, amountMinor, expenseDate]
+      properties:
+        description: { type: string, minLength: 1 }
+        category: { type: string, minLength: 1 }
+        amountMinor: { type: integer, minimum: 0 }
+        expenseDate: { type: string, format: date }
+    AuditLog:
+      type: object
+      required: [id, action, entityType, metadata, createdAt]
+      properties:
+        id: { type: integer }
+        actorStaffId: { type: ["integer", "null"] }
+        action: { type: string }
+        entityType: { type: string }
+        entityId: { type: ["string", "null"] }
+        metadata: { type: object, additionalProperties: true }
+        createdAt: { type: string, format: date-time }
+    DashboardSummary:
+      type: object
+      required: [revenueMinor, cogsMinor, expensesMinor, profitMinor, lowStockCount, orderCounts, recentMovements]
+      properties:
+        revenueMinor: { type: integer }
+        cogsMinor: { type: integer }
+        expensesMinor: { type: integer }
+        profitMinor: { type: integer }
+        lowStockCount: { type: integer }
+        orderCounts: { type: object, additionalProperties: { type: integer } }
+        recentMovements: { type: array, items: { $ref: "#/components/schemas/InventoryMovement" } }
+    SyncResult:
+      type: object
+      required: [syncedProducts, syncedOrders]
+      properties:
+        syncedProducts: { type: integer }
+        syncedOrders: { type: integer }
