@@ -1,13 +1,11 @@
-import { BookOpen, ClipboardList, FileBarChart, Landmark, PackageSearch, Plus, Save } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { BookOpen, ClipboardList, FileBarChart, Landmark, PackageSearch, Plus, X } from "lucide-react";
+import { useMemo, useState } from "react";
 import {
   useCreateAccount,
-  useCreateJournalEntry,
   useListAccounts,
   useListJournalEntries,
   useListInventoryMovements,
   type AccountType,
-  type JournalEntryInput,
 } from "@workspace/api-client-react";
 import { queryClient } from "@/lib/queryClient";
 import {
@@ -15,7 +13,6 @@ import {
   EmptyState,
   ErrorState,
   Field,
-  getErrorMessage,
   inputClass,
   LoadingState,
   money,
@@ -23,7 +20,6 @@ import {
   Panel,
   PanelTitle,
   quietButtonClass,
-  Toast,
   useAdmin,
 } from "@/components/admin/AdminUI";
 
@@ -47,85 +43,6 @@ function nextChildCode<T extends { id: number; code: string; parentId?: number |
   const parentCode = parentAccount?.code ?? "1000";
   const children = accounts.filter((account) => account.parentId === parentId).map((account) => Number(account.code)).filter(Number.isFinite);
   return String(Math.max(Number(parentCode), ...children) + 1);
-}
-
-type AccountPickerOption = { id: number; code: string; nameEn: string; nameAr: string };
-
-function AccountPicker({
-  id,
-  accounts,
-  value,
-  language,
-  onChange,
-}: {
-  id: string;
-  accounts: AccountPickerOption[];
-  value: string;
-  language: "en" | "ar";
-  onChange: (accountId: string) => void;
-}) {
-  const isAr = language === "ar";
-  const [text, setText] = useState("");
-  const [open, setOpen] = useState(false);
-
-  useEffect(() => {
-    const selected = accounts.find((account) => String(account.id) === value);
-    if (selected) setText(`${selected.code} · ${isAr ? selected.nameAr || selected.nameEn : selected.nameEn}`);
-    if (!value) setText("");
-  }, [accounts, isAr, value]);
-
-  const filteredAccounts = useMemo(() => {
-    const query = text.trim().toLocaleLowerCase();
-    if (!query) return accounts.slice(0, 12);
-    return accounts.filter((account) => [account.code, account.nameEn, account.nameAr].some((option) => option.toLocaleLowerCase().includes(query))).slice(0, 12);
-  }, [accounts, text]);
-
-  function handleChange(nextText: string) {
-    setText(nextText);
-    setOpen(true);
-    const normalized = nextText.trim().toLocaleLowerCase();
-    const selected = accounts.find((account) => [
-      account.code,
-      account.nameEn,
-      account.nameAr,
-      `${account.code} · ${account.nameEn}`,
-      `${account.code} · ${account.nameAr}`,
-    ].some((option) => option.trim().toLocaleLowerCase() === normalized));
-    onChange(selected ? String(selected.id) : "");
-  }
-
-  function selectAccount(account: AccountPickerOption) {
-    setText(`${account.code} · ${isAr ? account.nameAr || account.nameEn : account.nameEn}`);
-    onChange(String(account.id));
-    setOpen(false);
-  }
-
-  return <div className="relative grid gap-2">
-    <input
-      id={id}
-      className={inputClass}
-      required
-      value={text}
-      onChange={(event) => handleChange(event.target.value)}
-      onFocus={() => setOpen(true)}
-      onBlur={() => window.setTimeout(() => setOpen(false), 150)}
-      placeholder={isAr ? "اكتب اسم الحساب أو رمزه" : "Type an account name or code"}
-      autoComplete="off"
-    />
-    {open && <div className="absolute inset-x-0 top-11 z-30 max-h-60 overflow-y-auto border border-border bg-card p-1 shadow-xl">
-      {filteredAccounts.length > 0 ? filteredAccounts.map((account) => <button
-        key={account.id}
-        type="button"
-        className="flex w-full items-start justify-between gap-3 px-3 py-2 text-start text-sm transition hover:bg-muted"
-        onMouseDown={(event) => event.preventDefault()}
-        onClick={() => selectAccount(account)}
-      >
-        <span><span className="font-mono-ui text-xs text-primary">{account.code}</span><span className="ms-2">{isAr ? account.nameAr || account.nameEn : account.nameEn}</span></span>
-        <span className="text-[10px] text-muted-foreground">{isAr ? account.nameEn : account.nameAr}</span>
-      </button>) : <p className="px-3 py-3 text-xs text-muted-foreground">{isAr ? "لا يوجد حساب مطابق." : "No matching account."}</p>}
-    </div>}
-    {text && !value && <span className="text-xs text-destructive">{isAr ? "اختر حسابًا موجودًا من الاقتراحات." : "Choose an existing account from the suggestions."}</span>}
-  </div>;
 }
 
 export default function Accounting() {
