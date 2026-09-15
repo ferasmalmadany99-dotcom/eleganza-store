@@ -126,8 +126,8 @@ export function EmptyState({ title, detail, icon = <Search className="h-5 w-5" /
   return <div className="flex min-h-44 flex-col items-center justify-center gap-3 border border-dashed border-border p-6 text-center text-muted-foreground"><span className="text-primary">{icon}</span><p className="font-medium text-foreground">{title}</p><p className="max-w-sm text-sm">{detail}</p></div>;
 }
 
-export function Field({ label, children, hint }: { label: string; children: React.ReactNode; hint?: string }) {
-  return <label className="grid gap-2 text-sm"><span className="font-medium text-foreground">{label}</span>{children}{hint && <span className="text-xs text-muted-foreground">{hint}</span>}</label>;
+export function Field({ label, children, hint, labelClassName = "" }: { label: string; children: React.ReactNode; hint?: string; labelClassName?: string }) {
+  return <label className="grid gap-2 text-sm"><span className={`font-medium text-foreground ${labelClassName}`}>{label}</span>{children}{hint && <span className="text-xs text-muted-foreground">{hint}</span>}</label>;
 }
 
 export const inputClass = "h-10 w-full border border-input bg-background px-3 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15";
