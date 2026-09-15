@@ -116,6 +116,20 @@ export interface ProductUpdate {
   active?: boolean;
 }
 
+export type ProductReportSummary = {
+  movementCount: number;
+  purchaseQuantity: number;
+  purchaseCostMinor: number;
+  returnQuantity: number;
+  saleQuantity: number;
+  damageQuantity: number;
+  adjustmentQuantity: number;
+  inboundQuantity: number;
+  outboundQuantity: number;
+  weightedAverageCostMinor: number;
+  currentInventoryValueMinor: number;
+};
+
 export type InventoryMovementType = typeof InventoryMovementType[keyof typeof InventoryMovementType];
 
 
@@ -150,6 +164,12 @@ export interface InventoryMovement {
   /** @nullable */
   createdByStaffId?: number | null;
   createdAt: string;
+}
+
+export interface ProductReport {
+  product: Product;
+  summary: ProductReportSummary;
+  movements: InventoryMovement[];
 }
 
 export interface InventoryMovementInput {

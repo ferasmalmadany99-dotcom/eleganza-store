@@ -211,6 +211,68 @@ export const UpdateProductResponse = zod.object({
 
 
 /**
+ * @summary Get a product inventory report
+ */
+export const GetProductReportParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const getProductReportResponseMovementsItemUnitCostMinorMin = 0;
+
+
+
+export const GetProductReportResponse = zod.object({
+  "product": zod.object({
+  "id": zod.number().int(),
+  "sku": zod.string(),
+  "nameEn": zod.string(),
+  "nameAr": zod.string(),
+  "descriptionEn": zod.string().nullish(),
+  "descriptionAr": zod.string().nullish(),
+  "category": zod.string(),
+  "salePriceMinor": zod.number().int(),
+  "costMinor": zod.number().int(),
+  "quantityOnHand": zod.number().int(),
+  "reorderThreshold": zod.number().int(),
+  "imageUrls": zod.array(zod.string()),
+  "shopifyProductId": zod.string().nullish(),
+  "shopifyVariantId": zod.string().nullish(),
+  "active": zod.boolean(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+}),
+  "summary": zod.object({
+  "movementCount": zod.number().int(),
+  "purchaseQuantity": zod.number().int(),
+  "purchaseCostMinor": zod.number().int(),
+  "returnQuantity": zod.number().int(),
+  "saleQuantity": zod.number().int(),
+  "damageQuantity": zod.number().int(),
+  "adjustmentQuantity": zod.number().int(),
+  "inboundQuantity": zod.number().int(),
+  "outboundQuantity": zod.number().int(),
+  "weightedAverageCostMinor": zod.number().int(),
+  "currentInventoryValueMinor": zod.number().int()
+}),
+  "movements": zod.array(zod.object({
+  "id": zod.number().int(),
+  "productId": zod.number().int(),
+  "productNameEn": zod.string().nullish(),
+  "productNameAr": zod.string().nullish(),
+  "type": zod.enum(['purchase', 'sale', 'return', 'damage', 'adjustment']),
+  "quantity": zod.number().int(),
+  "unitCostMinor": zod.number().int().min(getProductReportResponseMovementsItemUnitCostMinorMin).nullish(),
+  "quantityBefore": zod.number().int(),
+  "quantityAfter": zod.number().int(),
+  "note": zod.string().nullish(),
+  "orderId": zod.number().int().nullish(),
+  "createdByStaffId": zod.number().int().nullish(),
+  "createdAt": zod.coerce.date()
+}))
+})
+
+
+/**
  * @summary List inventory movements
  */
 export const listInventoryMovementsQueryLimitDefault = 50;

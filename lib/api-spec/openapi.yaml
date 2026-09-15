@@ -111,6 +111,21 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Product" }
+  /products/{id}/report:
+    get:
+      operationId: getProductReport
+      tags: [products]
+      summary: Get a product inventory report
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "200":
+          description: Product inventory report
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ProductReport" }
+        "404":
+          description: Product not found
   /inventory/movements:
     get:
       operationId: listInventoryMovements
@@ -484,6 +499,29 @@ components:
         shopifyProductId: { type: string }
         shopifyVariantId: { type: string }
         active: { type: boolean }
+    ProductReport:
+      type: object
+      required: [product, summary, movements]
+      properties:
+        product: { $ref: "#/components/schemas/Product" }
+        summary:
+          type: object
+          required: [movementCount, purchaseQuantity, purchaseCostMinor, returnQuantity, saleQuantity, damageQuantity, adjustmentQuantity, inboundQuantity, outboundQuantity, weightedAverageCostMinor, currentInventoryValueMinor]
+          properties:
+            movementCount: { type: integer }
+            purchaseQuantity: { type: integer }
+            purchaseCostMinor: { type: integer }
+            returnQuantity: { type: integer }
+            saleQuantity: { type: integer }
+            damageQuantity: { type: integer }
+            adjustmentQuantity: { type: integer }
+            inboundQuantity: { type: integer }
+            outboundQuantity: { type: integer }
+            weightedAverageCostMinor: { type: integer }
+            currentInventoryValueMinor: { type: integer }
+        movements:
+          type: array
+          items: { $ref: "#/components/schemas/InventoryMovement" }
     InventoryMovementType:
       type: string
       enum: [purchase, sale, return, damage, adjustment]

@@ -1,9 +1,11 @@
 import { Router, type IRouter } from "express";
 import { and, desc, eq, ilike } from "drizzle-orm";
-import { db, productsTable } from "@workspace/db";
+import { db, inventoryMovementsTable, productsTable } from "@workspace/db";
 import {
   CreateProductBody,
   CreateProductResponse,
+  GetProductReportParams,
+  GetProductReportResponse,
   ListProductsQueryParams,
   ListProductsResponse,
   UpdateProductBody,
@@ -26,6 +28,81 @@ router.get("/products", requireAuth, async (req, res): Promise<void> => {
     .orderBy(desc(productsTable.createdAt))
     .limit(query.data.limit).offset(query.data.offset);
   res.json(ListProductsResponse.parse(products));
+});
+
+router.get("/products/:id/report", requireAuth, async (req, res): Promise<void> => {
+  const params = GetProductReportParams.safeParse(req.params);
+  if (!params.success) { res.status(400).json({ error: params.error.message }); return; }
+
+  const [product] = await db.select().from(productsTable).where(eq(productsTable.id, params.data.id)).limit(1);
+  if (!product) { res.status(404).json({ error: "Product not found" }); return; }
+
+  const movementRows = await db.select().from(inventoryMovementsTable)
+    .where(eq(inventoryMovementsTable.productId, product.id))
+    .orderBy(desc(inventoryMovementsTable.createdAt), desc(inventoryMovementsTable.id));
+  const movements = movementRows.map((movement) => ({
+    ...movement,
+    productNameEn: product.nameEn,
+    productNameAr: product.nameAr,
+  }));
+
+  let purchaseQuantity = 0;
+  let purchaseCostMinor = 0;
+  let returnQuantity = 0;
+  let saleQuantity = 0;
+  let damageQuantity = 0;
+  let adjustmentQuantity = 0;
+  let inboundQuantity = 0;
+  let outboundQuantity = 0;
+  let weightedCostTotalMinor = 0;
+  let weightedCostQuantity = 0;
+
+  for (const movement of movementRows) {
+    const quantity = Math.abs(movement.quantity);
+    if (movement.type === "purchase") {
+      purchaseQuantity += quantity;
+      purchaseCostMinor += quantity * (movement.unitCostMinor ?? product.costMinor);
+      inboundQuantity += quantity;
+      weightedCostTotalMinor += quantity * (movement.unitCostMinor ?? product.costMinor);
+      weightedCostQuantity += quantity;
+    } else if (movement.type === "return") {
+      returnQuantity += quantity;
+      inboundQuantity += quantity;
+      weightedCostTotalMinor += quantity * (movement.unitCostMinor ?? product.costMinor);
+      weightedCostQuantity += quantity;
+    } else if (movement.type === "sale") {
+      saleQuantity += quantity;
+      outboundQuantity += quantity;
+    } else if (movement.type === "damage") {
+      damageQuantity += quantity;
+      outboundQuantity += quantity;
+    } else if (movement.type === "adjustment") {
+      adjustmentQuantity += movement.quantity;
+      if (movement.quantity > 0) inboundQuantity += movement.quantity;
+      else outboundQuantity += Math.abs(movement.quantity);
+    }
+  }
+
+  const report = {
+    product,
+    summary: {
+      movementCount: movementRows.length,
+      purchaseQuantity,
+      purchaseCostMinor,
+      returnQuantity,
+      saleQuantity,
+      damageQuantity,
+      adjustmentQuantity,
+      inboundQuantity,
+      outboundQuantity,
+      weightedAverageCostMinor: weightedCostQuantity > 0
+        ? Math.round(weightedCostTotalMinor / weightedCostQuantity)
+        : product.costMinor,
+      currentInventoryValueMinor: product.quantityOnHand * product.costMinor,
+    },
+    movements,
+  };
+  res.json(GetProductReportResponse.parse(report));
 });
 
 router.post("/products", requireAuth, requireManager, async (req, res): Promise<void> => {
