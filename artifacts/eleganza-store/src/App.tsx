@@ -979,7 +979,7 @@ function App() {
       const existing = current.find((item) => item.id === product.id);
       return existing ? current.map((item) => item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item) : [...current, { ...product, quantity: 1 }];
     });
-    notify(`${product.name} added to your bag`);
+    notify(language === 'ar' ? `تمت إضافة ${product.name} إلى السلة بنجاح` : `${product.name} was added to your bag`);
   };
   const updateQuantity = (id: string, amount: number) => setBag((current) => current.flatMap((item) => item.id === id ? (item.quantity + amount > 0 ? [{ ...item, quantity: item.quantity + amount }] : []) : [item]));
   const jumpToShop = () => document.getElementById('shop')?.scrollIntoView({ behavior: 'smooth' });
@@ -1039,7 +1039,7 @@ function App() {
         </div>
       </footer>
 
-      {notice && <div className="fixed bottom-5 left-1/2 z-[60] -translate-x-1/2 bg-[#312b25] px-5 py-3 font-mono-ui text-[10px] uppercase tracking-[.12em] text-[#f8f0e6] shadow-xl" role="status" data-testid="status-notice"><Sparkles size={13} className="mr-2 inline-block text-[#d18c6d]" />{notice}</div>}
+      {notice && <div className="fixed bottom-6 left-1/2 z-[60] flex w-[calc(100%-2rem)] max-w-md -translate-x-1/2 items-center justify-center gap-3 bg-[#312b25] px-6 py-4 text-center text-sm font-medium leading-6 text-[#fff8ed] shadow-2xl sm:w-auto sm:min-w-[360px] sm:text-base" role="status" aria-live="polite" data-testid="status-notice"><Sparkles size={18} className="shrink-0 text-[#d18c6d]" />{notice}</div>}
       {bagOpen && <BagDrawer items={bag} language={language} c={c} onClose={() => setBagOpen(false)} onUpdate={updateQuantity} onRemove={(id) => setBag((current) => current.filter((item) => item.id !== id))} onCheckout={() => notify(language === 'ar' ? 'يتم تجهيز صفحة الدفع لك' : 'Checkout is being prepared for you')} />}
       {searchOpen && <SearchPanel products={products} c={c} language={language} onClose={() => setSearchOpen(false)} onSelect={(product) => { setSearchOpen(false); setSelectedProduct(product); }} />}
       {selectedProduct && <ProductDetail product={selectedProduct} language={language} c={c} favorite={favorites.includes(selectedProduct.id)} onFavorite={() => toggleFavorite(selectedProduct.id)} onAdd={() => { addToBag(selectedProduct); setSelectedProduct(null); }} onClose={() => setSelectedProduct(null)} />}
