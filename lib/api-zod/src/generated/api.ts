@@ -34,6 +34,10 @@ export const GetSessionResponse = zod.object({
 /**
  * @summary Dashboard KPI summary
  */
+export const getDashboardSummaryResponseRecentMovementsItemUnitCostMinorMin = 0;
+
+
+
 export const GetDashboardSummaryResponse = zod.object({
   "revenueMinor": zod.number().int(),
   "cogsMinor": zod.number().int(),
@@ -48,6 +52,7 @@ export const GetDashboardSummaryResponse = zod.object({
   "productNameAr": zod.string().nullish(),
   "type": zod.enum(['purchase', 'sale', 'return', 'damage', 'adjustment']),
   "quantity": zod.number().int(),
+  "unitCostMinor": zod.number().int().min(getDashboardSummaryResponseRecentMovementsItemUnitCostMinorMin).nullish(),
   "quantityBefore": zod.number().int(),
   "quantityAfter": zod.number().int(),
   "note": zod.string().nullish(),
@@ -222,6 +227,10 @@ export const ListInventoryMovementsQueryParams = zod.object({
   "productId": zod.coerce.number().int().optional()
 })
 
+export const listInventoryMovementsResponseUnitCostMinorMin = 0;
+
+
+
 export const ListInventoryMovementsResponseItem = zod.object({
   "id": zod.number().int(),
   "productId": zod.number().int(),
@@ -229,6 +238,7 @@ export const ListInventoryMovementsResponseItem = zod.object({
   "productNameAr": zod.string().nullish(),
   "type": zod.enum(['purchase', 'sale', 'return', 'damage', 'adjustment']),
   "quantity": zod.number().int(),
+  "unitCostMinor": zod.number().int().min(listInventoryMovementsResponseUnitCostMinorMin).nullish(),
   "quantityBefore": zod.number().int(),
   "quantityAfter": zod.number().int(),
   "note": zod.string().nullish(),
@@ -242,13 +252,22 @@ export const ListInventoryMovementsResponse = zod.array(ListInventoryMovementsRe
 /**
  * @summary Record an inventory movement
  */
+export const createInventoryMovementBodyUnitCostMinorMin = 0;
+
+
+
 export const CreateInventoryMovementBody = zod.object({
   "productId": zod.number().int(),
   "type": zod.enum(['purchase', 'sale', 'return', 'damage', 'adjustment']),
   "quantity": zod.number().int(),
+  "unitCostMinor": zod.number().int().min(createInventoryMovementBodyUnitCostMinorMin).optional(),
   "note": zod.string().optional(),
   "orderId": zod.number().int().optional()
 })
+
+export const createInventoryMovementResponseUnitCostMinorMin = 0;
+
+
 
 export const CreateInventoryMovementResponse = zod.object({
   "id": zod.number().int(),
@@ -257,6 +276,7 @@ export const CreateInventoryMovementResponse = zod.object({
   "productNameAr": zod.string().nullish(),
   "type": zod.enum(['purchase', 'sale', 'return', 'damage', 'adjustment']),
   "quantity": zod.number().int(),
+  "unitCostMinor": zod.number().int().min(createInventoryMovementResponseUnitCostMinorMin).nullish(),
   "quantityBefore": zod.number().int(),
   "quantityAfter": zod.number().int(),
   "note": zod.string().nullish(),

@@ -497,6 +497,7 @@ components:
         productNameAr: { type: ["string", "null"] }
         type: { $ref: "#/components/schemas/InventoryMovementType" }
         quantity: { type: integer }
+        unitCostMinor: { type: ["integer", "null"], minimum: 0 }
         quantityBefore: { type: integer }
         quantityAfter: { type: integer }
         note: { type: ["string", "null"] }
@@ -510,6 +511,7 @@ components:
         productId: { type: integer }
         type: { $ref: "#/components/schemas/InventoryMovementType" }
         quantity: { type: integer }
+        unitCostMinor: { type: integer, minimum: 0 }
         note: { type: string }
         orderId: { type: integer }
     AccountType:

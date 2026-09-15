@@ -44,10 +44,17 @@ router.post("/inventory/movements", requireInventory, async (req, res): Promise<
       : parsed.data.type === "adjustment" ? parsed.data.quantity : -Math.abs(parsed.data.quantity);
     const after = product.quantityOnHand + delta;
     if (after < 0 && parsed.data.type !== "adjustment") throw new Error("NEGATIVE_STOCK");
-    const [updated] = await tx.update(productsTable).set({ quantityOnHand: after })
+      const unitCostMinor = parsed.data.unitCostMinor ?? product.costMinor;
+      const [updated] = await tx.update(productsTable).set({
+        quantityOnHand: after,
+        ...(parsed.data.type === "purchase" && parsed.data.unitCostMinor !== undefined
+          ? { costMinor: parsed.data.unitCostMinor }
+          : {}),
+      })
       .where(eq(productsTable.id, product.id)).returning();
     const [created] = await tx.insert(inventoryMovementsTable).values({
       productId: product.id, type: parsed.data.type, quantity: delta,
+        unitCostMinor,
       quantityBefore: product.quantityOnHand, quantityAfter: after,
       note: parsed.data.note, orderId: parsed.data.orderId, createdByStaffId: req.staff?.id,
     }).returning();

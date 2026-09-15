@@ -151,6 +151,7 @@ export async function postInventoryJournal(input: {
   id: number;
   type: "purchase" | "sale" | "return" | "damage" | "adjustment";
   quantity: number;
+  unitCostMinor?: number | null;
   productId: number;
   createdAt: Date;
 }, staffId?: number) {
@@ -161,7 +162,7 @@ export async function postInventoryJournal(input: {
   const [product] = await db.select({ costMinor: productsTable.costMinor, nameEn: productsTable.nameEn })
     .from(productsTable).where(eq(productsTable.id, input.productId)).limit(1);
   if (!product || product.costMinor <= 0) return;
-  const amount = Math.abs(input.quantity) * product.costMinor;
+   const amount = Math.abs(input.quantity) * (input.unitCostMinor ?? product.costMinor);
   await ensureDefaultAccounts();
   const inventory = await accountId("1200");
   const cash = await accountId("1000");

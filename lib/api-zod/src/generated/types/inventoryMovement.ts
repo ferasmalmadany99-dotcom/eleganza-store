@@ -16,6 +16,11 @@ export interface InventoryMovement {
   productNameAr?: string | null;
   type: InventoryMovementType;
   quantity: number;
+  /**
+     * @minimum 0
+     * @nullable
+     */
+  unitCostMinor?: number | null;
   quantityBefore: number;
   quantityAfter: number;
   /** @nullable */

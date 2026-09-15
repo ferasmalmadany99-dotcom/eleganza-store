@@ -136,6 +136,11 @@ export interface InventoryMovement {
   productNameAr?: string | null;
   type: InventoryMovementType;
   quantity: number;
+  /**
+     * @minimum 0
+     * @nullable
+     */
+  unitCostMinor?: number | null;
   quantityBefore: number;
   quantityAfter: number;
   /** @nullable */
@@ -151,6 +156,8 @@ export interface InventoryMovementInput {
   productId: number;
   type: InventoryMovementType;
   quantity: number;
+  /** @minimum 0 */
+  unitCostMinor?: number;
   note?: string;
   orderId?: number;
 }

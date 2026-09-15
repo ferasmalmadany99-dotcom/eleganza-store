@@ -11,6 +11,7 @@ export const inventoryMovementsTable = pgTable("inventory_movements", {
   productId: integer("product_id").notNull().references(() => productsTable.id),
   type: inventoryMovementTypeEnum("type").notNull(),
   quantity: integer("quantity").notNull(),
+  unitCostMinor: integer("unit_cost_minor"),
   quantityBefore: integer("quantity_before").notNull(),
   quantityAfter: integer("quantity_after").notNull(),
   note: text("note"),

@@ -11,6 +11,8 @@ export interface InventoryMovementInput {
   productId: number;
   type: InventoryMovementType;
   quantity: number;
+  /** @minimum 0 */
+  unitCostMinor?: number;
   note?: string;
   orderId?: number;
 }
