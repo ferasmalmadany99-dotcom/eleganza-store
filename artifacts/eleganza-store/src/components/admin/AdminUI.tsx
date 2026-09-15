@@ -49,11 +49,18 @@ export function money(minor: number, language: AdminLanguage) {
   }).format((minor || 0) / 100);
 }
 
-export function dateLabel(value: string, language: AdminLanguage) {
+export function dateLabel(value: string | Date, language: AdminLanguage) {
+  const rawValue = value instanceof Date ? value : value.trim();
+  const date = rawValue instanceof Date
+    ? rawValue
+    : /^\d{4}-\d{2}-\d{2}$/.test(rawValue)
+      ? new Date(`${rawValue}T12:00:00`)
+      : new Date(rawValue);
+  if (Number.isNaN(date.getTime())) return "—";
   return new Intl.DateTimeFormat(language === "ar" ? "ar-LY" : "en-GB", {
     dateStyle: "medium",
     timeStyle: "short",
-  }).format(new Date(value));
+  }).format(date);
 }
 
 export function getErrorMessage(error: unknown, fallback = "Something went wrong") {
