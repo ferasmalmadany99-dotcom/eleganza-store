@@ -186,16 +186,20 @@ function AccountingSectionPage({ section }: { section: AccountingSection }) {
     return totals;
   }, [journal.data]);
 
-  const cashboxRows = useMemo(() => (accounts.data ?? [])
+  const cashboxRows = useMemo(() => {
+    const cashAccountId = accounts.data?.find((account) => account.code === "1000")?.id;
+    return (accounts.data ?? [])
     .filter((account) => {
       const searchable = `${account.code} ${account.nameEn} ${account.nameAr}`.toLocaleLowerCase();
-      return account.code === "1000" || ["cash", "cashbox", "bank", "vault", "نقد", "خزينة", "مصرف", "بنك"].some((term) => searchable.includes(term));
+      const isCashAccount = account.code === "1000" || account.id === cashAccountId || account.parentId === cashAccountId;
+      return isCashAccount || ["cash", "cashbox", "bank", "vault", "نقد", "خزينة", "مصرف", "بنك"].some((term) => searchable.includes(term));
     })
     .sort(sortAccountsByCode)
     .map((account) => {
       const totals = journalTotals.get(account.id) ?? { debitMinor: 0, creditMinor: 0 };
       return { account, totals, balance: totals.debitMinor - totals.creditMinor };
-    }), [accounts.data, journalTotals]);
+    });
+  }, [accounts.data, journalTotals]);
 
   async function submitNewAccount(event: React.FormEvent) {
     event.preventDefault();
