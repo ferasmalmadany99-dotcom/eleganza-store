@@ -464,14 +464,8 @@ function AccountingJournal() {
             <Field label={isAr ? "البيان" : "Description"}><input className={inputClass} required value={journalForm.description} onChange={(event) => setJournalForm({ ...journalForm, description: event.target.value })} placeholder={isAr ? "بيع عطر أو مصروف تشغيلي" : "Sale or operating expense"} /></Field>
             <Field label={isAr ? "التاريخ" : "Date"}><input className={inputClass} type="date" required value={journalForm.entryDate} onChange={(event) => setJournalForm({ ...journalForm, entryDate: event.target.value })} /></Field>
           </div>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <Field label={isAr ? "اسم حساب المدين" : "Debit account name"}><AccountPicker id="create-debit-account" accounts={accounts.data} value={journalForm.debitAccountId} language={language} onChange={(accountId) => setJournalForm({ ...journalForm, debitAccountId: accountId })} /></Field>
-            <Field label={isAr ? "قيمة المدين بالدينار" : "Debit amount in LYD"}><input className={inputClass} type="number" min="0.01" step="0.01" required value={journalForm.debitAmount} onChange={(event) => setJournalForm({ ...journalForm, debitAmount: event.target.value })} /></Field>
-          </div>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <Field label={isAr ? "اسم حساب الدائن" : "Credit account name"}><AccountPicker id="create-credit-account" accounts={accounts.data} value={journalForm.creditAccountId} language={language} onChange={(accountId) => setJournalForm({ ...journalForm, creditAccountId: accountId })} /></Field>
-            <Field label={isAr ? "قيمة الدائن بالدينار" : "Credit amount in LYD"}><input className={inputClass} type="number" min="0.01" step="0.01" required value={journalForm.creditAmount} onChange={(event) => setJournalForm({ ...journalForm, creditAmount: event.target.value })} /></Field>
-          </div>
+          {journalLineGroup("debit", journalForm.debitLines)}
+          {journalLineGroup("credit", journalForm.creditLines)}
           <Field label={isAr ? "ملاحظة" : "Memo"}><input className={inputClass} value={journalForm.memo} onChange={(event) => setJournalForm({ ...journalForm, memo: event.target.value })} /></Field>
           <div className="flex flex-wrap gap-2">
             <button type="submit" className={buttonClass} disabled={createJournal.isPending}><Save className="h-4 w-4" />{isAr ? "حفظ القيد" : "Save entry"}</button>
