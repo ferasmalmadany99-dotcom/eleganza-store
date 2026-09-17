@@ -65,6 +65,8 @@ function nextChildCode<T extends { id: number; code: string; parentId?: number |
 }
 
 type AccountPickerOption = { id: number; code: string; nameEn: string; nameAr: string };
+type JournalSide = "debit" | "credit";
+type JournalDraftLine = { id: number; accountId: string; amount: string };
 
 function AccountPicker({
   id,
@@ -331,7 +333,8 @@ function AccountingJournal() {
   const [createOpen, setCreateOpen] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [selectedEntryId, setSelectedEntryId] = useState<number | null>(null);
-  const [journalForm, setJournalForm] = useState({ entryDate: new Date().toISOString().slice(0, 10), description: "", debitAccountId: "", creditAccountId: "", debitAmount: "", creditAmount: "", memo: "" });
+  const [journalForm, setJournalForm] = useState({ entryDate: new Date().toISOString().slice(0, 10), description: "", debitLines: [{ id: 1, accountId: "", amount: "" }], creditLines: [{ id: 2, accountId: "", amount: "" }], memo: "" });
+  const [nextLineId, setNextLineId] = useState(3);
   const accountNames = useMemo(() => new Map((accounts.data ?? []).map((account) => [account.id, isAr ? account.nameAr || account.nameEn : account.nameEn])), [accounts.data, isAr]);
   const accountDetails = useMemo(() => new Map((accounts.data ?? []).map((account) => [account.id, account])), [accounts.data]);
   const canWrite = role === "owner" || role === "manager";
@@ -342,21 +345,71 @@ function AccountingJournal() {
   }
 
   function resetJournalForm() {
-    setJournalForm({ entryDate: new Date().toISOString().slice(0, 10), description: "", debitAccountId: "", creditAccountId: "", debitAmount: "", creditAmount: "", memo: "" });
+    setJournalForm({ entryDate: new Date().toISOString().slice(0, 10), description: "", debitLines: [{ id: 1, accountId: "", amount: "" }], creditLines: [{ id: 2, accountId: "", amount: "" }], memo: "" });
+    setNextLineId(3);
+  }
+
+  function addJournalLine(side: JournalSide) {
+    const line = { id: nextLineId, accountId: "", amount: "" };
+    setNextLineId((current) => current + 1);
+    setJournalForm((current) => side === "debit"
+      ? { ...current, debitLines: [...current.debitLines, line] }
+      : { ...current, creditLines: [...current.creditLines, line] });
+  }
+
+  function updateJournalLine(side: JournalSide, lineId: number, changes: Partial<JournalDraftLine>) {
+    setJournalForm((current) => {
+      const lines = side === "debit" ? current.debitLines : current.creditLines;
+      const updatedLines = lines.map((line) => line.id === lineId ? { ...line, ...changes } : line);
+      return side === "debit" ? { ...current, debitLines: updatedLines } : { ...current, creditLines: updatedLines };
+    });
+  }
+
+  function removeJournalLine(side: JournalSide, lineId: number) {
+    setJournalForm((current) => {
+      const lines = side === "debit" ? current.debitLines : current.creditLines;
+      if (lines.length === 1) return current;
+      const remainingLines = lines.filter((line) => line.id !== lineId);
+      return side === "debit" ? { ...current, debitLines: remainingLines } : { ...current, creditLines: remainingLines };
+    });
+  }
+
+  function journalLineGroup(side: JournalSide, lines: JournalDraftLine[]) {
+    const isDebit = side === "debit";
+    return <div className="grid gap-3 border border-border p-3">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-sm font-medium">{isDebit ? (isAr ? "صفوف المدين" : "Debit lines") : (isAr ? "صفوف الدائن" : "Credit lines")}</p>
+        <button type="button" className={quietButtonClass} onClick={() => addJournalLine(side)}><Plus className="h-4 w-4" />{isDebit ? (isAr ? "إضافة صف مدين" : "Add debit line") : (isAr ? "إضافة صف دائن" : "Add credit line")}</button>
+      </div>
+      {lines.map((line, index) => <div key={line.id} className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] sm:items-end">
+        <Field label={`${isDebit ? (isAr ? "اسم حساب المدين" : "Debit account name") : (isAr ? "اسم حساب الدائن" : "Credit account name")} ${lines.length > 1 ? index + 1 : ""}`}>
+          <AccountPicker id={`create-${side}-account-${line.id}`} accounts={accounts.data ?? []} value={line.accountId} language={language} onChange={(accountId) => updateJournalLine(side, line.id, { accountId })} />
+        </Field>
+        <Field label={`${isDebit ? (isAr ? "قيمة المدين بالدينار" : "Debit amount in LYD") : (isAr ? "قيمة الدائن بالدينار" : "Credit amount in LYD")} ${lines.length > 1 ? index + 1 : ""}`}>
+          <input className={inputClass} type="number" min="0.01" step="0.01" required value={line.amount} onChange={(event) => updateJournalLine(side, line.id, { amount: event.target.value })} />
+        </Field>
+        {lines.length > 1 && <button type="button" className={`${quietButtonClass} sm:mb-0`} aria-label={isAr ? "حذف الصف" : "Remove line"} onClick={() => removeJournalLine(side, line.id)}><X className="h-4 w-4" /></button>}
+      </div>)}
+    </div>;
   }
 
   async function submitJournal(event: React.FormEvent) {
     event.preventDefault();
-    if (!journalForm.debitAccountId || !journalForm.creditAccountId) {
-      setMessage(isAr ? "اختر حسابًا صحيحًا للمدين والدائن" : "Choose a valid debit and credit account");
+    const draftLines = [
+      ...journalForm.debitLines.map((line) => ({ ...line, side: "debit" as const })),
+      ...journalForm.creditLines.map((line) => ({ ...line, side: "credit" as const })),
+    ];
+    if (draftLines.some((line) => !line.accountId)) {
+      setMessage(isAr ? "اختر حسابًا صحيحًا لكل صف مدين ودائن" : "Choose a valid account for every debit and credit line");
       return;
     }
-    const debitMinor = Math.round(Number(journalForm.debitAmount) * 100);
-    const creditMinor = Math.round(Number(journalForm.creditAmount) * 100);
-    if (!Number.isFinite(debitMinor) || !Number.isFinite(creditMinor) || debitMinor <= 0 || creditMinor <= 0) {
-      setMessage(isAr ? "أدخل مبلغًا صحيحًا أكبر من صفر للمدين والدائن" : "Enter valid amounts greater than zero for debit and credit");
+    const parsedLines = draftLines.map((line) => ({ ...line, amountMinor: Math.round(Number(line.amount) * 100) }));
+    if (parsedLines.some((line) => !Number.isFinite(line.amountMinor) || line.amountMinor <= 0)) {
+      setMessage(isAr ? "أدخل مبلغًا صحيحًا أكبر من صفر لكل صف مدين ودائن" : "Enter valid amounts greater than zero for every debit and credit line");
       return;
     }
+    const debitMinor = parsedLines.filter((line) => line.side === "debit").reduce((total, line) => total + line.amountMinor, 0);
+    const creditMinor = parsedLines.filter((line) => line.side === "credit").reduce((total, line) => total + line.amountMinor, 0);
     if (debitMinor !== creditMinor) {
       setMessage(isAr ? "القيد غير متوازن: يجب أن يساوي المدين الدائن" : "Journal entry is unbalanced: debit must equal credit");
       return;
@@ -365,8 +418,11 @@ function AccountingJournal() {
       entryDate: journalForm.entryDate,
       description: journalForm.description,
       lines: [
-        { accountId: Number(journalForm.debitAccountId), debitMinor, memo: journalForm.memo || undefined },
-        { accountId: Number(journalForm.creditAccountId), creditMinor, memo: journalForm.memo || undefined },
+        ...parsedLines.map((line) => ({
+          accountId: Number(line.accountId),
+          ...(line.side === "debit" ? { debitMinor: line.amountMinor } : { creditMinor: line.amountMinor }),
+          memo: journalForm.memo || undefined,
+        })),
       ],
     };
     try {
