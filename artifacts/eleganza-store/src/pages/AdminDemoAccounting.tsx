@@ -87,7 +87,7 @@ export default function AdminDemoAccounting() {
           <span className="border border-primary/30 px-3 py-2 text-[10px] uppercase tracking-[.13em] text-primary">{isAr ? "بيانات تجريبية" : "Sample data"}</span>
         </header>
         <div className="mx-auto max-w-[1500px] p-5 lg:p-10">
-          <div className="mb-8 border border-primary/25 bg-primary/5 px-5 py-4"><p className="font-mono-ui text-[10px] uppercase tracking-[.2em] text-primary">{isAr ? "مركز المحاسبة" : "Accounting centre"}</p><h1 className="mt-2 font-display text-5xl leading-none">{isAr ? active.arabic : active.label}</h1><p className="mt-3 text-sm text-muted-foreground">{isAr ? "اختر قسمًا من القائمة الجانبية لإدارة ومراجعة البيانات المالية." : "Choose a section from the accounting sidebar to review financial data."}</p></div>
+          <div className="mb-8 rounded-2xl border border-primary/25 bg-primary/5 px-5 py-4"><p className="font-mono-ui text-[10px] uppercase tracking-[.2em] text-primary">{isAr ? "مركز المحاسبة" : "Accounting centre"}</p><h1 className="mt-2 font-display text-5xl leading-none">{isAr ? active.arabic : active.label}</h1><p className="mt-3 text-sm text-muted-foreground">{isAr ? "اختر قسمًا من القائمة الجانبية لإدارة ومراجعة البيانات المالية." : "Choose a section from the accounting sidebar to review financial data."}</p></div>
           {section === "journal" && <JournalSection isAr={isAr} />}
           {section === "chart" && <ChartSection isAr={isAr} accounts={accounts} setAccounts={setAccounts} />}
           {section === "ledger" && <LedgerSection isAr={isAr} />}

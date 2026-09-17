@@ -383,7 +383,7 @@ function AccountingJournal() {
       {journal.data && journal.data.length > 0 && <div className="grid gap-2">{journal.data.map((entry) => <article key={entry.id} className="grid gap-4 border-b border-border p-4 last:border-0 sm:grid-cols-[1fr_auto_auto] sm:items-center"><div><div className="flex flex-wrap items-center gap-3"><span className="font-mono-ui text-xs text-primary">{entry.entryNumber}</span><span className="text-xs text-muted-foreground">{entry.entryDate}</span></div><p className="mt-2 font-medium">{entry.description}</p><p className="mt-1 text-xs text-muted-foreground">{entry.referenceType ?? (isAr ? "قيد يدوي" : "Manual entry")}</p></div><div className="sm:text-end"><p className="text-[10px] uppercase tracking-[.14em] text-muted-foreground">{isAr ? "القيمة" : "Amount"}</p><p className="mt-1 font-display text-2xl">{money(entryAmount(entry), language)}</p></div><button type="button" className={quietButtonClass} onClick={() => setSelectedEntryId(entry.id)}>{isAr ? "عرض" : "View"}</button></article>)}</div>}
     </Panel>
     {createOpen && <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 p-4" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setCreateOpen(false); }}>
-      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto border border-border bg-card p-5 shadow-2xl" role="dialog" aria-modal="true" aria-labelledby="create-journal-dialog-title">
+      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-border bg-card p-5 shadow-2xl" role="dialog" aria-modal="true" aria-labelledby="create-journal-dialog-title">
         <div className="flex items-start justify-between gap-4 border-b border-border pb-4">
           <div><p className="font-mono-ui text-[10px] uppercase tracking-[.16em] text-primary">{isAr ? "قيد يومية جديد" : "New journal entry"}</p><h2 id="create-journal-dialog-title" className="mt-2 font-display text-2xl">{isAr ? "إنشاء قيد" : "Create journal entry"}</h2></div>
           <button type="button" className={quietButtonClass} aria-label={isAr ? "إغلاق" : "Close"} onClick={() => setCreateOpen(false)}><X className="h-4 w-4" /></button>
@@ -409,7 +409,7 @@ function AccountingJournal() {
       </div>
     </div>}
     {selectedEntry && <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 p-4" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setSelectedEntryId(null); }}>
-      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto border border-border bg-card p-5 shadow-2xl" role="dialog" aria-modal="true" aria-labelledby="journal-entry-dialog-title">
+      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-border bg-card p-5 shadow-2xl" role="dialog" aria-modal="true" aria-labelledby="journal-entry-dialog-title">
         <div className="flex items-start justify-between gap-4 border-b border-border pb-4">
           <div><p className="font-mono-ui text-[10px] uppercase tracking-[.16em] text-primary">{isAr ? "تفاصيل القيد" : "Journal entry details"}</p><h2 id="journal-entry-dialog-title" className="mt-2 font-display text-2xl">{selectedEntry.description}</h2></div>
           <button type="button" className={quietButtonClass} aria-label={isAr ? "إغلاق" : "Close"} onClick={() => setSelectedEntryId(null)}><X className="h-4 w-4" /></button>
@@ -420,7 +420,7 @@ function AccountingJournal() {
           <div><p className="text-[10px] uppercase tracking-[.14em] text-muted-foreground">{isAr ? "القيمة" : "Amount"}</p><p className="mt-1 font-display text-2xl">{money(entryAmount(selectedEntry), language)}</p></div>
         </div>
         <div className="mt-5 grid gap-2 sm:grid-cols-2">
-           {selectedEntry.lines.map((line) => { const account = accountDetails.get(line.accountId); return <div key={line.id} className="border border-border bg-muted/30 p-3"><div className="flex justify-between gap-3 text-sm"><span>{accountNames.get(line.accountId) ?? `#${line.accountId}`}</span><span className="font-mono-ui text-xs">{line.debitMinor > 0 ? `Dr ${money(line.debitMinor, language)}` : `Cr ${money(line.creditMinor, language)}`}</span></div><p className="mt-2 text-xs text-primary">{isAr ? "تصنيف الحساب" : "Account classification"}: {accountTypeLabel(account?.type, isAr)}</p>{line.memo && <p className="mt-1 text-xs text-muted-foreground">{isAr ? "الملاحظة" : "Memo"}: {line.memo}</p>}</div>; })}
+           {selectedEntry.lines.map((line) => { const account = accountDetails.get(line.accountId); return <div key={line.id} className="rounded-xl border border-border bg-muted/30 p-3"><div className="flex justify-between gap-3 text-sm"><span>{accountNames.get(line.accountId) ?? `#${line.accountId}`}</span><span className="font-mono-ui text-xs">{line.debitMinor > 0 ? `Dr ${money(line.debitMinor, language)}` : `Cr ${money(line.creditMinor, language)}`}</span></div><p className="mt-2 text-xs text-primary">{isAr ? "تصنيف الحساب" : "Account classification"}: {accountTypeLabel(account?.type, isAr)}</p>{line.memo && <p className="mt-1 text-xs text-muted-foreground">{isAr ? "الملاحظة" : "Memo"}: {line.memo}</p>}</div>; })}
         </div>
       </div>
     </div>}
