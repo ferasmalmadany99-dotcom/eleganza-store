@@ -191,8 +191,9 @@ function AccountingSectionPage({ section }: { section: AccountingSection }) {
     return (accounts.data ?? [])
     .filter((account) => {
       const searchable = `${account.code} ${account.nameEn} ${account.nameAr}`.toLocaleLowerCase();
-      const isCashAccount = account.code === "1000" || account.id === cashAccountId || account.parentId === cashAccountId;
-      return isCashAccount || ["cash", "cashbox", "bank", "vault", "نقد", "خزينة", "مصرف", "بنك"].some((term) => searchable.includes(term));
+      const isChildCashbox = account.parentId === cashAccountId;
+      const isStandaloneCashbox = account.code !== "1000" && ["cash", "cashbox", "bank", "vault", "نقد", "خزينة", "مصرف", "بنك"].some((term) => searchable.includes(term));
+      return isChildCashbox || isStandaloneCashbox;
     })
     .sort(sortAccountsByCode)
     .map((account) => {

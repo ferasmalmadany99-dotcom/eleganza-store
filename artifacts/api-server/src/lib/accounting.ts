@@ -23,6 +23,8 @@ export const DEFAULT_ACCOUNTS = [
   { code: "6100", nameEn: "Inventory adjustments", nameAr: "تسويات المخزون", type: "expense" as AccountType },
 ];
 
+const PRIMARY_CASH_ACCOUNT_CODE = "1001";
+
 export async function ensureDefaultAccounts() {
   await db.insert(chartAccountsTable).values(DEFAULT_ACCOUNTS).onConflictDoNothing({ target: chartAccountsTable.code });
   return db.select().from(chartAccountsTable).where(eq(chartAccountsTable.active, true)).orderBy(chartAccountsTable.code);
@@ -79,7 +81,7 @@ export async function postExpenseJournal(expense: { id: number; description: str
     createdByStaffId: staffId,
     lines: [
       { accountId: await accountId("6000"), debitMinor: expense.amountMinor },
-      { accountId: await accountId("1000"), creditMinor: expense.amountMinor },
+      { accountId: await accountId(PRIMARY_CASH_ACCOUNT_CODE), creditMinor: expense.amountMinor },
     ],
   });
 }
@@ -96,7 +98,7 @@ export async function postOrderJournal(orderId: number, staffId?: number) {
   }).from(orderItemsTable).where(eq(orderItemsTable.orderId, orderId));
   const cogsMinor = items.reduce((sum, item) => sum + item.quantity * item.unitCostMinor, 0);
   await ensureDefaultAccounts();
-  const paymentAccount = order.paymentMethod === "shopify" ? "1010" : "1000";
+  const paymentAccount = order.paymentMethod === "shopify" ? "1010" : PRIMARY_CASH_ACCOUNT_CODE;
   const lines = [
     { accountId: await accountId(paymentAccount), debitMinor: order.totalMinor },
     { accountId: await accountId("4000"), creditMinor: order.subtotalMinor + order.shippingMinor },
@@ -128,7 +130,7 @@ export async function postOrderReturnJournal(orderId: number, staffId?: number) 
     .from(orderItemsTable).where(eq(orderItemsTable.orderId, orderId));
   const cogsMinor = items.reduce((sum, item) => sum + item.quantity * item.unitCostMinor, 0);
   await ensureDefaultAccounts();
-  const paymentAccount = order.paymentMethod === "shopify" ? "1010" : "1000";
+  const paymentAccount = order.paymentMethod === "shopify" ? "1010" : PRIMARY_CASH_ACCOUNT_CODE;
   const lines = [
     { accountId: await accountId("4010"), debitMinor: order.subtotalMinor + order.shippingMinor },
     { accountId: await accountId(paymentAccount), creditMinor: order.totalMinor },
@@ -165,7 +167,7 @@ export async function postInventoryJournal(input: {
    const amount = Math.abs(input.quantity) * (input.unitCostMinor ?? product.costMinor);
   await ensureDefaultAccounts();
   const inventory = await accountId("1200");
-  const cash = await accountId("1000");
+  const cash = await accountId(PRIMARY_CASH_ACCOUNT_CODE);
   const adjustment = await accountId("6100");
   const lines = input.type === "damage" || input.type === "adjustment"
     ? [{ accountId: adjustment, debitMinor: amount }, { accountId: inventory, creditMinor: amount }]
