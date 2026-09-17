@@ -116,11 +116,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <button className="lg:hidden" onClick={() => setMobileOpen(true)} aria-label="Open navigation"><Menu className="h-5 w-5" /></button>
             <div><p className="font-mono-ui text-xs font-semibold uppercase tracking-[.18em] text-primary">{language === "ar" ? "عمليات Eleganza" : "Eleganza operations"}</p><p className="text-xs text-muted-foreground">{language === "ar" ? "مساحة العمل الفعلية — التغييرات محفوظة" : "Live workspace — changes are saved"}</p></div>
             <div className="ms-auto flex items-center gap-3 text-xs text-muted-foreground">
-              <span className="hidden border border-primary/30 px-3 py-2 text-xs font-semibold uppercase tracking-[.13em] text-primary sm:inline">{language === "ar" ? "بيانات فعلية" : "Live data"}</span>
+              <span className="hidden rounded-xl border border-primary/30 px-3 py-2 text-xs font-semibold uppercase tracking-[.13em] text-primary sm:inline">{language === "ar" ? "بيانات فعلية" : "Live data"}</span>
               <button
                 type="button"
                 onClick={() => setLanguage(language === "en" ? "ar" : "en")}
-                className="inline-flex h-9 items-center gap-2 border border-border px-3 font-semibold uppercase tracking-[.1em] transition hover:border-primary hover:text-primary"
+                className="inline-flex h-9 items-center gap-2 rounded-xl border border-border px-3 font-semibold uppercase tracking-[.1em] transition hover:border-primary hover:text-primary"
                 aria-label={language === "ar" ? "Switch to English" : "التبديل إلى العربية"}
               >
                 <Globe2 className="h-3.5 w-3.5" />
