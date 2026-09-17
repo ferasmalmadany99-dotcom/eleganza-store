@@ -80,17 +80,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <p className="mt-2 truncate text-sm font-medium">{session.data?.displayName}</p>
               <p className="mt-1 font-mono-ui text-xs font-semibold uppercase tracking-[.12em] text-primary">{role}</p>
             </div>
-            <div className="mt-6 flex min-h-0 min-w-0 flex-[1_1_220px] flex-col border border-primary/20 bg-background/60 p-2 shadow-[0_8px_24px_hsl(var(--foreground)/.03)]">
+            <div className="mt-6 flex min-w-0 flex-none flex-col overflow-hidden border border-primary/20 bg-background/60 p-2 shadow-[0_8px_24px_hsl(var(--foreground)/.03)]">
               <div className="flex shrink-0 items-center justify-between border-b border-primary/15 px-2 pb-3">
                 <p className="font-mono-ui text-xs font-semibold uppercase tracking-[.16em] text-primary">{language === "ar" ? "القائمة الرئيسية" : "Main navigation"}</p>
                 <span className="font-mono-ui text-xs font-medium text-muted-foreground">{visibleNavigation.length}</span>
               </div>
-              <nav className="admin-nav-scroll mt-2 h-48 min-h-48 flex-none overflow-y-scroll overscroll-contain pe-1">
+              <nav className="admin-nav-scroll mt-2 h-48 min-h-48 w-full min-w-0 max-w-full flex-none overflow-y-scroll overscroll-contain pe-1">
                 <div className="grid gap-1">
                   {visibleNavigation.map((item) => {
                     const Icon = item.icon;
                     const active = item.href === "/admin" ? location === "/admin" : location.startsWith(item.href);
-                    return <button key={item.href} onClick={() => go(item.href)} className={`flex w-full items-center gap-3 px-3 py-3 text-sm transition ${active ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}><Icon className="h-4 w-4" /><span>{language === "ar" ? item.arabic : item.label}</span></button>;
+                    return <button key={item.href} onClick={() => go(item.href)} className={`flex min-w-0 w-full items-center gap-3 overflow-hidden px-3 py-3 text-sm transition ${active ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}><Icon className="h-4 w-4 shrink-0" /><span className="min-w-0 truncate">{language === "ar" ? item.arabic : item.label}</span></button>;
                   })}
                 </div>
               </nav>
