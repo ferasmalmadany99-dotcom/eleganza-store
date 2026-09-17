@@ -2,6 +2,7 @@ import {
   BarChart3,
   BookOpen,
   Boxes,
+  ChevronDown,
   ExternalLink,
   Globe2,
   LogOut,
@@ -65,8 +66,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <AdminContext.Provider value={{ language, setLanguage, dir, role }}>
       <div dir={dir} className="min-h-screen bg-background text-foreground">
-        <aside className={`fixed inset-y-0 start-0 z-40 w-72 overscroll-contain border-e border-border bg-card transition-transform lg:!translate-x-0 ${mobileOpen ? "translate-x-0" : "ltr:-translate-x-full rtl:translate-x-full"}`}>
-          <div className="flex h-full min-h-0 flex-col bg-card p-6">
+        <aside className={`admin-sidebar-scroll fixed inset-y-0 start-0 z-40 w-72 overflow-y-auto overscroll-contain border-e border-border bg-card transition-transform lg:!translate-x-0 ${mobileOpen ? "translate-x-0" : "ltr:-translate-x-full rtl:translate-x-full"}`}>
+          <div className="flex min-h-full flex-col bg-card p-6">
             <div className="flex items-start justify-between">
               <Link href="/" className="group" onClick={() => setMobileOpen(false)}>
                 <div className="font-mono-ui text-xs font-semibold uppercase tracking-[.24em] text-primary">Eleganza</div>
@@ -84,7 +85,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <p className="font-mono-ui text-xs font-semibold uppercase tracking-[.16em] text-primary">{language === "ar" ? "القائمة الرئيسية" : "Main navigation"}</p>
                 <span className="font-mono-ui text-xs font-medium text-muted-foreground">{visibleNavigation.length}</span>
               </div>
-              <nav className="admin-nav-scroll mt-2 min-h-0 flex-1 overflow-y-scroll overscroll-contain pe-1">
+              <nav className="admin-nav-scroll mt-2 h-48 min-h-48 flex-none overflow-y-scroll overscroll-contain pe-1">
                 <div className="grid gap-1">
                   {visibleNavigation.map((item) => {
                     const Icon = item.icon;
@@ -93,6 +94,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   })}
                 </div>
               </nav>
+              {visibleNavigation.length > 4 && <div className="mt-2 flex shrink-0 items-center justify-center gap-1 border-t border-primary/15 pt-2 font-mono-ui text-[10px] font-semibold uppercase tracking-[.12em] text-primary"><ChevronDown className="h-3.5 w-3.5" />{language === "ar" ? "اسحب للأسفل للمزيد" : "Scroll for more"}</div>}
             </div>
             <div className="mt-4 shrink-0 border-t border-primary/20 pt-4">
               <p className="mb-2 px-2 font-mono-ui text-xs font-semibold uppercase tracking-[.16em] text-muted-foreground">{language === "ar" ? "إجراءات ثابتة" : "Fixed actions"}</p>

@@ -242,6 +242,10 @@
   .admin-nav-scroll::-webkit-scrollbar { width: 5px; }
   .admin-nav-scroll::-webkit-scrollbar-track { background: hsl(var(--muted) / .65); border-radius: 999px; }
   .admin-nav-scroll::-webkit-scrollbar-thumb { background: hsl(var(--primary) / .55); border-radius: 999px; }
+  .admin-sidebar-scroll { scrollbar-width: thin; scrollbar-color: hsl(var(--primary) / .7) hsl(var(--muted) / .7); scrollbar-gutter: stable; }
+  .admin-sidebar-scroll::-webkit-scrollbar { width: 6px; }
+  .admin-sidebar-scroll::-webkit-scrollbar-track { background: hsl(var(--muted) / .7); }
+  .admin-sidebar-scroll::-webkit-scrollbar-thumb { background: hsl(var(--primary) / .7); border-radius: 999px; }
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { scrollbar-width: none; }
   .rtl-ui { font-family: 'Noto Kufi Arabic', 'DM Sans', sans-serif; font-weight: 500; }
