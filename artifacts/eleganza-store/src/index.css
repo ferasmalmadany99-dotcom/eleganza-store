@@ -125,6 +125,25 @@
     font-weight: 500;
     line-height: 1.6;
   }
+  .admin-shell {
+    --radius: 0.8rem;
+    --radius-sm: 0.6rem;
+    --radius-md: 0.7rem;
+    --radius-lg: 0.8rem;
+    --radius-xl: 1rem;
+    --radius-2xl: 1.15rem;
+  }
+  .admin-shell button,
+  .admin-shell input,
+  .admin-shell textarea,
+  .admin-shell select {
+    border-radius: var(--radius-md);
+  }
+  .admin-shell section.border,
+  .admin-shell article.border,
+  .admin-shell div.border {
+    border-radius: var(--radius-lg);
+  }
   button, a, input { -webkit-tap-highlight-color: transparent; }
   button:not(:disabled),
   a[href],

@@ -103,7 +103,7 @@ export function PageHeader({
 }
 
 export function Panel({ children, className = "" }: { children: React.ReactNode; className?: string }) {
-  return <section className={`border border-border bg-card p-5 shadow-[0_8px_30px_hsl(var(--foreground)/.03)] ${className}`}>{children}</section>;
+  return <section className={`rounded-2xl border border-border bg-card p-5 shadow-[0_8px_30px_hsl(var(--foreground)/.03)] ${className}`}>{children}</section>;
 }
 
 export function PanelTitle({ children, detail }: { children: React.ReactNode; detail?: React.ReactNode }) {
@@ -121,7 +121,7 @@ export function LoadingState({ label = "Loading workspace…" }: { label?: strin
 
 export function ErrorState({ error, onRetry }: { error: unknown; onRetry?: () => void }) {
   return (
-    <div className="flex min-h-44 flex-col items-center justify-center gap-3 border border-destructive/20 bg-destructive/5 p-6 text-center">
+    <div className="flex min-h-44 flex-col items-center justify-center gap-3 rounded-xl border border-destructive/20 bg-destructive/5 p-6 text-center">
       <AlertCircle className="h-5 w-5 text-destructive" />
       <p className="max-w-lg text-sm text-destructive">{getErrorMessage(error)}</p>
       {onRetry && <button className="text-xs font-semibold uppercase tracking-[.16em] text-primary underline underline-offset-4" onClick={onRetry}>Try again</button>}
@@ -130,17 +130,17 @@ export function ErrorState({ error, onRetry }: { error: unknown; onRetry?: () =>
 }
 
 export function EmptyState({ title, detail, icon = <Search className="h-5 w-5" /> }: { title: string; detail: string; icon?: React.ReactNode }) {
-  return <div className="flex min-h-44 flex-col items-center justify-center gap-3 border border-dashed border-border p-6 text-center text-muted-foreground"><span className="text-primary">{icon}</span><p className="font-medium text-foreground">{title}</p><p className="max-w-sm text-sm">{detail}</p></div>;
+  return <div className="flex min-h-44 flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border p-6 text-center text-muted-foreground"><span className="text-primary">{icon}</span><p className="font-medium text-foreground">{title}</p><p className="max-w-sm text-sm">{detail}</p></div>;
 }
 
 export function Field({ label, children, hint, labelClassName = "" }: { label: string; children: React.ReactNode; hint?: string; labelClassName?: string }) {
   return <label className="grid gap-2 text-sm"><span className={`font-medium text-foreground ${labelClassName}`}>{label}</span>{children}{hint && <span className="text-xs text-muted-foreground">{hint}</span>}</label>;
 }
 
-export const inputClass = "h-10 w-full border border-input bg-background px-3 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15";
-export const textareaClass = "min-h-24 w-full resize-y border border-input bg-background px-3 py-2 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15";
-export const buttonClass = "inline-flex h-10 items-center justify-center gap-2 border border-primary bg-primary px-4 text-xs font-semibold uppercase tracking-[.13em] text-primary-foreground transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50";
-export const quietButtonClass = "inline-flex h-10 items-center justify-center gap-2 border border-border bg-background px-4 text-xs font-semibold uppercase tracking-[.13em] text-foreground transition hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-50";
+export const inputClass = "h-10 w-full rounded-xl border border-input bg-background px-3 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15";
+export const textareaClass = "min-h-24 w-full resize-y rounded-xl border border-input bg-background px-3 py-2 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15";
+export const buttonClass = "inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-primary bg-primary px-4 text-xs font-semibold uppercase tracking-[.13em] text-primary-foreground transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50";
+export const quietButtonClass = "inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 text-xs font-semibold uppercase tracking-[.13em] text-foreground transition hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-50";
 
 export function Toast({ message, onClose }: { message: string | null; onClose: () => void }) {
   if (!message) return null;
