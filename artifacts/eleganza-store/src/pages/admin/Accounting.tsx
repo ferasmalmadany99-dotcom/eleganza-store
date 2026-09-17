@@ -331,7 +331,7 @@ function AccountingJournal() {
   const [createOpen, setCreateOpen] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [selectedEntryId, setSelectedEntryId] = useState<number | null>(null);
-  const [journalForm, setJournalForm] = useState({ entryDate: new Date().toISOString().slice(0, 10), description: "", debitAccountId: "", creditAccountId: "", amount: "", memo: "" });
+  const [journalForm, setJournalForm] = useState({ entryDate: new Date().toISOString().slice(0, 10), description: "", debitAccountId: "", creditAccountId: "", debitAmount: "", creditAmount: "", memo: "" });
   const accountNames = useMemo(() => new Map((accounts.data ?? []).map((account) => [account.id, isAr ? account.nameAr || account.nameEn : account.nameEn])), [accounts.data, isAr]);
   const accountDetails = useMemo(() => new Map((accounts.data ?? []).map((account) => [account.id, account])), [accounts.data]);
   const canWrite = role === "owner" || role === "manager";
@@ -342,7 +342,7 @@ function AccountingJournal() {
   }
 
   function resetJournalForm() {
-    setJournalForm({ entryDate: new Date().toISOString().slice(0, 10), description: "", debitAccountId: "", creditAccountId: "", amount: "", memo: "" });
+    setJournalForm({ entryDate: new Date().toISOString().slice(0, 10), description: "", debitAccountId: "", creditAccountId: "", debitAmount: "", creditAmount: "", memo: "" });
   }
 
   async function submitJournal(event: React.FormEvent) {
@@ -351,17 +351,22 @@ function AccountingJournal() {
       setMessage(isAr ? "اختر حسابًا صحيحًا للمدين والدائن" : "Choose a valid debit and credit account");
       return;
     }
-    const amountMinor = Math.round(Number(journalForm.amount) * 100);
-    if (!Number.isFinite(amountMinor) || amountMinor <= 0) {
-      setMessage(isAr ? "أدخل مبلغًا صحيحًا أكبر من صفر" : "Enter a valid amount greater than zero");
+    const debitMinor = Math.round(Number(journalForm.debitAmount) * 100);
+    const creditMinor = Math.round(Number(journalForm.creditAmount) * 100);
+    if (!Number.isFinite(debitMinor) || !Number.isFinite(creditMinor) || debitMinor <= 0 || creditMinor <= 0) {
+      setMessage(isAr ? "أدخل مبلغًا صحيحًا أكبر من صفر للمدين والدائن" : "Enter valid amounts greater than zero for debit and credit");
+      return;
+    }
+    if (debitMinor !== creditMinor) {
+      setMessage(isAr ? "القيد غير متوازن: يجب أن يساوي المدين الدائن" : "Journal entry is unbalanced: debit must equal credit");
       return;
     }
     const payload: JournalEntryInput = {
       entryDate: journalForm.entryDate,
       description: journalForm.description,
       lines: [
-        { accountId: Number(journalForm.debitAccountId), debitMinor: amountMinor, memo: journalForm.memo || undefined },
-        { accountId: Number(journalForm.creditAccountId), creditMinor: amountMinor, memo: journalForm.memo || undefined },
+        { accountId: Number(journalForm.debitAccountId), debitMinor, memo: journalForm.memo || undefined },
+        { accountId: Number(journalForm.creditAccountId), creditMinor, memo: journalForm.memo || undefined },
       ],
     };
     try {
@@ -371,7 +376,10 @@ function AccountingJournal() {
       setCreateOpen(false);
       setMessage(isAr ? "تم حفظ قيد اليومية" : "Journal entry saved");
     } catch (error) {
-      setMessage(getErrorMessage(error));
+      const errorMessage = getErrorMessage(error);
+      setMessage(errorMessage === "Journal entry must be balanced"
+        ? (isAr ? "القيد غير متوازن" : "Journal entry is unbalanced")
+        : errorMessage);
     }
   }
 
@@ -398,7 +406,8 @@ function AccountingJournal() {
         {accounts.data && <form onSubmit={submitJournal} className="mt-5 grid gap-4">
           <div className="grid gap-3 sm:grid-cols-2">
             <Field label={isAr ? "التاريخ" : "Date"}><input className={inputClass} type="date" required value={journalForm.entryDate} onChange={(event) => setJournalForm({ ...journalForm, entryDate: event.target.value })} /></Field>
-            <Field label={isAr ? "المبلغ بالدينار" : "Amount in LYD"}><input className={inputClass} type="number" min="0.01" step="0.01" required value={journalForm.amount} onChange={(event) => setJournalForm({ ...journalForm, amount: event.target.value })} /></Field>
+            <Field label={isAr ? "مبلغ المدين بالدينار" : "Debit amount in LYD"}><input className={inputClass} type="number" min="0.01" step="0.01" required value={journalForm.debitAmount} onChange={(event) => setJournalForm({ ...journalForm, debitAmount: event.target.value })} /></Field>
+            <Field label={isAr ? "مبلغ الدائن بالدينار" : "Credit amount in LYD"}><input className={inputClass} type="number" min="0.01" step="0.01" required value={journalForm.creditAmount} onChange={(event) => setJournalForm({ ...journalForm, creditAmount: event.target.value })} /></Field>
           </div>
           <Field label={isAr ? "البيان" : "Description"}><input className={inputClass} required value={journalForm.description} onChange={(event) => setJournalForm({ ...journalForm, description: event.target.value })} placeholder={isAr ? "بيع عطر أو مصروف تشغيلي" : "Sale or operating expense"} /></Field>
           <div className="grid gap-3 sm:grid-cols-2">
