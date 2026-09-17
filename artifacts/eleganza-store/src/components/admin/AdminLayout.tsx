@@ -15,7 +15,7 @@ import {
   Users,
   X,
 } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useClerk } from "@clerk/react";
 import { useGetSession } from "@workspace/api-client-react";
@@ -36,6 +36,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const { language, setLanguage } = usePersistentAdminLanguage();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [location, setLocation] = useLocation();
+  const navigationRef = useRef<HTMLElement | null>(null);
   const { signOut } = useClerk();
   const session = useGetSession();
 
@@ -85,7 +86,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <p className="font-mono-ui text-xs font-semibold uppercase tracking-[.16em] text-primary">{language === "ar" ? "القائمة الرئيسية" : "Main navigation"}</p>
                 <span className="font-mono-ui text-xs font-medium text-muted-foreground">{visibleNavigation.length}</span>
               </div>
-              <nav className="admin-nav-scroll mt-2 h-48 min-h-48 w-full min-w-0 max-w-full flex-none overflow-y-scroll overscroll-contain pe-1">
+              <nav ref={navigationRef} className="admin-nav-scroll mt-2 h-48 min-h-48 w-full min-w-0 max-w-full flex-none overflow-y-scroll overscroll-contain pe-1">
                 <div className="grid gap-1">
                   {visibleNavigation.map((item) => {
                     const Icon = item.icon;
@@ -94,7 +95,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   })}
                 </div>
               </nav>
-              {visibleNavigation.length > 4 && <div className="mt-2 flex shrink-0 items-center justify-center gap-1 border-t border-primary/15 pt-2 font-mono-ui text-[10px] font-semibold uppercase tracking-[.12em] text-primary"><ChevronDown className="h-3.5 w-3.5" />{language === "ar" ? "اسحب للأسفل للمزيد" : "Scroll for more"}</div>}
+              {visibleNavigation.length > 4 && <button type="button" className="mt-2 flex shrink-0 items-center justify-center gap-1 border-t border-primary/15 pt-2 font-mono-ui text-[10px] font-semibold uppercase tracking-[.12em] text-primary transition hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary" onClick={() => navigationRef.current?.scrollBy({ top: 180, behavior: "smooth" })} aria-label={language === "ar" ? "عرض المزيد من خيارات القائمة" : "Show more navigation options"}><ChevronDown className="h-3.5 w-3.5" />{language === "ar" ? "اسحب للأسفل للمزيد" : "Scroll for more"}</button>}
             </div>
             <div className="mt-4 shrink-0 border-t border-primary/20 pt-4">
               <p className="mb-2 px-2 font-mono-ui text-xs font-semibold uppercase tracking-[.16em] text-muted-foreground">{language === "ar" ? "إجراءات ثابتة" : "Fixed actions"}</p>
