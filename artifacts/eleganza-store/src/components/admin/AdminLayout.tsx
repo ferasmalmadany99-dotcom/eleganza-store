@@ -15,7 +15,7 @@ import {
   Users,
   X,
 } from "lucide-react";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useClerk } from "@clerk/react";
 import { useGetSession } from "@workspace/api-client-react";
@@ -35,8 +35,8 @@ const navigation = [
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { language, setLanguage } = usePersistentAdminLanguage();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [navigationOpen, setNavigationOpen] = useState(false);
   const [location, setLocation] = useLocation();
-  const navigationRef = useRef<HTMLElement | null>(null);
   const { signOut } = useClerk();
   const session = useGetSession();
 
@@ -62,6 +62,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const go = (href: string) => {
     setLocation(href);
     setMobileOpen(false);
+    setNavigationOpen(false);
   };
 
   return (
@@ -86,7 +87,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <p className="font-mono-ui text-xs font-semibold uppercase tracking-[.16em] text-primary">{language === "ar" ? "القائمة الرئيسية" : "Main navigation"}</p>
                 <span className="font-mono-ui text-xs font-medium text-muted-foreground">{visibleNavigation.length}</span>
               </div>
-              <nav ref={navigationRef} className="admin-nav-scroll mt-2 h-48 min-h-48 w-full min-w-0 max-w-full flex-none overflow-y-scroll overscroll-contain pe-1">
+              <nav className="admin-nav-scroll mt-2 h-48 min-h-48 w-full min-w-0 max-w-full flex-none overflow-y-scroll overscroll-contain pe-1">
                 <div className="grid gap-1">
                   {visibleNavigation.map((item) => {
                     const Icon = item.icon;
@@ -95,7 +96,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   })}
                 </div>
               </nav>
-              {visibleNavigation.length > 4 && <button type="button" className="mt-2 flex shrink-0 items-center justify-center gap-1 border-t border-primary/15 pt-2 font-mono-ui text-[10px] font-semibold uppercase tracking-[.12em] text-primary transition hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary" onClick={() => navigationRef.current?.scrollBy({ top: 180, behavior: "smooth" })} aria-label={language === "ar" ? "عرض المزيد من خيارات القائمة" : "Show more navigation options"}><ChevronDown className="h-3.5 w-3.5" />{language === "ar" ? "اسحب للأسفل للمزيد" : "Scroll for more"}</button>}
+              {visibleNavigation.length > 4 && <button type="button" className="mt-2 flex shrink-0 items-center justify-center gap-1 border-t border-primary/15 pt-2 font-mono-ui text-[10px] font-semibold uppercase tracking-[.12em] text-primary transition hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary" onClick={() => setNavigationOpen(true)} aria-expanded={navigationOpen} aria-controls="all-navigation-options" aria-label={language === "ar" ? "عرض جميع خيارات القائمة" : "Show all navigation options"}><ChevronDown className="h-3.5 w-3.5" />{language === "ar" ? "عرض كل الخيارات" : "Show all options"}</button>}
             </div>
             <div className="mt-4 shrink-0 border-t border-primary/20 pt-4">
               <p className="mb-2 px-2 font-mono-ui text-xs font-semibold uppercase tracking-[.16em] text-muted-foreground">{language === "ar" ? "إجراءات ثابتة" : "Fixed actions"}</p>
@@ -108,6 +109,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
         </aside>
         {mobileOpen && <button aria-label="Close navigation" className="fixed inset-0 z-30 bg-foreground/20 lg:hidden" onClick={() => setMobileOpen(false)} />}
+        {navigationOpen && <><button type="button" aria-label={language === "ar" ? "إغلاق خيارات القائمة" : "Close navigation options"} className="fixed inset-0 z-40 bg-foreground/20" onClick={() => setNavigationOpen(false)} /><section id="all-navigation-options" dir={dir} className="fixed end-5 top-24 z-50 w-[min(20rem,calc(100vw-2.5rem))] overflow-hidden border border-primary/30 bg-card shadow-[0_18px_50px_hsl(var(--foreground)/.2)]" aria-label={language === "ar" ? "جميع خيارات القائمة" : "All navigation options"}><div className="flex items-center justify-between border-b border-border bg-background px-4 py-3"><div><p className="font-mono-ui text-[10px] font-semibold uppercase tracking-[.16em] text-primary">{language === "ar" ? "القائمة الرئيسية" : "Main navigation"}</p><p className="mt-1 text-sm font-semibold">{language === "ar" ? "جميع الخيارات" : "All options"}</p></div><button type="button" className="p-1 text-muted-foreground transition hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary" onClick={() => setNavigationOpen(false)} aria-label={language === "ar" ? "إغلاق" : "Close"}><X className="h-4 w-4" /></button></div><div className="admin-nav-scroll max-h-[calc(100vh-10rem)] overflow-y-auto p-2">{visibleNavigation.map((item) => { const Icon = item.icon; const active = item.href === "/admin" ? location === "/admin" : location.startsWith(item.href); return <button key={item.href} type="button" onClick={() => go(item.href)} className={`flex min-w-0 w-full items-center gap-3 px-3 py-3 text-sm transition ${active ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}><Icon className="h-4 w-4 shrink-0" /><span className="min-w-0 truncate">{language === "ar" ? item.arabic : item.label}</span></button>; })}</div></section></>}
         <main className="min-h-screen lg:ps-72">
           <header className="sticky top-0 z-20 flex min-h-16 items-center justify-between gap-4 border-b border-border bg-background/90 px-5 py-3 backdrop-blur lg:px-10">
             <button className="lg:hidden" onClick={() => setMobileOpen(true)} aria-label="Open navigation"><Menu className="h-5 w-5" /></button>
