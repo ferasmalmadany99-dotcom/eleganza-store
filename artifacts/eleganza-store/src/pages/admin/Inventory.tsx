@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useCreateInventoryMovement, useDeleteInventoryMovement, useListInventoryMovements, useListProducts, type InventoryMovementInput, type InventoryMovementType } from "@workspace/api-client-react";
 import { queryClient } from "@/lib/queryClient";
 import { buttonClass, can, EmptyState, ErrorState, Field, getErrorMessage, inputClass, LoadingState, money, PageHeader, Panel, PanelTitle, quietButtonClass, Toast, useAdmin, dateLabel } from "@/components/admin/AdminUI";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const movementTypeLabels: Record<InventoryMovementType, { en: string; ar: string }> = {
   purchase: { en: "Purchase", ar: "شراء" },
@@ -13,7 +14,7 @@ const movementTypeLabels: Record<InventoryMovementType, { en: string; ar: string
 };
 
 export default function Inventory() {
-  const { language, role } = useAdmin();
+  const { language, role, dir } = useAdmin();
   const isAr = language === "ar";
   const canWrite = can(role, "inventory");
   const [productId, setProductId] = useState("");
@@ -27,6 +28,17 @@ export default function Inventory() {
   const movements = useListInventoryMovements({ limit: 100 });
   const create = useCreateInventoryMovement();
   const remove = useDeleteInventoryMovement();
+
+  function handleTypeChange(nextType: InventoryMovementType) {
+    setType(nextType);
+    if (nextType === "adjustment") {
+      const product = products.data?.find((item) => item.id === Number(productId));
+      setQuantity(String(product?.quantityOnHand ?? 0));
+    } else {
+      setQuantity("1");
+    }
+    if (nextType !== "purchase") setPurchasePrice("");
+  }
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
@@ -85,7 +97,20 @@ export default function Inventory() {
          </div>
          <form onSubmit={submit} className="mt-5 grid gap-4">
            <Field label={isAr ? "المنتج" : "Product"}><select className={inputClass} required value={productId} onChange={(event) => { const value = event.target.value; setProductId(value); if (type === "adjustment") { const product = products.data?.find((item) => item.id === Number(value)); setQuantity(String(product?.quantityOnHand ?? 0)); } }}><option value="">{isAr ? "اختر المنتج" : "Select a product"}</option>{products.data?.map((product) => <option key={product.id} value={product.id}>{isAr ? product.nameAr || product.nameEn : product.nameEn} · {product.quantityOnHand} {isAr ? "في المخزون" : "in stock"}</option>)}</select></Field>
-           <Field label={isAr ? "النوع" : "Movement type"}><select className={inputClass} value={type} onChange={(event) => { const nextType = event.target.value as InventoryMovementType; setType(nextType); if (nextType === "adjustment") { const product = products.data?.find((item) => item.id === Number(productId)); setQuantity(String(product?.quantityOnHand ?? 0)); } else { setQuantity("1"); } if (nextType !== "purchase") setPurchasePrice(""); }}><option value="purchase">{isAr ? "شراء · إضافة" : "Purchase · add"}</option><option value="return">{isAr ? "مرتجع · إضافة" : "Return · add"}</option><option value="damage">{isAr ? "تالف · خصم" : "Damage · remove"}</option><option value="sale">{isAr ? "بيع · خصم" : "Sale · remove"}</option>{role === "owner" && <option value="adjustment">{isAr ? "تسوية · رصيد مستهدف" : "Reconcile · target stock"}</option>}</select></Field>
+            <Field label={isAr ? "النوع" : "Movement type"}>
+              <Select dir={dir} value={type} onValueChange={(value) => handleTypeChange(value as InventoryMovementType)}>
+                <SelectTrigger className={`${inputClass} justify-between`}>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="border-border bg-popover text-popover-foreground shadow-xl">
+                  <SelectItem value="purchase">{isAr ? "شراء · إضافة" : "Purchase · add"}</SelectItem>
+                  <SelectItem value="return">{isAr ? "مرتجع · إضافة" : "Return · add"}</SelectItem>
+                  <SelectItem value="damage">{isAr ? "تالف · خصم" : "Damage · remove"}</SelectItem>
+                  <SelectItem value="sale">{isAr ? "بيع · خصم" : "Sale · remove"}</SelectItem>
+                  {role === "owner" && <SelectItem value="adjustment">{isAr ? "تسوية · رصيد مستهدف" : "Reconcile · target stock"}</SelectItem>}
+                </SelectContent>
+              </Select>
+            </Field>
            {type === "purchase" && <Field label={isAr ? "سعر الشراء للوحدة" : "Purchase price per unit"} hint={isAr ? "بالدينار الليبي، وسيُستخدم لاحتساب تكلفة المخزون." : "In LYD; used to calculate inventory cost."}><input className={inputClass} type="number" min="0" step="0.01" required value={purchasePrice} onChange={(event) => setPurchasePrice(event.target.value)} placeholder={isAr ? "مثال: 35.50" : "e.g. 35.50"} /></Field>}
            <Field label={type === "adjustment" ? (isAr ? "الرصيد المستهدف" : "Target stock") : (isAr ? "الكمية" : "Quantity")} hint={type === "adjustment" ? (isAr ? "سيحسب النظام الفرق تلقائيًا مقارنة بالرصيد الحالي." : "The system calculates the delta from the current balance.") : undefined}><input className={inputClass} type="number" min="0" required value={quantity} onChange={(event) => setQuantity(event.target.value)} /></Field>
            <Field label={isAr ? "ملاحظة" : "Note"}><textarea className="min-h-20 w-full border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary" value={note} onChange={(event) => setNote(event.target.value)} /></Field>
