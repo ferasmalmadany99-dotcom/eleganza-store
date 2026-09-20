@@ -11,6 +11,7 @@ export const staffTable = pgTable("staff", {
   displayName: text("display_name").notNull(),
   email: text("email"),
   role: staffRoleEnum("role").notNull().default("viewer"),
+  permissions: staffRoleEnum("permissions").array().notNull().default(["viewer"]),
   status: staffStatusEnum("status").notNull().default("inactive"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),

@@ -31,6 +31,7 @@ export type AdminContextValue = {
   setLanguage: (language: AdminLanguage) => void;
   dir: "ltr" | "rtl";
   role: string;
+  permissions: string[];
 };
 
 export const AdminContext = createContext<AdminContextValue | null>(null);
@@ -71,11 +72,12 @@ export function getErrorMessage(error: unknown, fallback = "Something went wrong
   return error instanceof Error ? error.message : fallback;
 }
 
-export function can(role: string, capability: "manager" | "owner" | "inventory" | "sales") {
-  if (capability === "owner") return role === "owner";
-  if (capability === "manager") return role === "owner" || role === "manager";
-  if (capability === "inventory") return ["owner", "manager", "inventory"].includes(role);
-  if (capability === "sales") return ["owner", "manager", "sales"].includes(role);
+export function can(roleOrPermissions: string | string[], capability: "manager" | "owner" | "inventory" | "sales") {
+  const permissions = Array.isArray(roleOrPermissions) ? roleOrPermissions : [roleOrPermissions];
+  if (capability === "owner") return permissions.includes("owner");
+  if (capability === "manager") return permissions.some((permission) => ["owner", "manager"].includes(permission));
+  if (capability === "inventory") return permissions.some((permission) => ["owner", "manager", "inventory"].includes(permission));
+  if (capability === "sales") return permissions.some((permission) => ["owner", "manager", "sales"].includes(permission));
   return false;
 }
 

@@ -13,5 +13,6 @@ export interface StaffInviteResponse {
   email: string;
   displayName: string;
   role: StaffRole;
+  permissions: StaffRole[];
   status: StaffInviteResponseStatus;
 }

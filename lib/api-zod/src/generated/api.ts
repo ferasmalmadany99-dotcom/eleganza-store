@@ -19,12 +19,16 @@ export const HealthCheckResponse = zod.object({
 /**
  * @summary Current authenticated staff profile
  */
+
+
+
 export const GetSessionResponse = zod.object({
   "id": zod.number().int(),
   "clerkUserId": zod.string(),
   "displayName": zod.string(),
   "email": zod.string().nullish(),
   "role": zod.enum(['owner', 'manager', 'inventory', 'sales', 'viewer']),
+  "permissions": zod.array(zod.enum(['owner', 'manager', 'inventory', 'sales', 'viewer'])).min(1),
   "status": zod.enum(['active', 'inactive']),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
@@ -556,12 +560,16 @@ export const CreateExpenseResponse = zod.object({
 /**
  * @summary List staff
  */
+
+
+
 export const ListStaffResponseItem = zod.object({
   "id": zod.number().int(),
   "clerkUserId": zod.string(),
   "displayName": zod.string(),
   "email": zod.string().nullish(),
   "role": zod.enum(['owner', 'manager', 'inventory', 'sales', 'viewer']),
+  "permissions": zod.array(zod.enum(['owner', 'manager', 'inventory', 'sales', 'viewer'])).min(1),
   "status": zod.enum(['active', 'inactive']),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
@@ -576,10 +584,11 @@ export const inviteStaffBodyDisplayNameMin = 2;
 
 
 
+
 export const InviteStaffBody = zod.object({
   "email": zod.string().email(),
   "displayName": zod.string().min(inviteStaffBodyDisplayNameMin),
-  "role": zod.enum(['owner', 'manager', 'inventory', 'sales', 'viewer'])
+  "permissions": zod.array(zod.enum(['owner', 'manager', 'inventory', 'sales', 'viewer'])).min(1)
 })
 
 export const InviteStaffResponse = zod.object({
@@ -587,6 +596,7 @@ export const InviteStaffResponse = zod.object({
   "email": zod.string().email(),
   "displayName": zod.string(),
   "role": zod.enum(['owner', 'manager', 'inventory', 'sales', 'viewer']),
+  "permissions": zod.array(zod.enum(['owner', 'manager', 'inventory', 'sales', 'viewer'])),
   "status": zod.enum(['pending'])
 })
 
@@ -600,10 +610,14 @@ export const UpdateStaffParams = zod.object({
 
 export const UpdateStaffBody = zod.object({
   "role": zod.enum(['owner', 'manager', 'inventory', 'sales', 'viewer']).optional(),
+  "permissions": zod.array(zod.enum(['owner', 'manager', 'inventory', 'sales', 'viewer'])).optional(),
   "status": zod.enum(['active', 'inactive']).optional(),
   "displayName": zod.string().optional(),
   "email": zod.string().optional()
 })
+
+
+
 
 export const UpdateStaffResponse = zod.object({
   "id": zod.number().int(),
@@ -611,6 +625,7 @@ export const UpdateStaffResponse = zod.object({
   "displayName": zod.string(),
   "email": zod.string().nullish(),
   "role": zod.enum(['owner', 'manager', 'inventory', 'sales', 'viewer']),
+  "permissions": zod.array(zod.enum(['owner', 'manager', 'inventory', 'sales', 'viewer'])).min(1),
   "status": zod.enum(['active', 'inactive']),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()

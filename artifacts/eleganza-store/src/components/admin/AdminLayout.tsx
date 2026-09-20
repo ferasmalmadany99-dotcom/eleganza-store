@@ -56,8 +56,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   const role = session.data?.role ?? "viewer";
+  const permissions = session.data?.permissions ?? [role];
   const dir = language === "ar" ? "rtl" : "ltr";
-  const visibleNavigation = navigation.filter((item) => !item.capability || can(role, item.capability));
+  const visibleNavigation = navigation.filter((item) => !item.capability || can(permissions, item.capability));
 
   const go = (href: string) => {
     setLocation(href);
@@ -66,7 +67,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   };
 
   return (
-    <AdminContext.Provider value={{ language, setLanguage, dir, role }}>
+    <AdminContext.Provider value={{ language, setLanguage, dir, role, permissions }}>
       <div dir={dir} className="admin-shell min-h-screen bg-background text-foreground">
         <aside className={`admin-sidebar-scroll fixed inset-y-0 start-0 ${navigationOpen ? "z-50" : "z-40"} w-72 overflow-y-auto overscroll-contain border-e border-border bg-card transition-transform lg:!translate-x-0 ${mobileOpen ? "translate-x-0" : "ltr:-translate-x-full rtl:translate-x-full"}`}>
           <div className="flex min-h-full flex-col bg-card p-6">

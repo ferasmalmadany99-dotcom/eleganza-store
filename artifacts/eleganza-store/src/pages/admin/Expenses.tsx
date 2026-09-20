@@ -5,9 +5,9 @@ import { queryClient } from "@/lib/queryClient";
 import { buttonClass, can, EmptyState, ErrorState, Field, getErrorMessage, inputClass, LoadingState, money, PageHeader, Panel, PanelTitle, quietButtonClass, Toast, useAdmin, dateLabel } from "@/components/admin/AdminUI";
 
 export default function Expenses() {
-  const { language, role } = useAdmin();
+  const { language, permissions } = useAdmin();
   const isAr = language === "ar";
-  const canWrite = can(role, "manager");
+  const canWrite = can(permissions, "manager");
   const [showCreate, setShowCreate] = useState(false);
   const [form, setForm] = useState({ description: "", category: "operations", amountDinar: "", expenseDate: new Date().toISOString().slice(0, 10) });
   const [message, setMessage] = useState<string | null>(null);

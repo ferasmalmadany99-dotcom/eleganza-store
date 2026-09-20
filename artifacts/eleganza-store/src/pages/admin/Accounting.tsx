@@ -12,6 +12,7 @@ import {
 import { queryClient } from "@/lib/queryClient";
 import {
   buttonClass,
+  can,
   EmptyState,
   ErrorState,
   Field,
@@ -325,7 +326,7 @@ function AccountingSectionPage({ section }: { section: AccountingSection }) {
 }
 
 function AccountingJournal() {
-  const { language, role } = useAdmin();
+  const { language, permissions } = useAdmin();
   const isAr = language === "ar";
   const accounts = useListAccounts();
   const journal = useListJournalEntries({ limit: 100 });
@@ -337,7 +338,7 @@ function AccountingJournal() {
   const [nextLineId, setNextLineId] = useState(3);
   const accountNames = useMemo(() => new Map((accounts.data ?? []).map((account) => [account.id, isAr ? account.nameAr || account.nameEn : account.nameEn])), [accounts.data, isAr]);
   const accountDetails = useMemo(() => new Map((accounts.data ?? []).map((account) => [account.id, account])), [accounts.data]);
-  const canWrite = role === "owner" || role === "manager";
+  const canWrite = can(permissions, "manager");
   const selectedEntry = selectedEntryId === null ? undefined : journal.data?.find((entry) => entry.id === selectedEntryId);
 
   function entryAmount(entry: NonNullable<typeof journal.data>[number]) {

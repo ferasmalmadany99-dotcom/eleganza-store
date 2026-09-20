@@ -10,6 +10,11 @@ function isStaffRole(value: unknown): value is StaffRole {
   return typeof value === "string" && staffRoles.includes(value as StaffRole);
 }
 
+function readStaffPermissions(value: unknown): StaffRole[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter(isStaffRole);
+}
+
 declare global {
   namespace Express {
     interface Request {
@@ -28,6 +33,7 @@ export async function ensureStaffProfile(userId: string, req: Request) {
   let displayName = userId;
   let email: string | undefined;
   let invitedRole: StaffRole | undefined;
+  let invitedPermissions: StaffRole[] = [];
   try {
     const user = await clerkClient.users.getUser(userId);
     const metadata = user.publicMetadata as Record<string, unknown>;
@@ -37,16 +43,19 @@ export async function ensureStaffProfile(userId: string, req: Request) {
       : fullName || user.username || userId;
     email = user.primaryEmailAddress?.emailAddress
       ?? user.emailAddresses.find((address) => address.id === user.primaryEmailAddressId)?.emailAddress;
-    invitedRole = isStaffRole(metadata.role) ? metadata.role : undefined;
+    invitedPermissions = readStaffPermissions(metadata.permissions);
+    invitedRole = isStaffRole(metadata.role) ? metadata.role : invitedPermissions[0];
   } catch (error) {
     req.log.warn({ err: error, userId }, "Unable to load Clerk user details");
   }
+  const permissions = first ? ["owner" as StaffRole] : (invitedPermissions.length > 0 ? invitedPermissions : [invitedRole ?? "viewer"]);
   try {
     const [created] = await db.insert(staffTable).values({
       clerkUserId: userId,
       displayName,
       email,
       role: first ? "owner" : (invitedRole ?? "viewer"),
+      permissions,
       status: first ? "active" : "inactive",
     }).onConflictDoNothing({ target: staffTable.clerkUserId }).returning();
     if (created) return created;
@@ -94,7 +103,8 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
 
 export function requireRole(...roles: StaffRole[]) {
   return (req: Request, res: Response, next: NextFunction): void => {
-    if (!req.staff || !roles.includes(req.staff.role as StaffRole)) {
+    const permissions = req.staff?.permissions ?? [req.staff?.role];
+    if (!req.staff || !roles.some((role) => permissions.includes(role) || permissions.includes("owner"))) {
       res.status(403).json({ error: "Insufficient permissions" });
       return;
     }

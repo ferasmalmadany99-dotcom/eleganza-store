@@ -15,6 +15,8 @@ export interface Staff {
   /** @nullable */
   email?: string | null;
   role: StaffRole;
+  /** @minItems 1 */
+  permissions: StaffRole[];
   status: StaffStatus;
   createdAt: Date;
   updatedAt: Date;

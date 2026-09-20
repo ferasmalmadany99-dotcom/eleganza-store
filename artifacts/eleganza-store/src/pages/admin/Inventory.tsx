@@ -14,9 +14,9 @@ const movementTypeLabels: Record<InventoryMovementType, { en: string; ar: string
 };
 
 export default function Inventory() {
-  const { language, role, dir } = useAdmin();
+  const { language, role, permissions, dir } = useAdmin();
   const isAr = language === "ar";
-  const canWrite = can(role, "inventory");
+  const canWrite = can(permissions, "inventory");
   const [productId, setProductId] = useState("");
   const [type, setType] = useState<InventoryMovementType>("purchase");
   const [quantity, setQuantity] = useState("1");

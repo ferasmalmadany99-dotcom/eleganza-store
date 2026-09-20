@@ -438,13 +438,17 @@ components:
       enum: [active, inactive]
     Staff:
       type: object
-      required: [id, clerkUserId, displayName, role, status, createdAt, updatedAt]
+      required: [id, clerkUserId, displayName, role, permissions, status, createdAt, updatedAt]
       properties:
         id: { type: integer }
         clerkUserId: { type: string }
         displayName: { type: string }
         email: { type: ["string", "null"] }
         role: { $ref: "#/components/schemas/StaffRole" }
+        permissions:
+          type: array
+          minItems: 1
+          items: { $ref: "#/components/schemas/StaffRole" }
         status: { $ref: "#/components/schemas/StaffStatus" }
         createdAt: { type: string, format: date-time }
         updatedAt: { type: string, format: date-time }
@@ -455,24 +459,33 @@ components:
       type: object
       properties:
         role: { $ref: "#/components/schemas/StaffRole" }
+        permissions:
+          type: array
+          items: { $ref: "#/components/schemas/StaffRole" }
         status: { $ref: "#/components/schemas/StaffStatus" }
         displayName: { type: string }
         email: { type: string }
     StaffInviteInput:
       type: object
-      required: [email, displayName, role]
+      required: [email, displayName, permissions]
       properties:
         email: { type: string, format: email }
         displayName: { type: string, minLength: 2 }
-        role: { $ref: "#/components/schemas/StaffRole" }
+        permissions:
+          type: array
+          minItems: 1
+          items: { $ref: "#/components/schemas/StaffRole" }
     StaffInviteResponse:
       type: object
-      required: [id, email, displayName, role, status]
+      required: [id, email, displayName, role, permissions, status]
       properties:
         id: { type: string }
         email: { type: string, format: email }
         displayName: { type: string }
         role: { $ref: "#/components/schemas/StaffRole" }
+        permissions:
+          type: array
+          items: { $ref: "#/components/schemas/StaffRole" }
         status: { type: string, enum: [pending] }
     Product:
       type: object

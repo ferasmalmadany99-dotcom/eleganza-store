@@ -32,19 +32,20 @@ router.post("/staff/invitations", requireOwner, async (req, res): Promise<void> 
       emailAddress: email,
       notify: true,
       redirectUrl: "/sign-up",
-      publicMetadata: { displayName, role: parsed.data.role },
+      publicMetadata: { displayName, permissions: parsed.data.permissions },
     });
     const response = InviteStaffResponse.parse({
       id: invitation.id,
       email,
       displayName,
-      role: parsed.data.role,
+      role: parsed.data.permissions[0],
+      permissions: parsed.data.permissions,
       status: "pending",
     });
     await writeAudit(req.staff?.id, "invite", "staff", invitation.id, {
       email,
       displayName,
-      role: parsed.data.role,
+      permissions: parsed.data.permissions,
     });
     res.status(201).json(response);
   } catch (error) {
@@ -60,25 +61,38 @@ router.patch("/staff/:id", requireOwner, async (req, res): Promise<void> => {
     const error = !params.success ? params.error.message : "Invalid request body";
     res.status(400).json({ error }); return;
   }
-  if (params.data.id === req.staff?.id && parsed.data.status === "inactive") {
-    res.status(400).json({ error: "Owners cannot deactivate themselves" }); return;
-  }
   const [target] = await db.select().from(staffTable).where(eq(staffTable.id, params.data.id));
   if (!target) { res.status(404).json({ error: "Staff member not found" }); return; }
-  if (target.id === req.staff?.id && parsed.data.role && parsed.data.role !== "owner") {
-    res.status(400).json({ error: "Owners cannot demote themselves" }); return;
+  const targetPermissions = target.permissions?.length ? target.permissions : [target.role];
+  const requestedPermissions = parsed.data.permissions?.length
+    ? parsed.data.permissions
+    : parsed.data.role
+      ? [parsed.data.role]
+      : targetPermissions;
+  const nextPermissions: typeof targetPermissions = requestedPermissions.includes("owner")
+    ? ["owner", ...requestedPermissions.filter((permission) => permission !== "owner")]
+    : requestedPermissions;
+  if (params.data.id === req.staff?.id && (parsed.data.status === "inactive" || !nextPermissions.includes("owner"))) {
+    res.status(400).json({ error: "Owners cannot deactivate themselves" }); return;
   }
-  if (target.role === "owner" && (parsed.data.role && parsed.data.role !== "owner" || parsed.data.status === "inactive")) {
+  if (targetPermissions.includes("owner") && (!nextPermissions.includes("owner") || parsed.data.status === "inactive")) {
     const [owners] = await db.select({ value: count(staffTable.id) }).from(staffTable)
       .where(and(eq(staffTable.role, "owner"), eq(staffTable.status, "active")));
     if (Number(owners?.value ?? 0) <= 1) {
       res.status(400).json({ error: "At least one active owner is required" }); return;
     }
   }
-  const [updated] = await db.update(staffTable).set(parsed.data)
+  const updateData: Partial<typeof staffTable.$inferInsert> = {
+    ...(parsed.data.status !== undefined ? { status: parsed.data.status } : {}),
+    ...(parsed.data.displayName !== undefined ? { displayName: parsed.data.displayName } : {}),
+    ...(parsed.data.email !== undefined ? { email: parsed.data.email } : {}),
+    role: nextPermissions[0],
+    permissions: nextPermissions,
+  };
+  const [updated] = await db.update(staffTable).set(updateData)
     .where(eq(staffTable.id, params.data.id)).returning();
   if (!updated) { res.status(404).json({ error: "Staff member not found" }); return; }
-  await writeAudit(req.staff?.id, "update", "staff", updated.id, parsed.data);
+  await writeAudit(req.staff?.id, "update", "staff", updated.id, updateData);
   res.json(UpdateStaffResponse.parse(updated));
 });
 

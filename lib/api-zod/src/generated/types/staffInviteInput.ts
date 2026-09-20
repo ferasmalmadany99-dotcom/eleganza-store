@@ -11,5 +11,6 @@ export interface StaffInviteInput {
   email: string;
   /** @minLength 2 */
   displayName: string;
-  role: StaffRole;
+  /** @minItems 1 */
+  permissions: StaffRole[];
 }

@@ -10,6 +10,7 @@ import type { StaffStatus } from './staffStatus';
 
 export interface StaffUpdate {
   role?: StaffRole;
+  permissions?: StaffRole[];
   status?: StaffStatus;
   displayName?: string;
   email?: string;

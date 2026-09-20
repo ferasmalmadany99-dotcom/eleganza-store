@@ -7,10 +7,10 @@ import { buttonClass, can, EmptyState, ErrorState, Field, getErrorMessage, input
 const statuses: OrderStatus[] = ["pending", "confirmed", "processing", "completed", "cancelled", "returned"];
 
 export default function Orders() {
-  const { language, role } = useAdmin();
+  const { language, permissions } = useAdmin();
   const isAr = language === "ar";
-  const canCreate = can(role, "sales");
-  const canUpdate = can(role, "manager");
+  const canCreate = can(permissions, "sales");
+  const canUpdate = can(permissions, "manager");
   const [filter, setFilter] = useState<OrderStatus | "">("");
   const [showCreate, setShowCreate] = useState(false);
   const [customerName, setCustomerName] = useState("");

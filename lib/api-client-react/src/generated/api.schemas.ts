@@ -35,6 +35,8 @@ export interface Staff {
   /** @nullable */
   email?: string | null;
   role: StaffRole;
+  /** @minItems 1 */
+  permissions: StaffRole[];
   status: StaffStatus;
   createdAt: string;
   updatedAt: string;
@@ -44,6 +46,7 @@ export type Session = Staff;
 
 export interface StaffUpdate {
   role?: StaffRole;
+  permissions?: StaffRole[];
   status?: StaffStatus;
   displayName?: string;
   email?: string;
@@ -53,7 +56,8 @@ export interface StaffInviteInput {
   email: string;
   /** @minLength 2 */
   displayName: string;
-  role: StaffRole;
+  /** @minItems 1 */
+  permissions: StaffRole[];
 }
 
 export type StaffInviteResponseStatus = typeof StaffInviteResponseStatus[keyof typeof StaffInviteResponseStatus];
@@ -68,6 +72,7 @@ export interface StaffInviteResponse {
   email: string;
   displayName: string;
   role: StaffRole;
+  permissions: StaffRole[];
   status: StaffInviteResponseStatus;
 }
 
