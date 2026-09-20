@@ -570,6 +570,28 @@ export const ListStaffResponse = zod.array(ListStaffResponseItem)
 
 
 /**
+ * @summary Invite a staff member
+ */
+export const inviteStaffBodyDisplayNameMin = 2;
+
+
+
+export const InviteStaffBody = zod.object({
+  "email": zod.string().email(),
+  "displayName": zod.string().min(inviteStaffBodyDisplayNameMin),
+  "role": zod.enum(['owner', 'manager', 'inventory', 'sales', 'viewer'])
+})
+
+export const InviteStaffResponse = zod.object({
+  "id": zod.string(),
+  "email": zod.string().email(),
+  "displayName": zod.string(),
+  "role": zod.enum(['owner', 'manager', 'inventory', 'sales', 'viewer']),
+  "status": zod.enum(['pending'])
+})
+
+
+/**
  * @summary Update staff role or status
  */
 export const UpdateStaffParams = zod.object({

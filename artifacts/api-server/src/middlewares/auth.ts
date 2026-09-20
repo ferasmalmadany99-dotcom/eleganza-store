@@ -1,8 +1,14 @@
-import { getAuth } from "@clerk/express";
+import { clerkClient, getAuth } from "@clerk/express";
 import type { NextFunction, Request, Response } from "express";
 import { eq } from "drizzle-orm";
 import { db, staffTable } from "@workspace/db";
 import type { StaffRole } from "@workspace/api-zod";
+
+const staffRoles: StaffRole[] = ["owner", "manager", "inventory", "sales", "viewer"];
+
+function isStaffRole(value: unknown): value is StaffRole {
+  return typeof value === "string" && staffRoles.includes(value as StaffRole);
+}
 
 declare global {
   namespace Express {
@@ -19,11 +25,28 @@ export async function ensureStaffProfile(userId: string, req: Request) {
 
   const count = await db.select({ id: staffTable.id }).from(staffTable).limit(1);
   const first = count.length === 0;
+  let displayName = userId;
+  let email: string | undefined;
+  let invitedRole: StaffRole | undefined;
+  try {
+    const user = await clerkClient.users.getUser(userId);
+    const metadata = user.publicMetadata as Record<string, unknown>;
+    const fullName = [user.firstName, user.lastName].filter(Boolean).join(" ").trim();
+    displayName = typeof metadata.displayName === "string" && metadata.displayName.trim()
+      ? metadata.displayName.trim()
+      : fullName || user.username || userId;
+    email = user.primaryEmailAddress?.emailAddress
+      ?? user.emailAddresses.find((address) => address.id === user.primaryEmailAddressId)?.emailAddress;
+    invitedRole = isStaffRole(metadata.role) ? metadata.role : undefined;
+  } catch (error) {
+    req.log.warn({ err: error, userId }, "Unable to load Clerk user details");
+  }
   try {
     const [created] = await db.insert(staffTable).values({
       clerkUserId: userId,
-      displayName: userId,
-      role: first ? "owner" : "viewer",
+      displayName,
+      email,
+      role: first ? "owner" : (invitedRole ?? "viewer"),
       status: first ? "active" : "inactive",
     }).onConflictDoNothing({ target: staffTable.clerkUserId }).returning();
     if (created) return created;

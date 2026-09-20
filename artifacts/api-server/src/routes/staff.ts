@@ -1,7 +1,8 @@
 import { Router, type IRouter } from "express";
 import { eq, and, count } from "drizzle-orm";
+import { clerkClient } from "@clerk/express";
 import { db, staffTable } from "@workspace/db";
-import { ListStaffResponse, UpdateStaffBody, UpdateStaffParams, UpdateStaffResponse } from "@workspace/api-zod";
+import { InviteStaffBody, InviteStaffResponse, ListStaffResponse, UpdateStaffBody, UpdateStaffParams, UpdateStaffResponse } from "@workspace/api-zod";
 import { requireAuth, requireOwner } from "../middlewares/auth";
 import { writeAudit } from "../lib/audit";
 
@@ -11,6 +12,45 @@ router.use(requireAuth);
 router.get("/staff", requireOwner, async (_req, res): Promise<void> => {
   const staff = await db.select().from(staffTable);
   res.json(ListStaffResponse.parse(staff));
+});
+
+router.post("/staff/invitations", requireOwner, async (req, res): Promise<void> => {
+  const parsed = InviteStaffBody.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.message }); return;
+  }
+
+  const email = parsed.data.email.trim().toLowerCase();
+  const displayName = parsed.data.displayName.trim();
+  const [existingStaff] = await db.select({ id: staffTable.id }).from(staffTable).where(eq(staffTable.email, email)).limit(1);
+  if (existingStaff) {
+    res.status(409).json({ error: "A staff member with this email already exists" }); return;
+  }
+
+  try {
+    const invitation = await clerkClient.invitations.createInvitation({
+      emailAddress: email,
+      notify: true,
+      redirectUrl: "/sign-up",
+      publicMetadata: { displayName, role: parsed.data.role },
+    });
+    const response = InviteStaffResponse.parse({
+      id: invitation.id,
+      email,
+      displayName,
+      role: parsed.data.role,
+      status: "pending",
+    });
+    await writeAudit(req.staff?.id, "invite", "staff", invitation.id, {
+      email,
+      displayName,
+      role: parsed.data.role,
+    });
+    res.status(201).json(response);
+  } catch (error) {
+    req.log.error({ err: error, email }, "Unable to create staff invitation");
+    res.status(400).json({ error: "Unable to send the staff invitation" });
+  }
 });
 
 router.patch("/staff/:id", requireOwner, async (req, res): Promise<void> => {

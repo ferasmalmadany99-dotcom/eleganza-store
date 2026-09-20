@@ -266,6 +266,22 @@ paths:
               schema:
                 type: array
                 items: { $ref: "#/components/schemas/Staff" }
+  /staff/invitations:
+    post:
+      operationId: inviteStaff
+      tags: [staff]
+      summary: Invite a staff member
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/StaffInviteInput" }
+      responses:
+        "201":
+          description: Staff invitation created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/StaffInviteResponse" }
   /staff/{id}:
     patch:
       operationId: updateStaff
@@ -442,6 +458,22 @@ components:
         status: { $ref: "#/components/schemas/StaffStatus" }
         displayName: { type: string }
         email: { type: string }
+    StaffInviteInput:
+      type: object
+      required: [email, displayName, role]
+      properties:
+        email: { type: string, format: email }
+        displayName: { type: string, minLength: 2 }
+        role: { $ref: "#/components/schemas/StaffRole" }
+    StaffInviteResponse:
+      type: object
+      required: [id, email, displayName, role, status]
+      properties:
+        id: { type: string }
+        email: { type: string, format: email }
+        displayName: { type: string }
+        role: { $ref: "#/components/schemas/StaffRole" }
+        status: { type: string, enum: [pending] }
     Product:
       type: object
       required: [id, sku, nameEn, nameAr, category, salePriceMinor, costMinor, quantityOnHand, reorderThreshold, imageUrls, active, createdAt, updatedAt]

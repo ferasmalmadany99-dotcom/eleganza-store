@@ -49,6 +49,28 @@ export interface StaffUpdate {
   email?: string;
 }
 
+export interface StaffInviteInput {
+  email: string;
+  /** @minLength 2 */
+  displayName: string;
+  role: StaffRole;
+}
+
+export type StaffInviteResponseStatus = typeof StaffInviteResponseStatus[keyof typeof StaffInviteResponseStatus];
+
+
+export const StaffInviteResponseStatus = {
+  pending: 'pending',
+} as const;
+
+export interface StaffInviteResponse {
+  id: string;
+  email: string;
+  displayName: string;
+  role: StaffRole;
+  status: StaffInviteResponseStatus;
+}
+
 export interface Product {
   id: number;
   sku: string;
