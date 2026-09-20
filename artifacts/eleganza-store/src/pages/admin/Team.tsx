@@ -1,5 +1,6 @@
-import { Edit3, MailPlus, ShieldCheck, UserRound } from "lucide-react";
+import { Edit3, MailCheck, MailPlus, ShieldCheck, UserRound } from "lucide-react";
 import { useState } from "react";
+import { useSignIn } from "@clerk/react/legacy";
 import { useInviteStaff, useListStaff, useUpdateStaff, type Staff, type StaffRole, type StaffStatus } from "@workspace/api-client-react";
 import { queryClient } from "@/lib/queryClient";
 import { buttonClass, EmptyState, ErrorState, Field, getErrorMessage, inputClass, LoadingState, PageHeader, Panel, PanelTitle, Toast, useAdmin, dateLabel } from "@/components/admin/AdminUI";
@@ -27,6 +28,8 @@ export default function Team() {
   const [editEmail, setEditEmail] = useState("");
   const [editPermissions, setEditPermissions] = useState<StaffRole[]>([]);
   const [editStatus, setEditStatus] = useState<StaffStatus>("inactive");
+  const [resendPending, setResendPending] = useState(false);
+  const { isLoaded, signIn } = useSignIn();
   const staff = useListStaff();
   const update = useUpdateStaff();
   const invite = useInviteStaff();
@@ -73,6 +76,27 @@ export default function Team() {
       setMessage(isAr ? "تم تحديث بيانات الموظف" : "Employee details updated");
     } catch (error) {
       setMessage(getErrorMessage(error));
+    }
+  }
+
+  async function resendLoginCode() {
+    if (!editing || !editEmail.trim() || !isLoaded) {
+      setMessage(isAr ? "أدخل بريد الموظف أولًا" : "Enter the employee email first");
+      return;
+    }
+    setResendPending(true);
+    try {
+      await signIn.create({ identifier: editEmail.trim() });
+      const emailFactor = signIn.supportedFirstFactors?.find((factor) => factor.strategy === "email_code");
+      if (!emailFactor || !("emailAddressId" in emailFactor)) {
+        throw new Error(isAr ? "لا يوجد بريد مؤهل لإرسال الرمز" : "No eligible email factor was found");
+      }
+      await signIn.prepareFirstFactor({ strategy: "email_code", emailAddressId: emailFactor.emailAddressId });
+      setMessage(isAr ? "تم إرسال رمز دخول جديد إلى بريد الموظف" : "A new sign-in code was sent to the employee email");
+    } catch (error) {
+      setMessage(getErrorMessage(error, isAr ? "تعذر إرسال رمز الدخول" : "Unable to send the sign-in code"));
+    } finally {
+      setResendPending(false);
     }
   }
 
@@ -135,7 +159,7 @@ export default function Team() {
         <form onSubmit={submitEdit} className="grid gap-4">
           <div className="grid gap-4 md:grid-cols-2">
             <Field label={isAr ? "اسم الموظف" : "Employee name"}><input className={inputClass} required minLength={2} value={editDisplayName} onChange={(event) => setEditDisplayName(event.target.value)} /></Field>
-            <Field label={isAr ? "البريد الإلكتروني" : "Email address"}><input className={inputClass} required type="email" value={editEmail} onChange={(event) => setEditEmail(event.target.value)} /></Field>
+            <Field label={isAr ? "البريد الإلكتروني" : "Email address"}><input className={inputClass} required type="email" value={editEmail} onChange={(event) => setEditEmail(event.target.value)} /><button type="button" className="mt-2 inline-flex h-9 items-center gap-2 border border-border px-3 text-xs font-semibold transition hover:border-primary hover:text-primary" onClick={resendLoginCode} disabled={resendPending || !isLoaded}><MailCheck className="h-4 w-4" />{resendPending ? (isAr ? "جاري الإرسال..." : "Sending...") : (isAr ? "إعادة إرسال رمز الدخول" : "Resend sign-in code")}</button></Field>
           </div>
           <Field label={isAr ? "الوظائف والصلاحيات" : "Services and permissions"}>
             {permissionChoices(editPermissions, setEditPermissions)}
