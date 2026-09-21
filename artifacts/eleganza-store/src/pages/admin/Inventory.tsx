@@ -1,8 +1,7 @@
-import html2canvas from "html2canvas";
-import { jsPDF } from "jspdf";
 import { Boxes, Download, Eye, FileText, Plus, Trash2, X } from "lucide-react";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useCreateInventoryMovement, useDeleteInventoryMovement, useListInventoryMovements, useListOrders, useListProducts, type InventoryMovement, type InventoryMovementInput, type InventoryMovementType, type Order, type Product } from "@workspace/api-client-react";
+import { downloadPaginatedPdf } from "@/lib/paginatedPdf";
 import { queryClient } from "@/lib/queryClient";
 import { buttonClass, can, EmptyState, ErrorState, Field, getErrorMessage, inputClass, LoadingState, money, PageHeader, Panel, PanelTitle, quietButtonClass, Toast, useAdmin, dateLabel } from "@/components/admin/AdminUI";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -15,6 +14,9 @@ const movementTypeLabels: Record<InventoryMovementType, { en: string; ar: string
   adjustment: { en: "Adjustment", ar: "تسوية" },
 };
 
+const escapeHtml = (value: string) =>
+  value.replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" })[character] ?? character);
+
 function PurchaseInvoiceModal({ movement, movements, products, isAr, language, dir, onClose }: {
   movement: InventoryMovement;
   movements: InventoryMovement[];
@@ -24,7 +26,6 @@ function PurchaseInvoiceModal({ movement, movements, products, isAr, language, d
   dir: "ltr" | "rtl";
   onClose: () => void;
 }) {
-  const invoiceRef = useRef<HTMLDivElement>(null);
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloadError, setDownloadError] = useState<string | null>(null);
   const productNames = new Map(products.map((product) => [product.id, isAr ? product.nameAr || product.nameEn : product.nameEn]));
@@ -35,30 +36,26 @@ function PurchaseInvoiceModal({ movement, movements, products, isAr, language, d
   const hasMissingCost = lines.some((item) => item.unitCostMinor == null);
 
   async function downloadPdf() {
-    if (!invoiceRef.current) return;
     setIsDownloading(true);
     setDownloadError(null);
     try {
-      await document.fonts?.ready;
-      const canvas = await html2canvas(invoiceRef.current, { scale: 2, backgroundColor: "#fffaf3", useCORS: true });
-      const pdf = new jsPDF({ orientation: "portrait", unit: "pt", format: "a4" });
-      const margin = 32;
-      const pageWidth = pdf.internal.pageSize.getWidth() - margin * 2;
-      const pageHeight = pdf.internal.pageSize.getHeight();
-      const imageHeight = canvas.height * pageWidth / canvas.width;
-      const imageData = canvas.toDataURL("image/png");
-      let remainingHeight = imageHeight;
-      let offsetY = margin;
-      pdf.addImage(imageData, "PNG", margin, offsetY, pageWidth, imageHeight);
-      remainingHeight -= pageHeight - margin * 2;
-      while (remainingHeight > 0) {
-        pdf.addPage();
-        offsetY = margin - (imageHeight - remainingHeight);
-        pdf.addImage(imageData, "PNG", margin, offsetY, pageWidth, imageHeight);
-        remainingHeight -= pageHeight - margin * 2;
-      }
+      const pageSize = 8;
+      const linePages: InventoryMovement[][] = [];
+      for (let index = 0; index < lines.length; index += pageSize) linePages.push(lines.slice(index, index + pageSize));
       const safeInvoiceNumber = invoiceNumber.replace(/[^a-z0-9_-]+/gi, "-").replace(/^-+|-+$/g, "") || `movement-${movement.id}`;
-      pdf.save(`eleganza-purchase-${safeInvoiceNumber}.pdf`);
+      const pages = linePages.map((pageLines, pageIndex) => {
+        const rows = pageLines.map((item) => {
+          const itemName = productNames.get(item.productId) ?? (isAr ? item.productNameAr || item.productNameEn || `منتج #${item.productId}` : item.productNameEn || `Product #${item.productId}`);
+          const lineTotal = item.unitCostMinor != null ? money(item.quantity * item.unitCostMinor, language) : "—";
+          return `<tr><td style="padding:12px 4px;border-bottom:1px solid #e5dacf;word-break:break-word">${escapeHtml(itemName)}</td><td dir="ltr" style="padding:12px 4px;border-bottom:1px solid #e5dacf;text-align:end;direction:ltr;unicode-bidi:isolate">${item.quantity}</td><td style="padding:12px 4px;border-bottom:1px solid #e5dacf;text-align:end">${item.unitCostMinor != null ? escapeHtml(money(item.unitCostMinor, language)) : "—"}</td><td style="padding:12px 4px;border-bottom:1px solid #e5dacf;text-align:end">${escapeHtml(lineTotal)}</td></tr>`;
+        }).join("");
+        const isLastPage = pageIndex === linePages.length - 1;
+        const footerTotal = isLastPage
+          ? `<div style="display:flex;justify-content:space-between;border-top:2px solid #312b25;margin-top:20px;padding-top:16px;font-size:20px"><span>${isAr ? "الإجمالي" : "Total"}</span><strong dir="ltr" style="direction:ltr;unicode-bidi:isolate">${hasMissingCost ? "—" : escapeHtml(money(totalMinor, language))}</strong></div>`
+          : `<p style="margin:20px 0 0;color:#6f6258;font-size:12px">${isAr ? "يتبع في الصفحة التالية" : "Continued on the next page"}</p>`;
+        return `<div dir="${dir}" lang="${language}" style="height:100%;box-sizing:border-box;border:1px solid #ded0c1;padding:40px;font-family:Arial,sans-serif;unicode-bidi:isolate"><div style="display:flex;justify-content:space-between;gap:24px;align-items:flex-start;border-bottom:2px solid #9f523d;padding-bottom:24px"><div><p style="color:#9f523d;font-size:11px;letter-spacing:.16em;text-transform:uppercase;margin:0 0 8px">Eleganza Operations</p><h1 style="font-size:30px;font-weight:400;margin:0 0 8px">${isAr ? "فاتورة شراء مخزون" : "Inventory purchase invoice"}</h1><p style="line-height:1.6;margin:5px 0;color:#6f6258">${isAr ? "مستند مشتق من عملية الشراء المسجلة في المخزون." : "Generated from the recorded inventory purchase."}</p></div><div style="text-align:end"><p style="color:#9f523d;font-size:11px;letter-spacing:.16em;text-transform:uppercase;margin:0 0 8px">${isAr ? "رقم الفاتورة" : "Invoice number"}</p><p dir="ltr" style="font-size:16px;color:#9f523d;font-weight:bold;direction:ltr;unicode-bidi:isolate;margin:0">${escapeHtml(invoiceNumber)}</p><p style="margin:12px 0 0;color:#8b7b6e;font-size:11px">${isAr ? "التاريخ" : "Date"} · ${escapeHtml(dateLabel(movement.createdAt, language))}</p><p style="margin:8px 0 0;color:#8b7b6e;font-size:11px">${pageIndex + 1} / ${linePages.length}</p></div></div><section style="margin-top:28px"><table style="width:100%;table-layout:fixed;border-collapse:collapse;font-size:14px"><thead><tr><th style="width:40%;text-align:start;border-bottom:1px solid #ded0c1;padding:12px 4px;font-size:11px;color:#8b7b6e">${isAr ? "المنتج" : "Product"}</th><th style="width:15%;text-align:end;border-bottom:1px solid #ded0c1;padding:12px 4px;font-size:11px;color:#8b7b6e">${isAr ? "الكمية" : "Quantity"}</th><th style="width:22%;text-align:end;border-bottom:1px solid #ded0c1;padding:12px 4px;font-size:11px;color:#8b7b6e">${isAr ? "تكلفة الوحدة" : "Unit cost"}</th><th style="width:23%;text-align:end;border-bottom:1px solid #ded0c1;padding:12px 4px;font-size:11px;color:#8b7b6e">${isAr ? "الإجمالي" : "Total"}</th></tr></thead><tbody>${rows}</tbody></table>${footerTotal}</section>${isLastPage && movement.note ? `<p style="margin-top:28px;border-top:1px solid #ded0c1;padding-top:12px;color:#6f6258;font-size:12px"><strong>${isAr ? "ملاحظة" : "Note"}:</strong> ${escapeHtml(movement.note)}</p>` : ""}<div style="margin-top:28px;padding-top:12px;border-top:1px solid #ded0c1;color:#8b7b6e;font-size:11px;text-align:center">Eleganza Operations · ${escapeHtml(invoiceNumber)}</div></div>`;
+      });
+      await downloadPaginatedPdf({ pages, fileName: `eleganza-purchase-${safeInvoiceNumber}.pdf`, direction: dir });
     } catch {
       setDownloadError(isAr ? "تعذر إنشاء ملف الفاتورة. حاول مرة أخرى." : "Unable to create the invoice file. Please try again.");
     } finally {
@@ -75,7 +72,7 @@ function PurchaseInvoiceModal({ movement, movements, products, isAr, language, d
         </div>
         <button type="button" className={quietButtonClass} aria-label={isAr ? "إغلاق" : "Close"} onClick={onClose}><X className="h-4 w-4" /></button>
       </div>
-      <div ref={invoiceRef} className="border border-border bg-[#fffaf3] p-5 text-[#312b25] sm:p-8">
+      <div className="border border-border bg-[#fffaf3] p-5 text-[#312b25] sm:p-8">
         <div className="flex flex-wrap items-start justify-between gap-6 border-b-2 border-[#9f523d] pb-6">
           <div>
             <p className="font-mono-ui text-[10px] uppercase tracking-[.16em] text-[#9f523d]">Eleganza Operations</p>
