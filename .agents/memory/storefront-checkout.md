@@ -20,3 +20,9 @@ All delivery fields are mandatory at both client and server boundaries; whitespa
 **Why:** A partially specified delivery address can make an otherwise valid order impossible to fulfil, and client-side required attributes alone can be bypassed.
 
 **How to apply:** Keep UI validation for immediate feedback, but repeat trimmed-value and URL validation in the public order route.
+
+The checkout UI must provide an explicit save action after a customer returns from Google Maps; entering a link alone is not treated as a confirmed location.
+
+**Why:** Google Maps opens outside the storefront, so the customer needs a clear handoff back to the checkout before continuing.
+
+**How to apply:** Keep the save button disabled until a link exists, mark the location saved only after URL validation, and block the review step until that state is true.

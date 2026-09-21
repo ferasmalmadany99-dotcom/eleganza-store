@@ -347,6 +347,9 @@ const copy = {
     useCurrentLocation: 'Use my current location',
     locationLinkPlaceholder: 'Paste the Google Maps shared link',
     locationReady: 'Location link added',
+    saveLocation: 'Save location',
+    locationSaved: 'Location saved',
+    locationSaveRequired: 'Save your Google Maps location before continuing.',
     locationError: 'We could not access your location. Open Google Maps and paste the shared link instead.',
     checkoutRequiredFields: 'Please complete every delivery field before continuing.',
     continueReview: 'Review order',
@@ -457,6 +460,9 @@ const copy = {
     useCurrentLocation: 'استخدام موقعي الحالي',
     locationLinkPlaceholder: 'الصق رابط الموقع من Google Maps',
     locationReady: 'تمت إضافة رابط الموقع',
+    saveLocation: 'حفظ الموقع',
+    locationSaved: 'تم حفظ الموقع',
+    locationSaveRequired: 'احفظ موقعك على Google Maps قبل المتابعة.',
     locationError: 'تعذر الوصول إلى موقعك. افتح Google Maps والصق رابط المشاركة بدلًا من ذلك.',
     checkoutRequiredFields: 'يرجى إكمال جميع خانات بيانات التوصيل قبل المتابعة.',
     continueReview: 'مراجعة الطلب',
@@ -999,11 +1005,13 @@ function CheckoutPanel({
     customerLocationUrl: '',
   });
   const [locationError, setLocationError] = useState('');
+  const [locationSaved, setLocationSaved] = useState(false);
   const [formError, setFormError] = useState('');
   const [orderNumber, setOrderNumber] = useState('');
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const updateField = (field: keyof typeof form, value: string) => {
     setForm((current) => ({ ...current, [field]: value }));
+    if (field === 'customerLocationUrl') setLocationSaved(false);
     setFormError('');
   };
   const mapSearchUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${form.address}, ${form.city}`)}`;
@@ -1021,10 +1029,27 @@ function CheckoutPanel({
     );
   };
 
+  const saveLocation = () => {
+    try {
+      const locationUrl = new URL(form.customerLocationUrl.trim());
+      if (!['http:', 'https:'].includes(locationUrl.protocol)) throw new Error('Invalid location URL');
+      updateField('customerLocationUrl', form.customerLocationUrl.trim());
+      setLocationError('');
+      setLocationSaved(true);
+    } catch {
+      setLocationSaved(false);
+      setLocationError(c.locationError);
+    }
+  };
+
   const continueToReview = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if ([form.customerName, form.customerPhone, form.city, form.address, form.customerLocationUrl].some((value) => !value.trim())) {
       setFormError(c.checkoutRequiredFields);
+      return;
+    }
+    if (!locationSaved) {
+      setFormError(c.locationSaveRequired);
       return;
     }
     try {
@@ -1101,7 +1126,10 @@ function CheckoutPanel({
                     </div>
                   </div>
                   <input className={inputClass} required type="url" value={form.customerLocationUrl} onChange={(event) => { setLocationError(''); updateField('customerLocationUrl', event.target.value); }} placeholder={c.locationLinkPlaceholder} data-testid="input-checkout-location" />
-                  {form.customerLocationUrl && <a href={form.customerLocationUrl} target="_blank" rel="noreferrer" className="mt-2 inline-flex items-center gap-2 text-xs text-[#9f523d] hover:underline"><Check size={13} />{c.locationReady}</a>}
+                  <div className="mt-3 flex flex-wrap items-center gap-3">
+                    <button type="button" onClick={saveLocation} disabled={!form.customerLocationUrl.trim()} className="inline-flex items-center gap-2 bg-[#9f523d] px-4 py-2.5 font-mono-ui text-[9px] uppercase tracking-[.14em] text-[#fff5e8] transition-colors hover:bg-[#7f3f31] disabled:cursor-not-allowed disabled:opacity-40" data-testid="button-save-location">{locationSaved ? <Check size={13} /> : <MapPin size={13} />}{locationSaved ? c.locationSaved : c.saveLocation}</button>
+                    {form.customerLocationUrl && <a href={form.customerLocationUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-xs text-[#9f523d] hover:underline"><ExternalLink size={13} />{c.locationReady}</a>}
+                  </div>
                   {locationError && <p className="mt-2 text-xs leading-5 text-[#8b4037]" role="alert">{locationError}</p>}
                 </div>
               </div>
