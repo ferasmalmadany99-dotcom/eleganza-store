@@ -112,7 +112,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </aside>
         {mobileOpen && <button aria-label="Close navigation" className="fixed inset-0 z-30 bg-foreground/20 lg:hidden" onClick={() => setMobileOpen(false)} />}
         {navigationOpen && <button type="button" aria-label={language === "ar" ? "إغلاق خيارات القائمة" : "Close navigation options"} className="fixed inset-0 z-40 bg-foreground/20" onClick={() => setNavigationOpen(false)} />}
-        <main className="min-h-screen lg:ps-72">
+        <main className="min-h-screen min-w-0 lg:ps-72">
           <header className="sticky top-0 z-20 flex min-h-16 items-center justify-between gap-4 border-b border-border bg-background/90 px-5 py-3 backdrop-blur lg:px-10">
             <button className="lg:hidden" onClick={() => setMobileOpen(true)} aria-label="Open navigation"><Menu className="h-5 w-5" /></button>
             <div><p className="font-mono-ui text-xs font-semibold uppercase tracking-[.18em] text-primary">{language === "ar" ? "عمليات Eleganza" : "Eleganza operations"}</p><p className="text-xs text-muted-foreground">{language === "ar" ? "مساحة العمل الفعلية — التغييرات محفوظة" : "Live workspace — changes are saved"}</p></div>

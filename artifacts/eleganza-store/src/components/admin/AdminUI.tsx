@@ -93,26 +93,26 @@ export function PageHeader({
   action?: React.ReactNode;
 }) {
   return (
-    <div className="mb-8 flex flex-col gap-5 border-b border-border pb-7 lg:flex-row lg:items-end lg:justify-between">
+    <div className="mb-8 flex min-w-0 flex-col gap-5 border-b border-border pb-7 lg:flex-row lg:items-end lg:justify-between">
       <div>
         <p className="font-mono-ui text-[10px] uppercase tracking-[0.24em] text-primary">{eyebrow}</p>
         <h1 className="mt-2 font-display text-4xl leading-none text-foreground md:text-5xl">{title}</h1>
         {description && <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">{description}</p>}
       </div>
-      {action && <div className="flex shrink-0 flex-wrap gap-2">{action}</div>}
+      {action && <div className="flex w-full shrink-0 flex-wrap justify-start gap-2 lg:w-auto lg:justify-end">{action}</div>}
     </div>
   );
 }
 
 export function Panel({ children, className = "" }: { children: React.ReactNode; className?: string }) {
-  return <section className={`rounded-2xl border border-border bg-card p-5 shadow-[0_8px_30px_hsl(var(--foreground)/.03)] ${className}`}>{children}</section>;
+  return <section className={`min-w-0 rounded-2xl border border-border bg-card p-5 shadow-[0_8px_30px_hsl(var(--foreground)/.03)] ${className}`}>{children}</section>;
 }
 
 export function PanelTitle({ children, detail }: { children: React.ReactNode; detail?: React.ReactNode }) {
   return (
-    <div className="mb-5 flex items-center justify-between gap-3 border-b border-border pb-4">
-      <h2 className="font-display text-2xl text-foreground">{children}</h2>
-      {detail}
+    <div className="mb-5 flex flex-wrap items-center justify-between gap-3 border-b border-border pb-4">
+      <h2 className="min-w-0 font-display text-2xl text-foreground">{children}</h2>
+      <div className="shrink-0">{detail}</div>
     </div>
   );
 }
@@ -141,8 +141,8 @@ export function Field({ label, children, hint, labelClassName = "" }: { label: s
 
 export const inputClass = "h-10 w-full rounded-xl border border-input bg-background px-3 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15";
 export const textareaClass = "min-h-24 w-full resize-y rounded-xl border border-input bg-background px-3 py-2 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15";
-export const buttonClass = "inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-primary bg-primary px-4 text-xs font-semibold uppercase tracking-[.13em] text-primary-foreground transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50";
-export const quietButtonClass = "inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 text-xs font-semibold uppercase tracking-[.13em] text-foreground transition hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-50";
+export const buttonClass = "inline-flex h-10 shrink-0 whitespace-nowrap items-center justify-center gap-2 rounded-xl border border-primary bg-primary px-4 text-xs font-semibold uppercase tracking-[.13em] text-primary-foreground transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50";
+export const quietButtonClass = "inline-flex h-10 shrink-0 whitespace-nowrap items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 text-xs font-semibold uppercase tracking-[.13em] text-foreground transition hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-50";
 
 export function Toast({ message, onClose }: { message: string | null; onClose: () => void }) {
   if (!message) return null;
