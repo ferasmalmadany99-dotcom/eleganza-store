@@ -1128,7 +1128,7 @@ function BagDrawer({
                   <img src={item.image480} alt={item.name} width="96" height="112" loading="lazy" decoding="async" className="h-28 w-24 object-cover" />
                   <div className="flex min-w-0 flex-1 flex-col justify-between">
                     <div className="flex items-start justify-between gap-2"><div><h3 className="font-display text-2xl leading-none">{item.name}</h3><p className="mt-2 font-mono-ui text-[9px] uppercase tracking-[.1em] text-[#87796d]">{itemText.color}</p></div><button onClick={() => onRemove(item.id)} className="text-[#98887b] hover:text-[#9f523d]" aria-label={`Remove ${item.name}`} data-testid={`button-remove-${item.id}`}><X size={14} /></button></div>
-                    <div className="flex items-end justify-between"><div className="flex items-center border border-[#312b25]/20"><button className="grid h-7 w-7 place-items-center hover:bg-[#efe2d3]" onClick={() => onUpdate(item.id, -1)} aria-label={`Decrease ${item.name}`} data-testid={`button-decrease-${item.id}`}><Minus size={12} /></button><span className="w-7 text-center font-mono-ui text-[10px]" data-testid={`text-quantity-${item.id}`}>{item.quantity}</span><button className="grid h-7 w-7 place-items-center hover:bg-[#efe2d3]" onClick={() => onUpdate(item.id, 1)} aria-label={`Increase ${item.name}`} data-testid={`button-increase-${item.id}`}><Plus size={12} /></button></div><span className="font-mono-ui text-xs">{money(item.price * item.quantity)}</span></div>
+                    <div className="flex items-end justify-between"><div className="flex items-center border border-[#312b25]/20"><button className="grid h-7 w-7 place-items-center hover:bg-[#efe2d3]" onClick={() => onUpdate(item.id, -1)} aria-label={`Decrease ${item.name}`} data-testid={`button-decrease-${item.id}`}><Minus size={12} /></button><span className="w-7 text-center font-mono-ui text-[10px]" data-testid={`text-quantity-${item.id}`}>{item.quantity}</span><button className="grid h-7 w-7 place-items-center hover:bg-[#efe2d3]" onClick={() => onUpdate(item.id, 1)} aria-label={`Increase ${item.name}`} data-testid={`button-increase-${item.id}`}><Plus size={12} /></button></div><span className="font-mono-ui text-xs">{money(item.price * item.quantity, language)}</span></div>
                   </div>
                 </div>
                 );
@@ -1136,7 +1136,7 @@ function BagDrawer({
             </div>
           )}
         </div>
-         {items.length > 0 && <div className="border-t border-[#312b25]/15 px-6 py-6 sm:px-8"><div className="flex items-center justify-between"><span className="font-mono-ui text-[10px] uppercase tracking-[.16em] text-[#75685d]">{c.subtotal}</span><span className="font-display text-3xl">{money(subtotal)}</span></div><p className="mt-2 text-xs text-[#827469]">{c.freeShipping}</p><button onClick={onCheckout} className="mt-6 flex w-full items-center justify-center gap-3 bg-[#9f523d] py-4 font-mono-ui text-[10px] uppercase tracking-[.2em] text-[#fff5e8] hover:bg-[#7f3f31]" data-testid="button-checkout">{c.checkout} <ArrowRight size={15} /></button></div>}
+         {items.length > 0 && <div className="border-t border-[#312b25]/15 px-6 py-6 sm:px-8"><div className="flex items-center justify-between"><span className="font-mono-ui text-[10px] uppercase tracking-[.16em] text-[#75685d]">{c.subtotal}</span><span className="font-display text-3xl">{money(subtotal, language)}</span></div><p className="mt-2 text-xs text-[#827469]">{c.freeShipping}</p><button onClick={onCheckout} className="mt-6 flex w-full items-center justify-center gap-3 bg-[#9f523d] py-4 font-mono-ui text-[10px] uppercase tracking-[.2em] text-[#fff5e8] hover:bg-[#7f3f31]" data-testid="button-checkout">{c.checkout} <ArrowRight size={15} /></button></div>}
       </aside>
     </div>
   );
@@ -1300,7 +1300,7 @@ function CheckoutPanel({
               {formError && <p className="mt-5 border border-[#a64e3a]/30 bg-[#f2dfd7] px-4 py-3 text-sm leading-6 text-[#8b4037]" role="alert">{formError}</p>}
               <button type="submit" className="mt-8 flex w-full items-center justify-center gap-3 bg-[#9f523d] py-4 font-mono-ui text-[10px] uppercase tracking-[.2em] text-[#fff5e8] transition-colors hover:bg-[#7f3f31] sm:w-auto sm:px-10" data-testid="button-checkout-review">{c.continueReview}<ArrowRight size={15} /></button>
             </section>
-            <CheckoutSummary items={items} subtotal={subtotal} c={c} />
+            <CheckoutSummary items={items} subtotal={subtotal} language={language} c={c} />
           </form>
         )}
 
@@ -1322,7 +1322,7 @@ function CheckoutPanel({
                 <button type="button" onClick={placeOrder} disabled={createOrder.isPending} className="flex flex-1 items-center justify-center gap-3 bg-[#9f523d] px-6 py-4 font-mono-ui text-[10px] uppercase tracking-[.18em] text-[#fff5e8] transition-colors hover:bg-[#7f3f31] disabled:cursor-wait disabled:opacity-60" data-testid="button-place-order">{createOrder.isPending ? <><LoaderCircle size={15} className="animate-spin" />{c.placingOrder}</> : <>{c.placeOrder}<Check size={15} /></>}</button>
               </div>
             </section>
-            <CheckoutSummary items={items} subtotal={subtotal} c={c} />
+             <CheckoutSummary items={items} subtotal={subtotal} language={language} c={c} />
           </div>
         )}
 
@@ -1344,14 +1344,14 @@ function CheckoutPanel({
   );
 }
 
-function CheckoutSummary({ items, subtotal, c }: { items: CheckoutItem[]; subtotal: number; c: Copy }) {
+function CheckoutSummary({ items, subtotal, language, c }: { items: CheckoutItem[]; subtotal: number; language: Language; c: Copy }) {
   return (
     <aside className="h-fit border border-[#312b25]/15 bg-[#efe4d6] p-5 sm:p-6">
       <p className="font-mono-ui text-[10px] uppercase tracking-[.18em] text-[#9f523d]">{c.theBag}</p>
       <div className="mt-5 space-y-4">
-        {items.map((item) => <div key={item.id} className="flex items-start justify-between gap-4 border-b border-[#312b25]/10 pb-4 text-sm"><span className="min-w-0"><span className="block font-medium">{item.name}</span><span className="mt-1 block text-xs text-[#817267]">× {item.quantity}</span></span><span className="shrink-0 font-mono-ui text-xs">{money(item.price * item.quantity)}</span></div>)}
+        {items.map((item) => <div key={item.id} className="flex items-start justify-between gap-4 border-b border-[#312b25]/10 pb-4 text-sm"><span className="min-w-0"><span className="block font-medium">{item.name}</span><span className="mt-1 block text-xs text-[#817267]">× {item.quantity}</span></span><span className="shrink-0 font-mono-ui text-xs">{money(item.price * item.quantity, language)}</span></div>)}
       </div>
-      <div className="mt-5 flex items-center justify-between border-t border-[#312b25]/15 pt-5"><span className="font-mono-ui text-[10px] uppercase tracking-[.15em] text-[#75685d]">{c.subtotal}</span><span className="font-display text-3xl">{money(subtotal)}</span></div>
+      <div className="mt-5 flex items-center justify-between border-t border-[#312b25]/15 pt-5"><span className="font-mono-ui text-[10px] uppercase tracking-[.15em] text-[#75685d]">{c.subtotal}</span><span className="font-display text-3xl">{money(subtotal, language)}</span></div>
       <div className="mt-3 flex items-center justify-between text-xs text-[#75685d]"><span>{c.shipping}</span><span>{c.included}</span></div>
     </aside>
   );
@@ -1382,7 +1382,7 @@ function FavoritesDrawer({ items, language, c, onClose, onRemove, onSelect }: { 
                     <button onClick={() => onSelect(item)} className="shrink-0"><img src={item.image480} alt={item.name} width="96" height="112" loading="lazy" decoding="async" className="h-28 w-24 object-cover" /></button>
                     <div className="flex min-w-0 flex-1 flex-col justify-between">
                       <div className="flex items-start justify-between gap-2"><button onClick={() => onSelect(item)} className="text-start"><h3 className="font-display text-2xl leading-none">{item.name}</h3><p className="mt-2 font-mono-ui text-[9px] uppercase tracking-[.1em] text-[#87796d]">{itemText.color}</p></button><button onClick={() => onRemove(item.id)} className="text-[#a64e3a] hover:text-[#7f3f31]" aria-label={language === 'ar' ? `إزالة ${item.name} من المفضلة` : `Remove ${item.name} from favorites`}><Heart size={17} fill="currentColor" /></button></div>
-                      <div className="flex items-center justify-between"><button onClick={() => onSelect(item)} className="border-b border-[#312b25]/40 pb-1 font-mono-ui text-[9px] uppercase tracking-[.14em]">{language === 'ar' ? 'عرض المنتج' : 'View product'}</button><span className="font-mono-ui text-xs">{money(item.price)}</span></div>
+                      <div className="flex items-center justify-between"><button onClick={() => onSelect(item)} className="border-b border-[#312b25]/40 pb-1 font-mono-ui text-[9px] uppercase tracking-[.14em]">{language === 'ar' ? 'عرض المنتج' : 'View product'}</button><span className="font-mono-ui text-xs">{money(item.price, language)}</span></div>
                     </div>
                   </div>
                 );
@@ -1406,7 +1406,7 @@ function SearchPanel({ onClose, products: catalog, onSelect, c, language }: { on
       <div className="mx-auto max-w-[980px] px-5 py-6 sm:px-8 lg:px-12">
         <div className="flex items-center justify-between border-b border-[#312b25]/15 pb-5"><span className="font-display text-4xl">{c.findPiece}</span><button onClick={onClose} aria-label={c.close} data-testid="button-close-search"><X size={21} strokeWidth={1.3} /></button></div>
         <div className="flex items-center gap-4 border-b border-[#312b25]/30 py-7"><Search size={20} strokeWidth={1.3} className="text-[#9f523d]" /><input autoFocus value={query} onChange={(event) => setQuery(event.target.value)} placeholder={c.searchPlaceholder} className="w-full bg-transparent font-display text-3xl outline-none placeholder:text-[#b7a99d]" data-testid="input-search" /></div>
-        <div className="mt-8"><p className="font-mono-ui text-[10px] uppercase tracking-[.2em] text-[#9f523d]">{query ? `${results.length} ${c.results}` : c.consideredThings}</p><div className="mt-5 divide-y divide-[#312b25]/12">{results.map((product) => <button onClick={() => onSelect(product)} key={product.id} className="flex w-full items-center justify-between py-5 text-left hover:text-[#9f523d]" data-testid={`search-result-${product.id}`}><span className="font-display text-3xl">{product.name}</span><span className="font-mono-ui text-[10px] uppercase tracking-[.12em] text-[#8a796d]">{categoryLabels[language][product.category]} / {money(product.price)}</span></button>)}</div>{results.length === 0 && <p className="mt-8 font-display text-2xl text-[#817267]">{c.noResults}</p>}</div>
+        <div className="mt-8"><p className="font-mono-ui text-[10px] uppercase tracking-[.2em] text-[#9f523d]">{query ? `${results.length} ${c.results}` : c.consideredThings}</p><div className="mt-5 divide-y divide-[#312b25]/12">{results.map((product) => <button onClick={() => onSelect(product)} key={product.id} className="flex w-full items-center justify-between py-5 text-left hover:text-[#9f523d]" data-testid={`search-result-${product.id}`}><span className="font-display text-3xl">{product.name}</span><span className="font-mono-ui text-[10px] uppercase tracking-[.12em] text-[#8a796d]">{categoryLabels[language][product.category]} / {money(product.price, language)}</span></button>)}</div>{results.length === 0 && <p className="mt-8 font-display text-2xl text-[#817267]">{c.noResults}</p>}</div>
       </div>
     </div>
   );

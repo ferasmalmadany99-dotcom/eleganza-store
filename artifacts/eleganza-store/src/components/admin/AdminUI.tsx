@@ -47,7 +47,7 @@ export function money(minor: number, language: AdminLanguage) {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format((minor || 0) / 100);
-  return `${amount} د.ل`;
+  return `${amount} ${language === "ar" ? "د.ل" : "LYD"}`;
 }
 
 export function dateLabel(value: string | Date, language: AdminLanguage) {
