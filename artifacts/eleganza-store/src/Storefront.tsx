@@ -6,6 +6,7 @@ import {
   Check,
   ChevronDown,
   ChevronUp,
+  Download,
   ExternalLink,
   Heart,
   LoaderCircle,
@@ -352,6 +353,9 @@ const copy = {
     locationSaveRequired: 'Save your Google Maps location before continuing.',
     locationError: 'We could not access your location. Open Google Maps and paste the shared link instead.',
     checkoutRequiredFields: 'Please complete every delivery field before continuing.',
+    downloadReceipt: 'Download receipt PDF',
+    receiptDownloadHint: 'In the print window, choose Save as PDF.',
+    quantity: 'Quantity',
     continueReview: 'Review order',
     back: 'Back',
     payment: 'Payment method',
@@ -465,6 +469,9 @@ const copy = {
     locationSaveRequired: 'احفظ موقعك على Google Maps قبل المتابعة.',
     locationError: 'تعذر الوصول إلى موقعك. افتح Google Maps والصق رابط المشاركة بدلًا من ذلك.',
     checkoutRequiredFields: 'يرجى إكمال جميع خانات بيانات التوصيل قبل المتابعة.',
+    downloadReceipt: 'تنزيل إيصال الطلب PDF',
+    receiptDownloadHint: 'في نافذة الطباعة اختر «حفظ بصيغة PDF».',
+    quantity: 'الكمية',
     continueReview: 'مراجعة الطلب',
     back: 'رجوع',
     payment: 'طريقة الدفع',
@@ -666,6 +673,34 @@ const getProductCopy = (product: Product, language: Language) =>
 
 const money = (value: number) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value);
+
+const escapeHtml = (value: string) =>
+  value.replace(/[&<>"']/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' })[character] ?? character);
+
+function downloadReceiptPdf({
+  orderNumber,
+  items,
+  subtotal,
+  form,
+  language,
+  c,
+}: {
+  orderNumber: string;
+  items: CheckoutItem[];
+  subtotal: number;
+  form: { customerName: string; customerPhone: string; city: string; address: string; customerLocationUrl: string };
+  language: Language;
+  c: Copy;
+}) {
+  const receiptWindow = window.open('', '_blank', 'width=760,height=900');
+  if (!receiptWindow) return;
+  const itemRows = items.map((item) => `<tr><td>${escapeHtml(item.name)}</td><td>${item.quantity}</td><td>${escapeHtml(money(item.price * item.quantity))}</td></tr>`).join('');
+  const direction = language === 'ar' ? 'rtl' : 'ltr';
+  receiptWindow.document.write(`<!doctype html><html lang="${language}" dir="${direction}"><head><meta charset="utf-8"><title>${escapeHtml(c.downloadReceipt)} — ${escapeHtml(orderNumber)}</title><style>
+    :root{color-scheme:light}*{box-sizing:border-box}body{margin:0;background:#f8f0e6;color:#312b25;font-family:Arial,sans-serif;padding:40px}main{max-width:720px;margin:0 auto;background:#fffaf3;padding:40px;border:1px solid #ded0c1}header{display:flex;justify-content:space-between;gap:24px;align-items:flex-start;border-bottom:2px solid #9f523d;padding-bottom:24px}h1{font-family:Georgia,serif;font-size:36px;font-weight:400;margin:0 0 8px}p{line-height:1.6;margin:5px 0}.eyebrow{color:#9f523d;font-size:11px;letter-spacing:.16em;text-transform:uppercase}.order-number{font-size:16px;color:#9f523d;font-weight:bold;direction:ltr}.section{margin-top:28px}.section-title{font-size:11px;color:#9f523d;letter-spacing:.14em;text-transform:uppercase;margin-bottom:12px}dl{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:0}dt{font-size:11px;color:#8b7b6e}dd{margin:4px 0 0;font-size:14px}table{width:100%;border-collapse:collapse;font-size:14px}th,td{text-align:start;border-bottom:1px solid #e5dacf;padding:12px 4px}th{font-size:11px;color:#8b7b6e;text-transform:uppercase}.total{display:flex;justify-content:space-between;border-top:2px solid #312b25;margin-top:20px;padding-top:16px;font-size:20px}.print-button{display:block;margin:28px auto 0;background:#9f523d;color:#fff;padding:12px 20px;border:0;font-size:13px;cursor:pointer}@media print{body{background:#fff;padding:0}main{border:0;max-width:none;padding:0}.print-button{display:none}}
+  </style></head><body><main><header><div><p class="eyebrow">Eleganza / ${escapeHtml(c.checkoutSuccess)}</p><h1>${escapeHtml(c.checkoutSuccess)}</h1><p>${escapeHtml(c.cashOnDeliveryDetail)}</p></div><div><p class="eyebrow">${escapeHtml(c.orderNumber)}</p><p class="order-number">${escapeHtml(orderNumber)}</p></div></header><section class="section"><p class="section-title">${escapeHtml(c.checkoutDetails)}</p><dl><div><dt>${escapeHtml(c.customerName)}</dt><dd>${escapeHtml(form.customerName)}</dd></div><div><dt>${escapeHtml(c.customerPhone)}</dt><dd dir="ltr">${escapeHtml(form.customerPhone)}</dd></div><div><dt>${escapeHtml(c.customerCity)}</dt><dd>${escapeHtml(form.city)}</dd></div><div><dt>${escapeHtml(c.customerAddress)}</dt><dd>${escapeHtml(form.address)}</dd></div></dl><p style="margin-top:14px;font-size:12px;word-break:break-all"><strong>${escapeHtml(c.customerLocation)}</strong><br>${escapeHtml(form.customerLocationUrl)}</p></section><section class="section"><p class="section-title">${escapeHtml(c.theBag)}</p><table><thead><tr><th>${escapeHtml(c.included)}</th><th>${escapeHtml(c.quantity)}</th><th>${escapeHtml(c.subtotal)}</th></tr></thead><tbody>${itemRows}</tbody></table><div class="total"><span>${escapeHtml(c.subtotal)}</span><strong>${escapeHtml(money(subtotal))}</strong></div></section><button class="print-button" onclick="window.print()">${escapeHtml(c.downloadReceipt)}</button></main><script>window.onload=function(){window.focus();window.print()}</script></body></html>`);
+  receiptWindow.document.close();
+}
 
 const normalizeProductName = (name: string) => name.trim().toLocaleLowerCase();
 
@@ -1170,7 +1205,9 @@ function CheckoutPanel({
             <p className="mt-6 max-w-[440px] text-sm leading-7 text-[#75685d]">{c.orderReceived}</p>
             <div className="mt-8 border-y border-[#312b25]/15 px-10 py-5"><p className="font-mono-ui text-[9px] uppercase tracking-[.16em] text-[#9b8b7e]">{c.orderNumber}</p><p className="mt-2 font-mono-ui text-lg tracking-[.12em] text-[#9f523d]" dir="ltr">{orderNumber}</p></div>
             <p className="mt-6 text-sm text-[#75685d]">{c.deliveryEstimate}</p>
-            <button type="button" onClick={onClose} className="mt-10 border-b border-[#9f523d] pb-2 font-mono-ui text-[10px] uppercase tracking-[.18em] text-[#9f523d]" data-testid="button-finish-checkout">{c.continueBrowsing}</button>
+            <button type="button" onClick={() => downloadReceiptPdf({ orderNumber, items, subtotal, form, language, c })} className="mt-8 inline-flex items-center justify-center gap-2 border border-[#9f523d] px-5 py-3 font-mono-ui text-[10px] uppercase tracking-[.16em] text-[#9f523d] transition-colors hover:bg-[#9f523d] hover:text-[#fff5e8]" data-testid="button-download-receipt"><Download size={15} />{c.downloadReceipt}</button>
+            <p className="mt-3 text-xs text-[#8b7b6e]">{c.receiptDownloadHint}</p>
+            <button type="button" onClick={onClose} className="mt-8 border-b border-[#9f523d] pb-2 font-mono-ui text-[10px] uppercase tracking-[.18em] text-[#9f523d]" data-testid="button-finish-checkout">{c.continueBrowsing}</button>
           </section>
         )}
       </div>
