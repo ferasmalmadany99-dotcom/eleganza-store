@@ -17,9 +17,11 @@ const statusLabels: Record<OrderStatus, { en: string; ar: string }> = {
 function getMapCoordinates(mapUrl: string) {
   try {
     const decodedUrl = decodeURIComponent(mapUrl);
-    const queryMatch = decodedUrl.match(/[?&]query=(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)/i);
+    const queryMatch = decodedUrl.match(/[?&](?:query|q)=(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)/i);
     const atMatch = decodedUrl.match(/@(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)/i);
-    const match = queryMatch ?? atMatch;
+    const placeMatch = decodedUrl.match(/(?:place\/|!3d)(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)/i);
+    const coordinateMatch = decodedUrl.match(/(-?\d{1,3}\.\d+),\s*(-?\d{1,3}\.\d+)/);
+    const match = queryMatch ?? atMatch ?? placeMatch ?? coordinateMatch;
     if (!match) return null;
     const latitude = Number(match[1]);
     const longitude = Number(match[2]);
@@ -30,11 +32,11 @@ function getMapCoordinates(mapUrl: string) {
   }
 }
 
-function getStaticMapPreviewUrl(mapUrl: string) {
+function getMapPreviewUrl(mapUrl: string) {
   const coordinates = getMapCoordinates(mapUrl);
   if (!coordinates) return null;
   const { latitude, longitude } = coordinates;
-  return `https://staticmap.openstreetmap.de/staticmap.php?center=${latitude},${longitude}&zoom=16&size=800x360&maptype=mapnik&markers=${latitude},${longitude},red-pushpin`;
+  return `https://www.google.com/maps?q=${latitude},${longitude}&z=16&output=embed`;
 }
 
 function CustomerOrderDetails({ order, language, onView }: { order: Pick<Order, "customerName" | "customerPhone" | "customerAddress" | "items">; language: "en" | "ar"; onView: () => void }) {
@@ -44,8 +46,8 @@ function CustomerOrderDetails({ order, language, onView }: { order: Pick<Order, 
 
 function CustomerDetailsModal({ order, isAr, onClose }: { order: Order; isAr: boolean; onClose: () => void }) {
   const [address, mapUrl] = (order.customerAddress ?? "").split("\nGoogle Maps: ");
-  const mapPreviewUrl = mapUrl ? getStaticMapPreviewUrl(mapUrl) : null;
-  return <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={onClose} role="presentation"><section className="w-full max-w-lg border border-border bg-card p-6 shadow-xl" dir={isAr ? "rtl" : "ltr"} role="dialog" aria-modal="true" aria-labelledby="customer-details-title" onClick={(event) => event.stopPropagation()}><div className="flex items-start justify-between gap-4"><div><p className="text-xs uppercase tracking-[.14em] text-primary">{order.orderNumber}</p><h2 id="customer-details-title" className="mt-2 font-display text-3xl">{isAr ? "معلومات العميل" : "Customer details"}</h2></div><button type="button" onClick={onClose} className="grid h-9 w-9 place-items-center border border-border hover:bg-muted" aria-label={isAr ? "إغلاق" : "Close"}><X className="h-4 w-4" /></button></div><dl className="mt-7 grid gap-4 text-sm"><div className="border-b border-border pb-3"><dt className="text-xs text-muted-foreground">{isAr ? "الاسم" : "Name"}</dt><dd className="mt-1 font-medium">{order.customerName}</dd></div><div className="border-b border-border pb-3"><dt className="text-xs text-muted-foreground">{isAr ? "رقم الهاتف" : "Phone"}</dt><dd className="mt-1" dir="ltr">{order.customerPhone || (isAr ? "غير متوفر" : "Not provided")}</dd></div><div className="border-b border-border pb-3"><dt className="text-xs text-muted-foreground">{isAr ? "العنوان التفصيلي" : "Detailed address"}</dt><dd className="mt-1 leading-6">{address || (isAr ? "غير متوفر" : "Not provided")}</dd></div></dl>{mapUrl && <div className="mt-6"><p className="mb-2 text-xs text-muted-foreground">{isAr ? "معاينة الموقع" : "Location preview"}</p>{mapPreviewUrl ? <img src={mapPreviewUrl} alt={isAr ? "خريطة موقع العميل" : "Customer location map"} className="h-44 w-full rounded-sm border border-border object-cover" loading="lazy" /> : <div className="flex h-24 items-center justify-center border border-dashed border-border px-4 text-center text-xs text-muted-foreground">{isAr ? "لا تتوفر معاينة للصورة لهذا الرابط المختصر." : "A preview is not available for this shortened map link."}</div>}<a href={mapUrl} target="_blank" rel="noreferrer" className="mt-3 inline-flex items-center gap-2 bg-primary px-4 py-3 text-xs font-semibold text-primary-foreground hover:opacity-90"><ExternalLink className="h-3.5 w-3.5" />{isAr ? "فتح الموقع على Google Maps" : "Open location in Google Maps"}</a></div>}</section></div>;
+  const mapPreviewUrl = mapUrl ? getMapPreviewUrl(mapUrl) : null;
+  return <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={onClose} role="presentation"><section className="w-full max-w-lg border border-border bg-card p-6 shadow-xl" dir={isAr ? "rtl" : "ltr"} role="dialog" aria-modal="true" aria-labelledby="customer-details-title" onClick={(event) => event.stopPropagation()}><div className="flex items-start justify-between gap-4"><div><p className="text-xs uppercase tracking-[.14em] text-primary">{order.orderNumber}</p><h2 id="customer-details-title" className="mt-2 font-display text-3xl">{isAr ? "معلومات العميل" : "Customer details"}</h2></div><button type="button" onClick={onClose} className="grid h-9 w-9 place-items-center border border-border hover:bg-muted" aria-label={isAr ? "إغلاق" : "Close"}><X className="h-4 w-4" /></button></div><dl className="mt-7 grid gap-4 text-sm"><div className="border-b border-border pb-3"><dt className="text-xs text-muted-foreground">{isAr ? "الاسم" : "Name"}</dt><dd className="mt-1 font-medium">{order.customerName}</dd></div><div className="border-b border-border pb-3"><dt className="text-xs text-muted-foreground">{isAr ? "رقم الهاتف" : "Phone"}</dt><dd className="mt-1" dir="ltr">{order.customerPhone || (isAr ? "غير متوفر" : "Not provided")}</dd></div><div className="border-b border-border pb-3"><dt className="text-xs text-muted-foreground">{isAr ? "العنوان التفصيلي" : "Detailed address"}</dt><dd className="mt-1 leading-6">{address || (isAr ? "غير متوفر" : "Not provided")}</dd></div></dl>{mapUrl && <div className="mt-6"><p className="mb-2 text-xs text-muted-foreground">{isAr ? "معاينة الموقع" : "Location preview"}</p>{mapPreviewUrl ? <iframe src={mapPreviewUrl} title={isAr ? "خريطة موقع العميل" : "Customer location map"} className="h-52 w-full rounded-sm border border-border" loading="lazy" /> : <div className="flex h-24 items-center justify-center border border-dashed border-border px-4 text-center text-xs text-muted-foreground">{isAr ? "لا تتوفر معاينة لهذا الرابط المختصر. استخدم رابط Google Maps لفتحه." : "A preview is not available for this shortened map link. Use the Google Maps link to open it."}</div>}<a href={mapUrl} target="_blank" rel="noreferrer" className="mt-3 inline-flex items-center gap-2 bg-primary px-4 py-3 text-xs font-semibold text-primary-foreground hover:opacity-90"><ExternalLink className="h-3.5 w-3.5" />{isAr ? "فتح الموقع على Google Maps" : "Open location in Google Maps"}</a></div>}</section></div>;
 }
 
 export default function Orders() {
