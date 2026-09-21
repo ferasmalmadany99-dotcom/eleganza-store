@@ -578,6 +578,62 @@ export const ListStaffResponse = zod.array(ListStaffResponseItem)
 
 
 /**
+ * @summary Create a customer storefront order
+ */
+export const createStorefrontOrderBodyCustomerNameMin = 2;
+export const createStorefrontOrderBodyCustomerNameMax = 120;
+
+export const createStorefrontOrderBodyCustomerPhoneMin = 5;
+export const createStorefrontOrderBodyCustomerPhoneMax = 40;
+
+export const createStorefrontOrderBodyCustomerAddressMin = 5;
+export const createStorefrontOrderBodyCustomerAddressMax = 500;
+
+
+export const createStorefrontOrderBodyItemsItemQuantityMax = 99;
+
+export const createStorefrontOrderBodyItemsMax = 50;
+
+
+
+export const CreateStorefrontOrderBody = zod.object({
+  "customerName": zod.string().min(createStorefrontOrderBodyCustomerNameMin).max(createStorefrontOrderBodyCustomerNameMax),
+  "customerPhone": zod.string().min(createStorefrontOrderBodyCustomerPhoneMin).max(createStorefrontOrderBodyCustomerPhoneMax),
+  "customerAddress": zod.string().min(createStorefrontOrderBodyCustomerAddressMin).max(createStorefrontOrderBodyCustomerAddressMax),
+  "paymentMethod": zod.enum(['cod']),
+  "items": zod.array(zod.object({
+  "productId": zod.number().int().min(1),
+  "quantity": zod.number().int().min(1).max(createStorefrontOrderBodyItemsItemQuantityMax)
+})).min(1).max(createStorefrontOrderBodyItemsMax)
+})
+
+export const CreateStorefrontOrderResponse = zod.object({
+  "id": zod.number().int(),
+  "orderNumber": zod.string(),
+  "status": zod.enum(['pending', 'confirmed', 'processing', 'completed', 'cancelled', 'returned']),
+  "paymentMethod": zod.enum(['cod', 'shopify', 'electronic']),
+  "customerName": zod.string(),
+  "customerPhone": zod.string().nullish(),
+  "customerAddress": zod.string().nullish(),
+  "subtotalMinor": zod.number().int(),
+  "shippingMinor": zod.number().int(),
+  "totalMinor": zod.number().int(),
+  "shopifyOrderId": zod.string().nullish(),
+  "createdByStaffId": zod.number().int().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date(),
+  "items": zod.array(zod.object({
+  "id": zod.number().int(),
+  "orderId": zod.number().int(),
+  "productId": zod.number().int(),
+  "quantity": zod.number().int(),
+  "unitPriceMinor": zod.number().int(),
+  "unitCostMinor": zod.number().int()
+}))
+})
+
+
+/**
  * @summary Invite a staff member
  */
 export const inviteStaffBodyDisplayNameMin = 2;

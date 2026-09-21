@@ -3,17 +3,22 @@ import {
   ArrowDownRight,
   ArrowLeft,
   ArrowRight,
+  Check,
   ChevronDown,
   ChevronUp,
   Heart,
+  LoaderCircle,
+  MapPin,
   Menu,
   Minus,
+  Phone,
   Plus,
   Search,
   ShoppingBag,
   Sparkles,
   X,
 } from 'lucide-react';
+import { useCreateStorefrontOrder } from '@workspace/api-client-react';
 import heroImage from './assets/beauty-hero.jpg';
 import perfumeImage from './assets/perfume-product.jpg';
 import perfumeImage480 from './assets/perfume-product-480.jpg';
@@ -73,10 +78,14 @@ type Product = {
 type CartItem = Product & { quantity: number };
 type ArticleId = 'ritual' | 'scent' | 'five-minute-face';
 type StorefrontInventoryProduct = {
+  id: number;
+  sku: string;
   nameEn: string;
   nameAr: string;
+  salePriceMinor: number;
   quantityOnHand: number;
 };
+type CheckoutItem = CartItem & { serverProductId: number };
 
 type Article = {
   id: ArticleId;
@@ -318,6 +327,32 @@ const copy = {
     subtotal: 'Subtotal',
     freeShipping: 'Complimentary shipping on orders over $300.',
     checkout: 'Continue to checkout',
+    checkoutTitle: 'Complete your order',
+    checkoutDetails: 'Delivery details',
+    checkoutReview: 'Review order',
+    checkoutSuccess: 'Your order is confirmed',
+    customerName: 'Full name',
+    customerPhone: 'Phone number',
+    customerCity: 'City',
+    customerAddress: 'Delivery address',
+    customerNamePlaceholder: 'e.g. Alex Morgan',
+    customerPhonePlaceholder: '+218 91 000 0000',
+    customerCityPlaceholder: 'Tripoli',
+    customerAddressPlaceholder: 'Street, building and nearby landmark',
+    continueReview: 'Review order',
+    back: 'Back',
+    payment: 'Payment method',
+    cashOnDelivery: 'Cash on delivery',
+    cashOnDeliveryDetail: 'Pay when your order arrives.',
+    placeOrder: 'Place order',
+    placingOrder: 'Placing order...',
+    orderNumber: 'Order number',
+    orderReceived: 'We received your order and will contact you to confirm delivery.',
+    deliveryEstimate: 'Estimated dispatch: within 2–3 days',
+    closeCheckout: 'Close checkout',
+    checkoutError: 'We could not place the order. Please check your details and try again.',
+    unavailableForCheckout: 'Some products are no longer available. Please review your bag.',
+    included: 'Included',
     format: 'Format',
     notes: 'Notes',
     dispatch: 'Dispatch',
@@ -394,6 +429,32 @@ const copy = {
     subtotal: 'المجموع الفرعي',
     freeShipping: 'الشحن مجاني للطلبات التي تتجاوز 300 دولار.',
     checkout: 'متابعة إلى الدفع',
+    checkoutTitle: 'إكمال الطلب',
+    checkoutDetails: 'بيانات التوصيل',
+    checkoutReview: 'مراجعة الطلب',
+    checkoutSuccess: 'تم تأكيد طلبك',
+    customerName: 'الاسم الكامل',
+    customerPhone: 'رقم الهاتف',
+    customerCity: 'المدينة',
+    customerAddress: 'عنوان التوصيل',
+    customerNamePlaceholder: 'مثال: أحمد محمد',
+    customerPhonePlaceholder: '+218 91 000 0000',
+    customerCityPlaceholder: 'طرابلس',
+    customerAddressPlaceholder: 'الشارع، المبنى، وأقرب معلم',
+    continueReview: 'مراجعة الطلب',
+    back: 'رجوع',
+    payment: 'طريقة الدفع',
+    cashOnDelivery: 'الدفع عند الاستلام',
+    cashOnDeliveryDetail: 'ادفع عند وصول طلبك.',
+    placeOrder: 'تأكيد الطلب',
+    placingOrder: 'جاري تأكيد الطلب...',
+    orderNumber: 'رقم الطلب',
+    orderReceived: 'استلمنا طلبك وسنتواصل معك لتأكيد موعد التوصيل.',
+    deliveryEstimate: 'التجهيز المتوقع: خلال 2–3 أيام',
+    closeCheckout: 'إغلاق الدفع',
+    checkoutError: 'تعذر إنشاء الطلب. تحقق من البيانات وحاول مرة أخرى.',
+    unavailableForCheckout: 'بعض المنتجات لم تعد متوفرة. راجع السلة وحاول مرة أخرى.',
+    included: 'مشمول',
     format: 'النوع',
     notes: 'الدرجات',
     dispatch: 'التوصيل',
@@ -897,6 +958,148 @@ function BagDrawer({
   );
 }
 
+function CheckoutPanel({
+  items,
+  language,
+  c,
+  onClose,
+  onSubmitted,
+}: {
+  items: CheckoutItem[];
+  language: Language;
+  c: Copy;
+  onClose: () => void;
+  onSubmitted: (orderNumber: string) => void;
+}) {
+  const createOrder = useCreateStorefrontOrder();
+  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [form, setForm] = useState({
+    customerName: '',
+    customerPhone: '',
+    city: '',
+    address: '',
+  });
+  const [orderNumber, setOrderNumber] = useState('');
+  const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const updateField = (field: keyof typeof form, value: string) => setForm((current) => ({ ...current, [field]: value }));
+
+  const continueToReview = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setStep(2);
+  };
+
+  async function placeOrder() {
+    try {
+      const order = await createOrder.mutateAsync({
+        data: {
+          customerName: form.customerName.trim(),
+          customerPhone: form.customerPhone.trim(),
+          customerAddress: `${form.city.trim()} — ${form.address.trim()}`,
+          paymentMethod: 'cod',
+          items: items.map((item) => ({ productId: item.serverProductId, quantity: item.quantity })),
+        },
+      });
+      setOrderNumber(order.orderNumber);
+      setStep(3);
+      onSubmitted(order.orderNumber);
+    } catch {
+      // The mutation state stays available for the retry button below.
+    }
+  }
+
+  const inputClass = 'mt-2 w-full border border-[#312b25]/20 bg-transparent px-4 py-3 text-sm outline-none transition-colors placeholder:text-[#9b8b7e] focus:border-[#9f523d]';
+
+  return (
+    <div className="fixed inset-0 z-[70] overflow-y-auto bg-[#f8f0e6] text-[#312b25]" dir={language === 'ar' ? 'rtl' : 'ltr'} role="dialog" aria-modal="true" aria-label={c.checkoutTitle}>
+      <div className="mx-auto min-h-[100dvh] max-w-[1180px] px-5 py-6 sm:px-8 lg:px-12">
+        <header className="flex items-center justify-between border-b border-[#312b25]/15 pb-5">
+          <BrandName compact />
+          <button type="button" onClick={onClose} className="flex items-center gap-2 font-mono-ui text-[10px] uppercase tracking-[.15em] text-[#6f6258] hover:text-[#9f523d]" data-testid="button-close-checkout">
+            {c.closeCheckout} <X size={18} strokeWidth={1.3} />
+          </button>
+        </header>
+
+        {step < 3 && (
+          <div className="mx-auto mt-10 flex max-w-[720px] items-center gap-3">
+            {[{ number: 1, label: c.checkoutDetails }, { number: 2, label: c.checkoutReview }].map((item, index) => (
+              <div key={item.number} className="flex min-w-0 flex-1 items-center gap-3">
+                <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-full border text-xs ${step >= item.number ? 'border-[#9f523d] bg-[#9f523d] text-[#fff5e8]' : 'border-[#312b25]/20 text-[#8c7b6d]'}`}>{step > item.number ? <Check size={15} /> : item.number}</span>
+                <span className={`truncate font-mono-ui text-[9px] uppercase tracking-[.13em] ${step >= item.number ? 'text-[#9f523d]' : 'text-[#8c7b6d]'}`}>{item.label}</span>
+                {index === 0 && <span className="h-px flex-1 bg-[#312b25]/15" />}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {step === 1 && (
+          <form onSubmit={continueToReview} className="mx-auto mt-12 grid max-w-[980px] gap-10 lg:grid-cols-[1fr_340px]">
+            <section>
+              <p className="font-mono-ui text-[10px] uppercase tracking-[.22em] text-[#9f523d]">01 / {c.checkoutDetails}</p>
+              <h1 className="mt-4 font-display text-5xl leading-none sm:text-7xl">{c.checkoutTitle}</h1>
+              <p className="mt-5 max-w-[510px] text-sm leading-7 text-[#75685d]">{language === 'ar' ? 'أدخل معلومات التوصيل حتى نتمكن من تجهيز طلبك والتواصل معك.' : 'Add your delivery details so we can prepare your order and reach you.'}</p>
+              <div className="mt-10 grid gap-5 sm:grid-cols-2">
+                <label className="text-sm sm:col-span-2">{c.customerName}<input className={inputClass} required minLength={2} value={form.customerName} onChange={(event) => updateField('customerName', event.target.value)} placeholder={c.customerNamePlaceholder} data-testid="input-checkout-name" /></label>
+                <label className="text-sm"><span>{c.customerPhone}</span><span className="relative block"><Phone size={15} className="absolute start-4 top-1/2 -translate-y-1/2 text-[#9f523d]" /><input className={`${inputClass} mt-2 ps-10`} required minLength={5} value={form.customerPhone} onChange={(event) => updateField('customerPhone', event.target.value)} placeholder={c.customerPhonePlaceholder} type="tel" dir="ltr" data-testid="input-checkout-phone" /></span></label>
+                <label className="text-sm">{c.customerCity}<input className={inputClass} required minLength={2} value={form.city} onChange={(event) => updateField('city', event.target.value)} placeholder={c.customerCityPlaceholder} data-testid="input-checkout-city" /></label>
+                <label className="text-sm sm:col-span-2"><span className="flex items-center gap-2"><MapPin size={15} className="text-[#9f523d]" />{c.customerAddress}</span><textarea className={`${inputClass} min-h-28 resize-y`} required minLength={5} value={form.address} onChange={(event) => updateField('address', event.target.value)} placeholder={c.customerAddressPlaceholder} data-testid="input-checkout-address" /></label>
+              </div>
+              <button type="submit" className="mt-8 flex w-full items-center justify-center gap-3 bg-[#9f523d] py-4 font-mono-ui text-[10px] uppercase tracking-[.2em] text-[#fff5e8] transition-colors hover:bg-[#7f3f31] sm:w-auto sm:px-10" data-testid="button-checkout-review">{c.continueReview}<ArrowRight size={15} /></button>
+            </section>
+            <CheckoutSummary items={items} subtotal={subtotal} c={c} />
+          </form>
+        )}
+
+        {step === 2 && (
+          <div className="mx-auto mt-12 grid max-w-[980px] gap-10 lg:grid-cols-[1fr_340px]">
+            <section>
+              <p className="font-mono-ui text-[10px] uppercase tracking-[.22em] text-[#9f523d]">02 / {c.checkoutReview}</p>
+              <h1 className="mt-4 font-display text-5xl leading-none sm:text-7xl">{c.checkoutReview}</h1>
+              <div className="mt-10 border-y border-[#312b25]/15 py-6">
+                <div className="flex items-start gap-4"><MapPin size={18} className="mt-1 shrink-0 text-[#9f523d]" /><div><p className="font-medium">{form.customerName}</p><p className="mt-1 text-sm leading-6 text-[#75685d]">{form.customerPhone}<br />{form.city} — {form.address}</p></div></div>
+              </div>
+              <div className="mt-8">
+                <p className="font-mono-ui text-[10px] uppercase tracking-[.18em] text-[#9f523d]">{c.payment}</p>
+                <div className="mt-3 flex items-start gap-4 border border-[#9f523d] bg-[#efe0d0] p-4"><span className="mt-1 grid h-4 w-4 place-items-center rounded-full border border-[#9f523d] bg-[#9f523d]"><span className="h-1.5 w-1.5 rounded-full bg-[#fff5e8]" /></span><div><p className="text-sm font-medium">{c.cashOnDelivery}</p><p className="mt-1 text-xs leading-5 text-[#75685d]">{c.cashOnDeliveryDetail}</p></div></div>
+              </div>
+              {createOrder.isError && <p className="mt-5 border border-[#a64e3a]/30 bg-[#f2dfd7] px-4 py-3 text-sm leading-6 text-[#8b4037]" role="alert">{c.checkoutError}</p>}
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                <button type="button" onClick={() => setStep(1)} className="flex items-center justify-center gap-2 border border-[#312b25]/20 px-6 py-4 font-mono-ui text-[10px] uppercase tracking-[.18em] hover:border-[#9f523d]" data-testid="button-checkout-back"><ArrowLeft size={15} />{c.back}</button>
+                <button type="button" onClick={placeOrder} disabled={createOrder.isPending} className="flex flex-1 items-center justify-center gap-3 bg-[#9f523d] px-6 py-4 font-mono-ui text-[10px] uppercase tracking-[.18em] text-[#fff5e8] transition-colors hover:bg-[#7f3f31] disabled:cursor-wait disabled:opacity-60" data-testid="button-place-order">{createOrder.isPending ? <><LoaderCircle size={15} className="animate-spin" />{c.placingOrder}</> : <>{c.placeOrder}<Check size={15} /></>}</button>
+              </div>
+            </section>
+            <CheckoutSummary items={items} subtotal={subtotal} c={c} />
+          </div>
+        )}
+
+        {step === 3 && (
+          <section className="mx-auto flex min-h-[65dvh] max-w-[620px] flex-col items-center justify-center text-center">
+            <span className="grid h-16 w-16 place-items-center rounded-full bg-[#9f523d] text-[#fff5e8]"><Check size={28} strokeWidth={1.5} /></span>
+            <p className="mt-8 font-mono-ui text-[10px] uppercase tracking-[.22em] text-[#9f523d]">Eleganza / {c.checkoutSuccess}</p>
+            <h1 className="mt-4 font-display text-5xl leading-none sm:text-7xl">{c.checkoutSuccess}</h1>
+            <p className="mt-6 max-w-[440px] text-sm leading-7 text-[#75685d]">{c.orderReceived}</p>
+            <div className="mt-8 border-y border-[#312b25]/15 px-10 py-5"><p className="font-mono-ui text-[9px] uppercase tracking-[.16em] text-[#9b8b7e]">{c.orderNumber}</p><p className="mt-2 font-mono-ui text-lg tracking-[.12em] text-[#9f523d]" dir="ltr">{orderNumber}</p></div>
+            <p className="mt-6 text-sm text-[#75685d]">{c.deliveryEstimate}</p>
+            <button type="button" onClick={onClose} className="mt-10 border-b border-[#9f523d] pb-2 font-mono-ui text-[10px] uppercase tracking-[.18em] text-[#9f523d]" data-testid="button-finish-checkout">{c.continueBrowsing}</button>
+          </section>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function CheckoutSummary({ items, subtotal, c }: { items: CheckoutItem[]; subtotal: number; c: Copy }) {
+  return (
+    <aside className="h-fit border border-[#312b25]/15 bg-[#efe4d6] p-5 sm:p-6">
+      <p className="font-mono-ui text-[10px] uppercase tracking-[.18em] text-[#9f523d]">{c.theBag}</p>
+      <div className="mt-5 space-y-4">
+        {items.map((item) => <div key={item.id} className="flex items-start justify-between gap-4 border-b border-[#312b25]/10 pb-4 text-sm"><span className="min-w-0"><span className="block font-medium">{item.name}</span><span className="mt-1 block text-xs text-[#817267]">× {item.quantity}</span></span><span className="shrink-0 font-mono-ui text-xs">{money(item.price * item.quantity)}</span></div>)}
+      </div>
+      <div className="mt-5 flex items-center justify-between border-t border-[#312b25]/15 pt-5"><span className="font-mono-ui text-[10px] uppercase tracking-[.15em] text-[#75685d]">{c.subtotal}</span><span className="font-display text-3xl">{money(subtotal)}</span></div>
+      <div className="mt-3 flex items-center justify-between text-xs text-[#75685d]"><span>{c.shipping}</span><span>{c.included}</span></div>
+    </aside>
+  );
+}
+
 function FavoritesDrawer({ items, language, c, onClose, onRemove, onSelect }: { items: Product[]; language: Language; c: Copy; onClose: () => void; onRemove: (id: string) => void; onSelect: (product: Product) => void }) {
   return (
     <div className="fixed inset-0 z-50 bg-[#211b18]/45 backdrop-blur-[2px]" onClick={onClose}>
@@ -1042,8 +1245,9 @@ function Storefront() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [journalIndexOpen, setJournalIndexOpen] = useState(false);
   const [selectedArticleId, setSelectedArticleId] = useState<ArticleId | null>(null);
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [notice, setNotice] = useState('');
-  const [inventoryByName, setInventoryByName] = useState<Record<string, number>>({});
+  const [inventoryByName, setInventoryByName] = useState<Record<string, { id: number; quantityOnHand: number; salePriceMinor: number }>>({});
   const [inventoryLoaded, setInventoryLoaded] = useState(false);
   const c = copy[language];
   const selectedArticle = articles[language].find((article) => article.id === selectedArticleId) ?? null;
@@ -1066,11 +1270,16 @@ function Storefront() {
         if (!response.ok) throw new Error(`Inventory request failed with ${response.status}`);
         const data = await response.json() as StorefrontInventoryProduct[];
         if (disposed) return;
-        const next: Record<string, number> = {};
+        const next: Record<string, { id: number; quantityOnHand: number; salePriceMinor: number }> = {};
         for (const product of data) {
           const quantity = Math.max(0, Number(product.quantityOnHand) || 0);
-          if (product.nameEn) next[normalizeProductName(product.nameEn)] = quantity;
-          if (product.nameAr) next[normalizeProductName(product.nameAr)] = quantity;
+          const productData = {
+            id: Number(product.id),
+            quantityOnHand: quantity,
+            salePriceMinor: Math.max(0, Number(product.salePriceMinor) || 0),
+          };
+          if (product.nameEn) next[normalizeProductName(product.nameEn)] = productData;
+          if (product.nameAr) next[normalizeProductName(product.nameAr)] = productData;
         }
         setInventoryByName(next);
         setInventoryLoaded(true);
@@ -1089,7 +1298,7 @@ function Storefront() {
   }, []);
 
   const currentStockFor = (product: Pick<Product, 'name' | 'stock'>) =>
-    inventoryLoaded ? inventoryByName[normalizeProductName(product.name)] ?? 0 : product.stock;
+    inventoryLoaded ? inventoryByName[normalizeProductName(product.name)]?.quantityOnHand ?? 0 : product.stock;
   const withCurrentStock = (product: Product): Product => ({
     ...product,
     stock: currentStockFor(product),
@@ -1097,6 +1306,9 @@ function Storefront() {
   const withCurrentCartStock = (item: CartItem): CartItem => ({
     ...item,
     stock: currentStockFor(item),
+    price: inventoryByName[normalizeProductName(item.name)]?.salePriceMinor
+      ? inventoryByName[normalizeProductName(item.name)].salePriceMinor / 100
+      : item.price,
   });
 
   const shownProducts = useMemo(() => {
@@ -1135,7 +1347,7 @@ function Storefront() {
   };
   const updateQuantity = (id: string, amount: number) => {
     const item = bag.find((entry) => entry.id === id);
-    const availableStock = item && inventoryLoaded ? inventoryByName[normalizeProductName(item.name)] ?? 0 : item?.stock;
+    const availableStock = item && inventoryLoaded ? inventoryByName[normalizeProductName(item.name)]?.quantityOnHand ?? 0 : item?.stock;
     if (item && amount > 0 && item.quantity + amount > (availableStock ?? 0)) {
       notify(language === 'ar' ? `${item.name}: ${c.stockLimitReason}` : `${item.name}: ${c.stockLimitReason}`);
       return;
@@ -1143,6 +1355,23 @@ function Storefront() {
     setBag((current) => current.flatMap((entry) => entry.id === id ? (entry.quantity + amount > 0 ? [{ ...entry, quantity: entry.quantity + amount }] : []) : [entry]));
   };
   const jumpToShop = () => document.getElementById('shop')?.scrollIntoView({ behavior: 'smooth' });
+  const openCheckout = () => {
+    const checkoutItems = bag.map((item) => inventoryByName[normalizeProductName(item.name)]);
+    if (!inventoryLoaded || checkoutItems.some((item) => !item?.id)) {
+      notify(language === 'ar' ? 'جاري تحديث بيانات المنتجات. حاول مرة أخرى بعد لحظات.' : 'Product availability is still loading. Please try again in a moment.');
+      return;
+    }
+    if (bag.some((item) => item.quantity > (inventoryByName[normalizeProductName(item.name)]?.quantityOnHand ?? 0))) {
+      notify(c.unavailableForCheckout);
+      return;
+    }
+    setBagOpen(false);
+    setCheckoutOpen(true);
+  };
+  const checkoutItems: CheckoutItem[] = bag.flatMap((item) => {
+    const serverProduct = inventoryByName[normalizeProductName(item.name)];
+    return serverProduct?.id ? [{ ...withCurrentCartStock(item), serverProductId: serverProduct.id }] : [];
+  });
 
   return (
     <div className={`grain min-h-[100dvh] bg-[#f8f0e6] text-[#312b25] ${language === 'ar' ? 'rtl-ui' : ''}`}>
@@ -1200,7 +1429,8 @@ function Storefront() {
       </footer>
 
       {notice && <div className="fixed bottom-6 left-1/2 z-[60] flex w-[calc(100%-2rem)] max-w-md -translate-x-1/2 items-center justify-center gap-3 bg-[#312b25] px-6 py-4 text-center text-sm font-medium leading-6 text-[#fff8ed] shadow-2xl sm:w-auto sm:min-w-[360px] sm:text-base" role="status" aria-live="polite" data-testid="status-notice"><Sparkles size={18} className="shrink-0 text-[#d18c6d]" />{notice}</div>}
-      {bagOpen && <BagDrawer items={bag.map(withCurrentCartStock)} language={language} c={c} onClose={() => setBagOpen(false)} onUpdate={updateQuantity} onRemove={(id) => setBag((current) => current.filter((item) => item.id !== id))} onCheckout={() => notify(language === 'ar' ? 'يتم تجهيز صفحة الدفع لك' : 'Checkout is being prepared for you')} />}
+       {bagOpen && <BagDrawer items={bag.map(withCurrentCartStock)} language={language} c={c} onClose={() => setBagOpen(false)} onUpdate={updateQuantity} onRemove={(id) => setBag((current) => current.filter((item) => item.id !== id))} onCheckout={openCheckout} />}
+       {checkoutOpen && checkoutItems.length > 0 && <CheckoutPanel items={checkoutItems} language={language} c={c} onClose={() => setCheckoutOpen(false)} onSubmitted={() => setBag([])} />}
       {favoritesOpen && <FavoritesDrawer items={favoriteProducts} language={language} c={c} onClose={() => setFavoritesOpen(false)} onRemove={toggleFavorite} onSelect={(product) => { setFavoritesOpen(false); setSelectedProduct(product); }} />}
       {searchOpen && <SearchPanel products={products} c={c} language={language} onClose={() => setSearchOpen(false)} onSelect={(product) => { setSearchOpen(false); setSelectedProduct(product); }} />}
       {currentSelectedProduct && <ProductDetail product={currentSelectedProduct} language={language} c={c} favorite={favorites.includes(currentSelectedProduct.id)} onFavorite={() => toggleFavorite(currentSelectedProduct.id)} onAdd={() => { if (addToBag(currentSelectedProduct)) setSelectedProduct(null); }} onClose={() => setSelectedProduct(null)} />}

@@ -24,6 +24,7 @@ import type {
   AccountInput,
   AccountUpdate,
   AuditLog,
+  CreateStorefrontOrder409,
   DashboardSummary,
   Expense,
   ExpenseInput,
@@ -50,6 +51,7 @@ import type {
   StaffInviteInput,
   StaffInviteResponse,
   StaffUpdate,
+  StorefrontOrderInput,
   SyncResult
 } from './api.schemas';
 
@@ -1404,6 +1406,94 @@ export function useListStaff<TData = Awaited<ReturnType<typeof listStaff>>, TErr
 
 
 
+
+export const getCreateStorefrontOrderUrl = () => {
+
+
+
+
+  return `/api/storefront/orders`
+}
+
+/**
+ * @summary Create a customer storefront order
+ */
+export const createStorefrontOrder = async (storefrontOrderInput: StorefrontOrderInput, options?: Parameters<typeof customFetch>[1]): Promise<Order> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<Order>(getCreateStorefrontOrderUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(storefrontOrderInput)
+  }
+);}
+
+
+
+
+
+export const getCreateStorefrontOrderMutationKey = () => ['createStorefrontOrder'] as const;
+
+export const getCreateStorefrontOrderMutationOptions = <TError = ErrorType<CreateStorefrontOrder409>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createStorefrontOrder>>, TError,CreateStorefrontOrderMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createStorefrontOrder>>, TError,CreateStorefrontOrderMutationVariables, TContext> => {
+
+const mutationKey = getCreateStorefrontOrderMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createStorefrontOrder>>, CreateStorefrontOrderMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createStorefrontOrder(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateStorefrontOrderMutationResult = NonNullable<Awaited<ReturnType<typeof createStorefrontOrder>>>
+    export type CreateStorefrontOrderMutationBody = BodyType<StorefrontOrderInput>
+    export type CreateStorefrontOrderMutationError = ErrorType<CreateStorefrontOrder409>
+    export type CreateStorefrontOrderMutationVariables = {data: BodyType<StorefrontOrderInput>}
+
+    /**
+ * @summary Create a customer storefront order
+ */
+export const useCreateStorefrontOrder = <TError = ErrorType<CreateStorefrontOrder409>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createStorefrontOrder>>, TError,CreateStorefrontOrderMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createStorefrontOrder>>,
+        TError,
+        CreateStorefrontOrderMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateStorefrontOrderMutationOptions(options));
+    }
 
 export const getInviteStaffUrl = () => {
 

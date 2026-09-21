@@ -76,6 +76,47 @@ export interface StaffInviteResponse {
   status: StaffInviteResponseStatus;
 }
 
+export type StorefrontOrderInputPaymentMethod = typeof StorefrontOrderInputPaymentMethod[keyof typeof StorefrontOrderInputPaymentMethod];
+
+
+export const StorefrontOrderInputPaymentMethod = {
+  cod: 'cod',
+} as const;
+
+export type StorefrontOrderInputItemsItem = {
+  /** @minimum 1 */
+  productId: number;
+  /**
+     * @minimum 1
+     * @maximum 99
+     */
+  quantity: number;
+};
+
+export interface StorefrontOrderInput {
+  /**
+     * @minLength 2
+     * @maxLength 120
+     */
+  customerName: string;
+  /**
+     * @minLength 5
+     * @maxLength 40
+     */
+  customerPhone: string;
+  /**
+     * @minLength 5
+     * @maxLength 500
+     */
+  customerAddress: string;
+  paymentMethod: StorefrontOrderInputPaymentMethod;
+  /**
+     * @minItems 1
+     * @maxItems 50
+     */
+  items: StorefrontOrderInputItemsItem[];
+}
+
 export interface Product {
   id: number;
   sku: string;
@@ -487,6 +528,10 @@ limit?: LimitParameter;
  * @minimum 0
  */
 offset?: OffsetParameter;
+};
+
+export type CreateStorefrontOrder409 = {
+  error: string;
 };
 
 export type ListAuditLogsParams = {
