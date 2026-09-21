@@ -26,9 +26,3 @@ The checkout UI must provide an explicit save action after a customer returns fr
 **Why:** Google Maps opens outside the storefront, so the customer needs a clear handoff back to the checkout before continuing.
 
 **How to apply:** Keep the save button disabled until a link exists, mark the location saved only after URL validation, and block the review step until that state is true.
-
-Admin customer details should show a map thumbnail when the stored URL exposes latitude and longitude; shortened map links need a clear fallback because their destination cannot be resolved safely in the browser.
-
-**Why:** A visual preview is faster for fulfilment staff, but resolving arbitrary short-link redirects would require an external server-side fetch or provider API.
-
-**How to apply:** Parse coordinates from supported Google Maps URL forms, render a static preview, and retain the original map link as the fallback action.
