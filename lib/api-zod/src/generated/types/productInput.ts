@@ -5,6 +5,7 @@
  * Eleganza administration API
  * OpenAPI spec version: 0.1.0
  */
+import type { ProductAudience } from './productAudience';
 
 export interface ProductInput {
   /** @minLength 1 */
@@ -16,6 +17,7 @@ export interface ProductInput {
   descriptionAr?: string;
   /** @minLength 1 */
   category: string;
+  audience: ProductAudience;
   /** @minimum 0 */
   salePriceMinor: number;
   /** @minimum 0 */

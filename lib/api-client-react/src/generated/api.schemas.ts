@@ -126,6 +126,14 @@ export interface StorefrontOrderInput {
   items: StorefrontOrderInputItemsItem[];
 }
 
+export type ProductAudience = typeof ProductAudience[keyof typeof ProductAudience];
+
+
+export const ProductAudience = {
+  men: 'men',
+  women: 'women',
+} as const;
+
 export interface Product {
   id: number;
   sku: string;
@@ -136,6 +144,7 @@ export interface Product {
   /** @nullable */
   descriptionAr?: string | null;
   category: string;
+  audience: ProductAudience;
   salePriceMinor: number;
   costMinor: number;
   quantityOnHand: number;
@@ -160,6 +169,7 @@ export interface ProductInput {
   descriptionAr?: string;
   /** @minLength 1 */
   category: string;
+  audience: ProductAudience;
   /** @minimum 0 */
   salePriceMinor: number;
   /** @minimum 0 */
@@ -181,6 +191,7 @@ export interface ProductUpdate {
   descriptionEn?: string;
   descriptionAr?: string;
   category?: string;
+  audience?: ProductAudience;
   /** @minimum 0 */
   salePriceMinor?: number;
   /** @minimum 0 */

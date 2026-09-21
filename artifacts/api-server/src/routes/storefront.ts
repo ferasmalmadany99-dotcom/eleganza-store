@@ -12,6 +12,7 @@ router.get("/products", async (_req, res): Promise<void> => {
     sku: productsTable.sku,
     nameEn: productsTable.nameEn,
     nameAr: productsTable.nameAr,
+    audience: productsTable.audience,
     salePriceMinor: productsTable.salePriceMinor,
     quantityOnHand: productsTable.quantityOnHand,
   }).from(productsTable)

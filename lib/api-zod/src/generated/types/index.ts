@@ -41,6 +41,7 @@ export * from './orderStatus';
 export * from './orderStatusUpdate';
 export * from './paymentMethod';
 export * from './product';
+export * from './productAudience';
 export * from './productInput';
 export * from './productReport';
 export * from './productReportMovement';

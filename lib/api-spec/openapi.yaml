@@ -537,9 +537,12 @@ components:
             properties:
               productId: { type: integer, minimum: 1 }
               quantity: { type: integer, minimum: 1, maximum: 99 }
+    ProductAudience:
+      type: string
+      enum: [men, women]
     Product:
       type: object
-      required: [id, sku, nameEn, nameAr, category, salePriceMinor, costMinor, quantityOnHand, reorderThreshold, imageUrls, active, createdAt, updatedAt]
+      required: [id, sku, nameEn, nameAr, category, audience, salePriceMinor, costMinor, quantityOnHand, reorderThreshold, imageUrls, active, createdAt, updatedAt]
       properties:
         id: { type: integer }
         sku: { type: string }
@@ -548,6 +551,7 @@ components:
         descriptionEn: { type: ["string", "null"] }
         descriptionAr: { type: ["string", "null"] }
         category: { type: string }
+        audience: { $ref: "#/components/schemas/ProductAudience" }
         salePriceMinor: { type: integer }
         costMinor: { type: integer }
         quantityOnHand: { type: integer }
@@ -562,7 +566,7 @@ components:
         updatedAt: { type: string, format: date-time }
     ProductInput:
       type: object
-      required: [sku, nameEn, nameAr, category, salePriceMinor, costMinor, reorderThreshold]
+      required: [sku, nameEn, nameAr, category, audience, salePriceMinor, costMinor, reorderThreshold]
       properties:
         sku: { type: string, minLength: 1 }
         nameEn: { type: string, minLength: 1 }
@@ -570,6 +574,7 @@ components:
         descriptionEn: { type: string }
         descriptionAr: { type: string }
         category: { type: string, minLength: 1 }
+        audience: { $ref: "#/components/schemas/ProductAudience" }
         salePriceMinor: { type: integer, minimum: 0 }
         costMinor: { type: integer, minimum: 0 }
         quantityOnHand: { type: integer, minimum: 0, default: 0 }
@@ -587,6 +592,7 @@ components:
         descriptionEn: { type: string }
         descriptionAr: { type: string }
         category: { type: string }
+        audience: { $ref: "#/components/schemas/ProductAudience" }
         salePriceMinor: { type: integer, minimum: 0 }
         costMinor: { type: integer, minimum: 0 }
         reorderThreshold: { type: integer, minimum: 0 }

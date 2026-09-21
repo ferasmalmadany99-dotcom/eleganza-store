@@ -5,6 +5,7 @@
  * Eleganza administration API
  * OpenAPI spec version: 0.1.0
  */
+import type { ProductAudience } from './productAudience';
 
 export interface Product {
   id: number;
@@ -16,6 +17,7 @@ export interface Product {
   /** @nullable */
   descriptionAr?: string | null;
   category: string;
+  audience: ProductAudience;
   salePriceMinor: number;
   costMinor: number;
   quantityOnHand: number;

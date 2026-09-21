@@ -10,6 +10,7 @@ export const productsTable = pgTable("products", {
   descriptionEn: text("description_en"),
   descriptionAr: text("description_ar"),
   category: text("category").notNull(),
+  audience: text("audience").notNull().default("women"),
   salePriceMinor: integer("sale_price_minor").notNull(),
   costMinor: integer("cost_minor").notNull().default(0),
   quantityOnHand: integer("quantity_on_hand").notNull().default(0),
