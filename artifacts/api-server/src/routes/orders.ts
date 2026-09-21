@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, ilike } from "drizzle-orm";
 import { db, inventoryMovementsTable, orderItemsTable, ordersTable, productsTable } from "@workspace/db";
 import {
   CreateOrderBody,
@@ -27,8 +27,11 @@ async function withItems<T extends { id: number }>(orders: T[]) {
 router.get("/orders", async (req, res): Promise<void> => {
   const query = ListOrdersQueryParams.safeParse(req.query);
   if (!query.success) { res.status(400).json({ error: query.error.message }); return; }
+  const filters = [];
+  if (query.data.status) filters.push(eq(ordersTable.status, query.data.status));
+  if (query.data.invoiceNumber) filters.push(ilike(ordersTable.orderNumber, `%${query.data.invoiceNumber}%`));
   const orders = await db.select().from(ordersTable)
-    .where(query.data.status ? eq(ordersTable.status, query.data.status) : undefined)
+    .where(filters.length ? and(...filters) : undefined)
     .orderBy(desc(ordersTable.createdAt)).limit(query.data.limit).offset(query.data.offset);
   res.json(ListOrdersResponse.parse(await withItems(orders)));
 });

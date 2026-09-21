@@ -528,6 +528,10 @@ limit?: LimitParameter;
  */
 offset?: OffsetParameter;
 status?: OrderStatus;
+/**
+ * Filter orders by an invoice/order number, including partial matches
+ */
+invoiceNumber?: string;
 };
 
 export type ListExpensesParams = {

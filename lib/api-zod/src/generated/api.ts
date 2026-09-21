@@ -385,7 +385,8 @@ export const listOrdersQueryOffsetMin = 0;
 export const ListOrdersQueryParams = zod.object({
   "limit": zod.coerce.number().int().min(1).max(listOrdersQueryLimitMax).default(listOrdersQueryLimitDefault),
   "offset": zod.coerce.number().int().min(listOrdersQueryOffsetMin).default(listOrdersQueryOffsetDefault),
-  "status": zod.enum(['pending', 'confirmed', 'processing', 'completed', 'cancelled', 'returned']).optional()
+  "status": zod.enum(['pending', 'confirmed', 'processing', 'completed', 'cancelled', 'returned']).optional(),
+  "invoiceNumber": zod.coerce.string().optional().describe('Filter orders by an invoice/order number, including partial matches')
 })
 
 export const ListOrdersResponseItem = zod.object({

@@ -182,6 +182,10 @@ paths:
         - name: status
           in: query
           schema: { $ref: "#/components/schemas/OrderStatus" }
+        - name: invoiceNumber
+          in: query
+          description: Filter orders by an invoice/order number, including partial matches
+          schema: { type: string }
       responses:
         "200":
           description: Orders
