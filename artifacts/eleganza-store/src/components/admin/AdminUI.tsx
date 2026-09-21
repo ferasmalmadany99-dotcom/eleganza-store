@@ -43,11 +43,11 @@ export function useAdmin() {
 }
 
 export function money(minor: number, language: AdminLanguage) {
-  return new Intl.NumberFormat(language === "ar" ? "ar-LY" : "en-LY", {
-    style: "currency",
-    currency: "LYD",
+  const amount = new Intl.NumberFormat(language === "ar" ? "ar-LY" : "en-LY", {
     minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   }).format((minor || 0) / 100);
+  return `${amount} د.ل`;
 }
 
 export function dateLabel(value: string | Date, language: AdminLanguage) {
