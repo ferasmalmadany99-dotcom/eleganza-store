@@ -27,6 +27,12 @@ After a successful customer order, the receipt is offered from the success scree
 
 **How to apply:** Keep receipt content escaped before rendering it into the temporary PDF canvas, and retain the success screen until the customer closes checkout.
 
+Arabic text in the browser-generated receipt needs an Arabic-capable font and explicit bidi isolation for mixed Arabic, order numbers, phone numbers, URLs, and currency.
+
+**Why:** Canvas PDF rendering can make Arabic labels or mixed RTL/LTR values appear visually incorrect when it falls back to a generic font or inherits the wrong direction.
+
+**How to apply:** Use the storefront's Noto Arabic fonts for Arabic receipts, disable decorative letter spacing on Arabic labels, and mark numeric/URL values as LTR-isolated.
+
 The checkout UI must provide an explicit save action after a customer returns from Google Maps; entering a link alone is not treated as a confirmed location.
 
 **Why:** Google Maps opens outside the storefront, so the customer needs a clear handoff back to the checkout before continuing.
