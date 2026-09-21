@@ -334,6 +334,7 @@ function AccountingJournal() {
   const [createOpen, setCreateOpen] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [selectedEntryId, setSelectedEntryId] = useState<number | null>(null);
+  const [journalFilters, setJournalFilters] = useState({ date: "", amount: "", invoiceNumber: "", entryNumber: "" });
   const [journalForm, setJournalForm] = useState({ entryDate: new Date().toISOString().slice(0, 10), description: "", debitLines: [{ id: 1, accountId: "", amount: "" }], creditLines: [{ id: 2, accountId: "", amount: "" }], memo: "" });
   const [nextLineId, setNextLineId] = useState(3);
   const accountNames = useMemo(() => new Map((accounts.data ?? []).map((account) => [account.id, isAr ? account.nameAr || account.nameEn : account.nameEn])), [accounts.data, isAr]);
@@ -344,6 +345,23 @@ function AccountingJournal() {
   function entryAmount(entry: NonNullable<typeof journal.data>[number]) {
     return entry.lines.reduce((total, line) => total + line.debitMinor, 0);
   }
+
+  const filteredJournalEntries = useMemo(() => {
+    const amount = journalFilters.amount.trim() ? Number(journalFilters.amount) : null;
+    const invoiceQuery = journalFilters.invoiceNumber.trim().toLocaleLowerCase();
+    const entryQuery = journalFilters.entryNumber.trim().toLocaleLowerCase();
+    return (journal.data ?? []).filter((entry) => {
+      const entryDate = entry.entryDate.slice(0, 10);
+      const searchableInvoice = `${entry.description} ${entry.referenceType ?? ""} ${entry.referenceId ?? ""}`.toLocaleLowerCase();
+      const matchesDate = !journalFilters.date || entryDate === journalFilters.date;
+      const matchesAmount = amount === null || (Number.isFinite(amount) && entryAmount(entry) === Math.round(amount * 100));
+      const matchesInvoice = !invoiceQuery || searchableInvoice.includes(invoiceQuery);
+      const matchesEntryNumber = !entryQuery || entry.entryNumber.toLocaleLowerCase().includes(entryQuery);
+      return matchesDate && matchesAmount && matchesInvoice && matchesEntryNumber;
+    });
+  }, [journal.data, journalFilters]);
+
+  const hasJournalFilters = Object.values(journalFilters).some(Boolean);
 
   function resetJournalForm() {
     setJournalForm({ entryDate: new Date().toISOString().slice(0, 10), description: "", debitLines: [{ id: 1, accountId: "", amount: "" }], creditLines: [{ id: 2, accountId: "", amount: "" }], memo: "" });
