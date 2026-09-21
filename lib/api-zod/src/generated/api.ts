@@ -589,6 +589,9 @@ export const createStorefrontOrderBodyCustomerPhoneMax = 40;
 export const createStorefrontOrderBodyCustomerAddressMin = 5;
 export const createStorefrontOrderBodyCustomerAddressMax = 500;
 
+export const createStorefrontOrderBodyCustomerLocationUrlMin = 8;
+export const createStorefrontOrderBodyCustomerLocationUrlMax = 2000;
+
 
 export const createStorefrontOrderBodyItemsItemQuantityMax = 99;
 
@@ -600,6 +603,7 @@ export const CreateStorefrontOrderBody = zod.object({
   "customerName": zod.string().min(createStorefrontOrderBodyCustomerNameMin).max(createStorefrontOrderBodyCustomerNameMax),
   "customerPhone": zod.string().min(createStorefrontOrderBodyCustomerPhoneMin).max(createStorefrontOrderBodyCustomerPhoneMax),
   "customerAddress": zod.string().min(createStorefrontOrderBodyCustomerAddressMin).max(createStorefrontOrderBodyCustomerAddressMax),
+  "customerLocationUrl": zod.string().url().min(createStorefrontOrderBodyCustomerLocationUrlMin).max(createStorefrontOrderBodyCustomerLocationUrlMax),
   "paymentMethod": zod.enum(['cod']),
   "items": zod.array(zod.object({
   "productId": zod.number().int().min(1),

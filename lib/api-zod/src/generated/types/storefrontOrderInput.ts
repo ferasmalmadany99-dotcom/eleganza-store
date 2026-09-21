@@ -24,6 +24,11 @@ export interface StorefrontOrderInput {
      * @maxLength 500
      */
   customerAddress: string;
+  /**
+     * @minLength 8
+     * @maxLength 2000
+     */
+  customerLocationUrl: string;
   paymentMethod: StorefrontOrderInputPaymentMethod;
   /**
      * @minItems 1

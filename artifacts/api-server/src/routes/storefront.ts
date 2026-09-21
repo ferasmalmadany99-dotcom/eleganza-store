@@ -50,7 +50,7 @@ router.post("/orders", async (req, res): Promise<void> => {
       paymentMethod: "cod",
       customerName: parsed.data.customerName.trim(),
       customerPhone: parsed.data.customerPhone.trim(),
-      customerAddress: parsed.data.customerAddress.trim(),
+      customerAddress: `${parsed.data.customerAddress.trim()}\nGoogle Maps: ${parsed.data.customerLocationUrl.trim()}`,
       subtotalMinor,
       shippingMinor: 0,
       totalMinor: subtotalMinor,
