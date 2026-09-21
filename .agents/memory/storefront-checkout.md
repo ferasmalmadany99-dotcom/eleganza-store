@@ -14,3 +14,9 @@ Delivery location is collected as a Google Maps URL plus a separate free-text ad
 **Why:** Customers need both a precise pin and human directions such as building details or landmarks, while a link-based flow avoids putting a secret key in the public storefront.
 
 **How to apply:** Keep the map URL required in the public order contract, support both a shared Maps link and a browser geolocation-generated link, and preserve the description alongside it.
+
+All delivery fields are mandatory at both client and server boundaries; whitespace-only values and invalid location URLs must be rejected before an order is created.
+
+**Why:** A partially specified delivery address can make an otherwise valid order impossible to fulfil, and client-side required attributes alone can be bypassed.
+
+**How to apply:** Keep UI validation for immediate feedback, but repeat trimmed-value and URL validation in the public order route.

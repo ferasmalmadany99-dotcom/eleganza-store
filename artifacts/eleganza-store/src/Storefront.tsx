@@ -999,9 +999,13 @@ function CheckoutPanel({
     customerLocationUrl: '',
   });
   const [locationError, setLocationError] = useState('');
+  const [formError, setFormError] = useState('');
   const [orderNumber, setOrderNumber] = useState('');
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const updateField = (field: keyof typeof form, value: string) => setForm((current) => ({ ...current, [field]: value }));
+  const updateField = (field: keyof typeof form, value: string) => {
+    setForm((current) => ({ ...current, [field]: value }));
+    setFormError('');
+  };
   const mapSearchUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${form.address}, ${form.city}`)}`;
 
   const useCurrentLocation = () => {
@@ -1019,6 +1023,17 @@ function CheckoutPanel({
 
   const continueToReview = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if ([form.customerName, form.customerPhone, form.city, form.address, form.customerLocationUrl].some((value) => !value.trim())) {
+      setFormError(c.checkoutRequiredFields);
+      return;
+    }
+    try {
+      const locationUrl = new URL(form.customerLocationUrl.trim());
+      if (!['http:', 'https:'].includes(locationUrl.protocol)) throw new Error('Invalid location URL');
+    } catch {
+      setFormError(c.locationError);
+      return;
+    }
     setStep(2);
   };
 
@@ -1090,6 +1105,7 @@ function CheckoutPanel({
                   {locationError && <p className="mt-2 text-xs leading-5 text-[#8b4037]" role="alert">{locationError}</p>}
                 </div>
               </div>
+              {formError && <p className="mt-5 border border-[#a64e3a]/30 bg-[#f2dfd7] px-4 py-3 text-sm leading-6 text-[#8b4037]" role="alert">{formError}</p>}
               <button type="submit" className="mt-8 flex w-full items-center justify-center gap-3 bg-[#9f523d] py-4 font-mono-ui text-[10px] uppercase tracking-[.2em] text-[#fff5e8] transition-colors hover:bg-[#7f3f31] sm:w-auto sm:px-10" data-testid="button-checkout-review">{c.continueReview}<ArrowRight size={15} /></button>
             </section>
             <CheckoutSummary items={items} subtotal={subtotal} c={c} />
