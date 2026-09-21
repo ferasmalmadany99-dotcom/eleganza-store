@@ -63,12 +63,14 @@ import plumElanImage480 from './assets/plum-elan-480.jpg';
 import plumElanImage960 from './assets/plum-elan-960.jpg';
 
 type Category = 'All' | 'New in' | 'Perfume' | 'Makeup' | 'Accessories';
+type Audience = 'All' | 'Men' | 'Women';
 type Language = 'en' | 'ar';
 
 type Product = {
   id: string;
   name: string;
   category: Exclude<Category, 'All'>;
+  audience?: Exclude<Audience, 'All'>;
   price: number;
   stock: number;
   material: string;
@@ -108,6 +110,7 @@ const products: Product[] = [
     id: 'p01',
     name: 'Santal No. 03',
     category: 'Perfume',
+    audience: 'Men',
     price: 145,
     stock: 12,
     material: 'Eau de parfum / 50 ml',
@@ -136,6 +139,7 @@ const products: Product[] = [
     id: 'a01',
     name: 'Lune Hoops',
     category: 'Accessories',
+    audience: 'Women',
     price: 92,
     stock: 5,
     material: 'Gold vermeil',
@@ -163,6 +167,7 @@ const products: Product[] = [
     id: 'p02',
     name: 'Amber Reverie',
     category: 'Perfume',
+    audience: 'Women',
     price: 168,
     stock: 18,
     material: 'Eau de parfum / 75 ml',
@@ -190,6 +195,7 @@ const products: Product[] = [
     id: 'a02',
     name: 'Solstice Chain',
     category: 'Accessories',
+    audience: 'Men',
     price: 118,
     stock: 4,
     material: 'Gold vermeil / 42 cm',
@@ -217,6 +223,7 @@ const products: Product[] = [
     id: 'p03',
     name: 'Cedar Afterglow',
     category: 'Perfume',
+    audience: 'Men',
     price: 152,
     stock: 6,
     material: 'Eau de parfum / 50 ml',
@@ -244,6 +251,7 @@ const products: Product[] = [
     id: 'a03',
     name: 'Aurelia Drops',
     category: 'Accessories',
+    audience: 'Women',
     price: 105,
     stock: 3,
     material: 'Gold vermeil',
@@ -270,6 +278,7 @@ const products: Product[] = [
 ];
 
 const filters: Category[] = ['All', 'New in', 'Perfume', 'Makeup', 'Accessories'];
+const audienceFilters: Audience[] = ['All', 'Men', 'Women'];
 
 const copy = {
   en: {
@@ -294,6 +303,10 @@ const copy = {
     perfume: 'Perfume',
     makeup: 'Makeup',
     accessories: 'Accessories',
+    audienceAll: 'All',
+    men: 'Men',
+    women: 'Women',
+    chooseAudience: 'Shop by',
     ourPointOfView: 'Our point of view',
     aboutTitle: <>Beauty, but <em>better considered.</em></>,
     aboutDescription: 'Eleganza is a practice in editing. We look for the note that lingers, the color that feels like you, and the small detail that changes the whole ritual.',
@@ -417,6 +430,10 @@ const copy = {
     perfume: 'عطور',
     makeup: 'مكياج',
     accessories: 'إكسسوارات',
+    audienceAll: 'الكل',
+    men: 'رجالي',
+    women: 'نسائي',
+    chooseAudience: 'اختيار النوع',
     ourPointOfView: 'وجهة نظرنا',
     aboutTitle: <>الجمال، لكن <em>باختيار أفضل.</em></>,
     aboutDescription: 'إيليغانزا تمرين على الانتقاء. نبحث عن الأثر الذي يبقى، واللون الذي يشبهك، والتفصيل الصغير الذي يغيّر الطقس كله.',
@@ -616,6 +633,11 @@ const articles: Record<Language, Article[]> = {
 const categoryLabels: Record<Language, Record<Category, string>> = {
   en: { All: copy.en.all, 'New in': copy.en.newIn, Perfume: copy.en.perfume, Makeup: copy.en.makeup, Accessories: copy.en.accessories },
   ar: { All: copy.ar.all, 'New in': copy.ar.newIn, Perfume: copy.ar.perfume, Makeup: copy.ar.makeup, Accessories: copy.ar.accessories },
+};
+
+const audienceLabels: Record<Language, Record<Audience, string>> = {
+  en: { All: copy.en.audienceAll, Men: copy.en.men, Women: copy.en.women },
+  ar: { All: copy.ar.audienceAll, Men: copy.ar.men, Women: copy.ar.women },
 };
 
 const getBadgeLabel = (badge: string | undefined, c: Copy) =>
@@ -1400,6 +1422,7 @@ function Storefront() {
     return savedLanguage === 'ar' ? 'ar' : 'en';
   });
   const [activeFilter, setActiveFilter] = useState<Category>('All');
+  const [activeAudience, setActiveAudience] = useState<Audience>('All');
   const [favorites, setFavorites] = useState<string[]>(() => {
     try {
       const saved = JSON.parse(window.localStorage.getItem('eleganza-favorites') ?? '[]');
@@ -1483,13 +1506,16 @@ function Storefront() {
   });
 
   const shownProducts = useMemo(() => {
-    const filtered = activeFilter === 'All'
+    const categoryProducts = activeFilter === 'All'
       ? products
       : activeFilter === 'New in'
         ? products.filter((product) => product.badge === 'New' || product.badge === 'Edition 01')
         : products.filter((product) => product.category === activeFilter);
+    const filtered = activeAudience !== 'All' && (activeFilter === 'Perfume' || activeFilter === 'Accessories')
+      ? categoryProducts.filter((product) => product.audience === activeAudience)
+      : categoryProducts;
     return filtered.map(withCurrentStock);
-  }, [activeFilter, inventoryByName, inventoryLoaded]);
+  }, [activeAudience, activeFilter, inventoryByName, inventoryLoaded]);
   const bagCount = bag.reduce((sum, item) => sum + item.quantity, 0);
   const favoriteProducts = products.filter((product) => favorites.includes(product.id)).map(withCurrentStock);
   const currentSelectedProduct = selectedProduct ? withCurrentStock(selectedProduct) : null;
@@ -1559,10 +1585,11 @@ function Storefront() {
             <div><SectionKicker>{c.selectedForNow}</SectionKicker><h2 className="arabic-section-title mt-4 max-w-[500px] font-display text-5xl leading-[.9] tracking-[-.04em] sm:text-7xl">{c.essentials}</h2></div>
             <p className="max-w-[250px] text-sm leading-6 text-[#77695e]">{c.essentialsDescription}</p>
           </div>
-          <div className="mt-14 flex items-center justify-between border-y border-[#312b25]/15 py-4">
-            <div className="no-scrollbar flex gap-6 overflow-auto">{filters.map((filter) => <button key={filter} onClick={() => setActiveFilter(filter)} className={`whitespace-nowrap font-mono-ui text-[10px] uppercase tracking-[.16em] transition-colors ${activeFilter === filter ? 'text-[#9f523d]' : 'text-[#88796c] hover:text-[#312b25]'}`} data-testid={`button-filter-${filter.toLowerCase().replace(' ', '-')}`}>{categoryLabels[language][filter]}</button>)}</div>
+           <div className="mt-14 flex items-center justify-between border-y border-[#312b25]/15 py-4">
+             <div className="no-scrollbar flex gap-6 overflow-auto">{filters.map((filter) => <button key={filter} onClick={() => { setActiveFilter(filter); setActiveAudience('All'); }} className={`whitespace-nowrap font-mono-ui text-[10px] uppercase tracking-[.16em] transition-colors ${activeFilter === filter ? 'text-[#9f523d]' : 'text-[#88796c] hover:text-[#312b25]'}`} data-testid={`button-filter-${filter.toLowerCase().replace(' ', '-')}`}>{categoryLabels[language][filter]}</button>)}</div>
             <span className="hidden font-mono-ui text-[10px] uppercase tracking-[.14em] text-[#9b8b7e] sm:block">{String(shownProducts.length).padStart(2, '0')} / {String(products.length).padStart(2, '0')}</span>
           </div>
+           {(activeFilter === 'Perfume' || activeFilter === 'Accessories') && <div className="mt-5 flex flex-wrap items-center gap-5" aria-label={c.chooseAudience}><span className="font-mono-ui text-[9px] uppercase tracking-[.18em] text-[#9b8b7e]">{c.chooseAudience}</span>{audienceFilters.map((audience) => <button key={audience} onClick={() => setActiveAudience(audience)} className={`font-mono-ui text-[10px] uppercase tracking-[.16em] transition-colors ${activeAudience === audience ? 'text-[#9f523d]' : 'text-[#88796c] hover:text-[#312b25]'}`} data-testid={`button-audience-${audience.toLowerCase()}`}>{audienceLabels[language][audience]}</button>)}</div>}
           <div className="mt-8 grid gap-x-5 gap-y-14 sm:grid-cols-2 lg:grid-cols-4">{shownProducts.map((product) => <ProductCard key={product.id} product={product} language={language} c={c} favorite={favorites.includes(product.id)} onFavorite={() => toggleFavorite(product.id)} onSelect={() => setSelectedProduct(product)} onAdd={() => addToBag(product)} />)}</div>
         </section>
 
