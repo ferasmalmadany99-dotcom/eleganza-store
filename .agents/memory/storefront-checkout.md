@@ -21,6 +21,12 @@ All delivery fields are mandatory at both client and server boundaries; whitespa
 
 **How to apply:** Keep UI validation for immediate feedback, but repeat trimmed-value and URL validation in the public order route.
 
+After a successful customer order, the receipt is offered from the success screen through a printable PDF flow. The receipt includes the order number, customer delivery details, items, total, and cash-on-delivery method.
+
+**Why:** Browser-only receipt generation avoids adding a PDF dependency while still allowing the customer to choose “Save as PDF” from the print dialog.
+
+**How to apply:** Keep receipt content escaped before writing it into the print window, and retain the success screen until the customer closes checkout.
+
 The checkout UI must provide an explicit save action after a customer returns from Google Maps; entering a link alone is not treated as a confirmed location.
 
 **Why:** Google Maps opens outside the storefront, so the customer needs a clear handoff back to the checkout before continuing.
