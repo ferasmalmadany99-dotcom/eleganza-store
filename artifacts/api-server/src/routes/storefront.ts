@@ -26,6 +26,23 @@ router.post("/orders", async (req, res): Promise<void> => {
     res.status(400).json({ error: parsed.error.message });
     return;
   }
+  const requiredFields = [
+    parsed.data.customerName,
+    parsed.data.customerPhone,
+    parsed.data.customerAddress,
+    parsed.data.customerLocationUrl,
+  ];
+  if (requiredFields.some((value) => !value.trim())) {
+    res.status(400).json({ error: "All delivery details are required" });
+    return;
+  }
+  try {
+    const locationUrl = new URL(parsed.data.customerLocationUrl);
+    if (!["http:", "https:"].includes(locationUrl.protocol)) throw new Error("Invalid location URL");
+  } catch {
+    res.status(400).json({ error: "A valid Google Maps location link is required" });
+    return;
+  }
 
   const requestedItems = new Map<number, number>();
   for (const item of parsed.data.items) {

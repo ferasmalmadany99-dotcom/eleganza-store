@@ -583,15 +583,23 @@ export const ListStaffResponse = zod.array(ListStaffResponseItem)
 export const createStorefrontOrderBodyCustomerNameMin = 2;
 export const createStorefrontOrderBodyCustomerNameMax = 120;
 
+
+export const createStorefrontOrderBodyCustomerNameRegExp = new RegExp('.*\\S.*');
 export const createStorefrontOrderBodyCustomerPhoneMin = 5;
 export const createStorefrontOrderBodyCustomerPhoneMax = 40;
 
+
+export const createStorefrontOrderBodyCustomerPhoneRegExp = new RegExp('.*\\S.*');
 export const createStorefrontOrderBodyCustomerAddressMin = 5;
 export const createStorefrontOrderBodyCustomerAddressMax = 500;
 
+
+export const createStorefrontOrderBodyCustomerAddressRegExp = new RegExp('.*\\S.*');
 export const createStorefrontOrderBodyCustomerLocationUrlMin = 8;
 export const createStorefrontOrderBodyCustomerLocationUrlMax = 2000;
 
+
+export const createStorefrontOrderBodyCustomerLocationUrlRegExp = new RegExp('.*\\S.*');
 
 export const createStorefrontOrderBodyItemsItemQuantityMax = 99;
 
@@ -600,10 +608,10 @@ export const createStorefrontOrderBodyItemsMax = 50;
 
 
 export const CreateStorefrontOrderBody = zod.object({
-  "customerName": zod.string().min(createStorefrontOrderBodyCustomerNameMin).max(createStorefrontOrderBodyCustomerNameMax),
-  "customerPhone": zod.string().min(createStorefrontOrderBodyCustomerPhoneMin).max(createStorefrontOrderBodyCustomerPhoneMax),
-  "customerAddress": zod.string().min(createStorefrontOrderBodyCustomerAddressMin).max(createStorefrontOrderBodyCustomerAddressMax),
-  "customerLocationUrl": zod.string().url().min(createStorefrontOrderBodyCustomerLocationUrlMin).max(createStorefrontOrderBodyCustomerLocationUrlMax),
+  "customerName": zod.string().min(createStorefrontOrderBodyCustomerNameMin).max(createStorefrontOrderBodyCustomerNameMax).regex(createStorefrontOrderBodyCustomerNameRegExp),
+  "customerPhone": zod.string().min(createStorefrontOrderBodyCustomerPhoneMin).max(createStorefrontOrderBodyCustomerPhoneMax).regex(createStorefrontOrderBodyCustomerPhoneRegExp),
+  "customerAddress": zod.string().min(createStorefrontOrderBodyCustomerAddressMin).max(createStorefrontOrderBodyCustomerAddressMax).regex(createStorefrontOrderBodyCustomerAddressRegExp),
+  "customerLocationUrl": zod.string().url().min(createStorefrontOrderBodyCustomerLocationUrlMin).max(createStorefrontOrderBodyCustomerLocationUrlMax).regex(createStorefrontOrderBodyCustomerLocationUrlRegExp),
   "paymentMethod": zod.enum(['cod']),
   "items": zod.array(zod.object({
   "productId": zod.number().int().min(1),
