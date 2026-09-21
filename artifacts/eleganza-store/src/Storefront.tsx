@@ -340,10 +340,12 @@ const copy = {
     customerName: 'Full name',
     customerPhone: 'Phone number',
     customerCity: 'City',
+    customerArea: 'Area / Neighborhood',
     customerAddress: 'Delivery address',
     customerNamePlaceholder: 'e.g. Alex Morgan',
     customerPhonePlaceholder: '+218 91 000 0000',
     customerCityPlaceholder: 'Tripoli',
+    customerAreaPlaceholder: 'e.g. Hay Al-Andalus',
     customerAddressPlaceholder: 'Street, building and nearby landmark',
     customerLocation: 'Location on Google Maps',
     customerLocationHint: 'Open Google Maps, choose the delivery point, then paste the shared link here.',
@@ -461,10 +463,12 @@ const copy = {
     customerName: 'الاسم الكامل',
     customerPhone: 'رقم الهاتف',
     customerCity: 'المدينة',
+    customerArea: 'المنطقة / المحلة',
     customerAddress: 'عنوان التوصيل',
     customerNamePlaceholder: 'مثال: أحمد محمد',
     customerPhonePlaceholder: '+218 91 000 0000',
     customerCityPlaceholder: 'طرابلس',
+    customerAreaPlaceholder: 'مثال: حي الأندلس',
     customerAddressPlaceholder: 'الشارع، المبنى، وأقرب معلم',
     customerLocation: 'موقع التوصيل على Google Maps',
     customerLocationHint: 'افتح Google Maps وحدد نقطة التوصيل، ثم الصق رابط المشاركة هنا.',
@@ -700,7 +704,7 @@ async function downloadReceiptPdf({
   orderNumber: string;
   items: CheckoutItem[];
   subtotal: number;
-  form: { customerName: string; customerPhone: string; city: string; address: string; customerLocationUrl: string };
+  form: { customerName: string; customerPhone: string; city: string; area: string; address: string; customerLocationUrl: string };
   language: Language;
   c: Copy;
 }) {
@@ -710,7 +714,7 @@ async function downloadReceiptPdf({
   const labelLetterSpacing = language === 'ar' ? '0' : '.16em';
   const receipt = document.createElement('div');
   receipt.style.cssText = `position:fixed;left:-10000px;top:0;width:794px;padding:48px;background:#fffaf3;color:#312b25;font-family:${receiptFont};direction:${direction};unicode-bidi:isolate;`;
-  receipt.innerHTML = `<div dir="${direction}" lang="${language}" style="border:1px solid #ded0c1;padding:40px;font-family:${receiptFont};unicode-bidi:isolate"><div style="display:flex;justify-content:space-between;gap:24px;align-items:flex-start;border-bottom:2px solid #9f523d;padding-bottom:24px"><div><p style="color:#9f523d;font-size:11px;letter-spacing:${labelLetterSpacing};text-transform:uppercase;margin:0 0 8px">Eleganza / ${escapeHtml(c.checkoutSuccess)}</p><h1 style="font-family:${receiptFont};font-size:36px;font-weight:400;margin:0 0 8px">${escapeHtml(c.checkoutSuccess)}</h1><p style="line-height:1.6;margin:5px 0">${escapeHtml(c.cashOnDeliveryDetail)}</p></div><div><p style="color:#9f523d;font-size:11px;letter-spacing:${labelLetterSpacing};text-transform:uppercase;margin:0 0 8px">${escapeHtml(c.orderNumber)}</p><p dir="ltr" style="font-size:16px;color:#9f523d;font-weight:bold;direction:ltr;unicode-bidi:isolate;margin:0">${escapeHtml(orderNumber)}</p></div></div><section style="margin-top:28px"><p style="font-size:11px;color:#9f523d;letter-spacing:0;text-transform:uppercase;margin:0 0 12px">${escapeHtml(c.checkoutDetails)}</p><table style="width:100%;border-collapse:collapse;font-size:14px"><tbody><tr><td style="padding:8px 4px;border-bottom:1px solid #e5dacf"><strong>${escapeHtml(c.customerName)}</strong><br>${escapeHtml(form.customerName)}</td><td style="padding:8px 4px;border-bottom:1px solid #e5dacf"><strong>${escapeHtml(c.customerPhone)}</strong><br><span dir="ltr" style="unicode-bidi:isolate">${escapeHtml(form.customerPhone)}</span></td></tr><tr><td style="padding:8px 4px;border-bottom:1px solid #e5dacf"><strong>${escapeHtml(c.customerCity)}</strong><br>${escapeHtml(form.city)}</td><td style="padding:8px 4px;border-bottom:1px solid #e5dacf"><strong>${escapeHtml(c.customerAddress)}</strong><br>${escapeHtml(form.address)}</td></tr></tbody></table><p style="margin:14px 0 0;font-size:12px;word-break:break-all"><strong>${escapeHtml(c.customerLocation)}</strong><br><span dir="ltr" style="unicode-bidi:isolate">${escapeHtml(form.customerLocationUrl)}</span></p></section><section style="margin-top:28px"><p style="font-size:11px;color:#9f523d;letter-spacing:0;text-transform:uppercase;margin:0 0 12px">${escapeHtml(c.theBag)}</p><table dir="${direction}" style="width:100%;table-layout:fixed;border-collapse:collapse;font-size:14px"><thead><tr><th style="width:40%;text-align:start;border-bottom:1px solid #e5dacf;padding:12px 4px;font-size:11px;color:#8b7b6e">${escapeHtml(c.itemName)}</th><th dir="ltr" style="width:18%;text-align:start;border-bottom:1px solid #e5dacf;padding:12px 4px;font-size:11px;color:#8b7b6e;direction:ltr;unicode-bidi:isolate">${escapeHtml(c.unitPrice)}</th><th dir="ltr" style="width:17%;text-align:start;border-bottom:1px solid #e5dacf;padding:12px 4px;font-size:11px;color:#8b7b6e;direction:ltr;unicode-bidi:isolate">${escapeHtml(c.quantity)}</th><th dir="ltr" style="width:25%;text-align:start;border-bottom:1px solid #e5dacf;padding:12px 4px;font-size:11px;color:#8b7b6e;direction:ltr;unicode-bidi:isolate">${escapeHtml(c.lineTotal)}</th></tr></thead><tbody>${itemRows}</tbody></table><div style="display:flex;justify-content:space-between;border-top:2px solid #312b25;margin-top:20px;padding-top:16px;font-size:20px"><span>${escapeHtml(c.total)}</span><strong dir="ltr" style="direction:ltr;unicode-bidi:isolate">${escapeHtml(money(subtotal))}</strong></div></section></div>`;
+  receipt.innerHTML = `<div dir="${direction}" lang="${language}" style="border:1px solid #ded0c1;padding:40px;font-family:${receiptFont};unicode-bidi:isolate"><div style="display:flex;justify-content:space-between;gap:24px;align-items:flex-start;border-bottom:2px solid #9f523d;padding-bottom:24px"><div><p style="color:#9f523d;font-size:11px;letter-spacing:${labelLetterSpacing};text-transform:uppercase;margin:0 0 8px">Eleganza / ${escapeHtml(c.checkoutSuccess)}</p><h1 style="font-family:${receiptFont};font-size:36px;font-weight:400;margin:0 0 8px">${escapeHtml(c.checkoutSuccess)}</h1><p style="line-height:1.6;margin:5px 0">${escapeHtml(c.cashOnDeliveryDetail)}</p></div><div><p style="color:#9f523d;font-size:11px;letter-spacing:${labelLetterSpacing};text-transform:uppercase;margin:0 0 8px">${escapeHtml(c.orderNumber)}</p><p dir="ltr" style="font-size:16px;color:#9f523d;font-weight:bold;direction:ltr;unicode-bidi:isolate;margin:0">${escapeHtml(orderNumber)}</p></div></div><section style="margin-top:28px"><p style="font-size:11px;color:#9f523d;letter-spacing:0;text-transform:uppercase;margin:0 0 12px">${escapeHtml(c.checkoutDetails)}</p><table style="width:100%;border-collapse:collapse;font-size:14px"><tbody><tr><td style="padding:8px 4px;border-bottom:1px solid #e5dacf"><strong>${escapeHtml(c.customerName)}</strong><br>${escapeHtml(form.customerName)}</td><td style="padding:8px 4px;border-bottom:1px solid #e5dacf"><strong>${escapeHtml(c.customerPhone)}</strong><br><span dir="ltr" style="unicode-bidi:isolate">${escapeHtml(form.customerPhone)}</span></td></tr><tr><td style="padding:8px 4px;border-bottom:1px solid #e5dacf"><strong>${escapeHtml(c.customerCity)}</strong><br>${escapeHtml(form.city)}</td><td style="padding:8px 4px;border-bottom:1px solid #e5dacf"><strong>${escapeHtml(c.customerArea)}</strong><br>${escapeHtml(form.area)}</td></tr><tr><td colspan="2" style="padding:8px 4px;border-bottom:1px solid #e5dacf"><strong>${escapeHtml(c.customerAddress)}</strong><br>${escapeHtml(form.address)}</td></tr></tbody></table><p style="margin:14px 0 0;font-size:12px;word-break:break-all"><strong>${escapeHtml(c.customerLocation)}</strong><br><span dir="ltr" style="unicode-bidi:isolate">${escapeHtml(form.customerLocationUrl)}</span></p></section><section style="margin-top:28px"><p style="font-size:11px;color:#9f523d;letter-spacing:0;text-transform:uppercase;margin:0 0 12px">${escapeHtml(c.theBag)}</p><table dir="${direction}" style="width:100%;table-layout:fixed;border-collapse:collapse;font-size:14px"><thead><tr><th style="width:40%;text-align:start;border-bottom:1px solid #e5dacf;padding:12px 4px;font-size:11px;color:#8b7b6e">${escapeHtml(c.itemName)}</th><th dir="ltr" style="width:18%;text-align:start;border-bottom:1px solid #e5dacf;padding:12px 4px;font-size:11px;color:#8b7b6e;direction:ltr;unicode-bidi:isolate">${escapeHtml(c.unitPrice)}</th><th dir="ltr" style="width:17%;text-align:start;border-bottom:1px solid #e5dacf;padding:12px 4px;font-size:11px;color:#8b7b6e;direction:ltr;unicode-bidi:isolate">${escapeHtml(c.quantity)}</th><th dir="ltr" style="width:25%;text-align:start;border-bottom:1px solid #e5dacf;padding:12px 4px;font-size:11px;color:#8b7b6e;direction:ltr;unicode-bidi:isolate">${escapeHtml(c.lineTotal)}</th></tr></thead><tbody>${itemRows}</tbody></table><div style="display:flex;justify-content:space-between;border-top:2px solid #312b25;margin-top:20px;padding-top:16px;font-size:20px"><span>${escapeHtml(c.total)}</span><strong dir="ltr" style="direction:ltr;unicode-bidi:isolate">${escapeHtml(money(subtotal))}</strong></div></section></div>`;
   document.body.appendChild(receipt);
   try {
     await document.fonts?.ready;
@@ -1071,6 +1075,7 @@ function CheckoutPanel({
     customerName: '',
     customerPhone: '',
     city: '',
+    area: '',
     address: '',
     customerLocationUrl: '',
   });
@@ -1084,7 +1089,7 @@ function CheckoutPanel({
     if (field === 'customerLocationUrl') setLocationSaved(false);
     setFormError('');
   };
-  const mapSearchUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${form.address}, ${form.city}`)}`;
+  const mapSearchUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${form.address}, ${form.area}, ${form.city}`)}`;
 
   const useCurrentLocation = () => {
     setLocationError('');
@@ -1114,7 +1119,7 @@ function CheckoutPanel({
 
   const continueToReview = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if ([form.customerName, form.customerPhone, form.city, form.address, form.customerLocationUrl].some((value) => !value.trim())) {
+    if ([form.customerName, form.customerPhone, form.city, form.area, form.address, form.customerLocationUrl].some((value) => !value.trim())) {
       setFormError(c.checkoutRequiredFields);
       return;
     }
@@ -1138,7 +1143,7 @@ function CheckoutPanel({
         data: {
           customerName: form.customerName.trim(),
           customerPhone: form.customerPhone.trim(),
-          customerAddress: `${form.city.trim()} — ${form.address.trim()}`,
+          customerAddress: `${form.city.trim()} — ${form.area.trim()} — ${form.address.trim()}`,
           customerLocationUrl: form.customerLocationUrl.trim(),
           paymentMethod: 'cod',
           items: items.map((item) => ({ productId: item.serverProductId, quantity: item.quantity })),
@@ -1185,7 +1190,10 @@ function CheckoutPanel({
               <div className="mt-10 grid gap-5 sm:grid-cols-2">
                 <label className="text-sm sm:col-span-2">{c.customerName}<input className={inputClass} required minLength={2} value={form.customerName} onChange={(event) => updateField('customerName', event.target.value)} placeholder={c.customerNamePlaceholder} data-testid="input-checkout-name" /></label>
                 <label className="text-sm"><span>{c.customerPhone}</span><span className="relative block"><Phone size={15} className="absolute start-4 top-1/2 -translate-y-1/2 text-[#9f523d]" /><input className={`${inputClass} mt-2 ps-10`} required minLength={5} value={form.customerPhone} onChange={(event) => updateField('customerPhone', event.target.value)} placeholder={c.customerPhonePlaceholder} type="tel" dir="ltr" data-testid="input-checkout-phone" /></span></label>
-                <label className="text-sm">{c.customerCity}<input className={inputClass} required minLength={2} value={form.city} onChange={(event) => updateField('city', event.target.value)} placeholder={c.customerCityPlaceholder} data-testid="input-checkout-city" /></label>
+                <div className="grid gap-5">
+                  <label className="text-sm">{c.customerCity}<input className={inputClass} required minLength={2} value={form.city} onChange={(event) => updateField('city', event.target.value)} placeholder={c.customerCityPlaceholder} data-testid="input-checkout-city" /></label>
+                  <label className="text-sm">{c.customerArea}<input className={inputClass} required minLength={2} value={form.area} onChange={(event) => updateField('area', event.target.value)} placeholder={c.customerAreaPlaceholder} data-testid="input-checkout-area" /></label>
+                </div>
                 <label className="text-sm sm:col-span-2"><span className="flex items-center gap-2"><MapPin size={15} className="text-[#9f523d]" />{c.customerAddress}</span><textarea className={`${inputClass} min-h-28 resize-y`} required minLength={5} value={form.address} onChange={(event) => updateField('address', event.target.value)} placeholder={c.customerAddressPlaceholder} data-testid="input-checkout-address" /></label>
                 <div className="border border-[#312b25]/15 bg-[#efe4d6] p-4 sm:col-span-2">
                   <div className="flex flex-wrap items-start justify-between gap-3">
@@ -1216,7 +1224,7 @@ function CheckoutPanel({
               <p className="font-mono-ui text-[10px] uppercase tracking-[.22em] text-[#9f523d]">02 / {c.checkoutReview}</p>
               <h1 className="mt-4 font-display text-5xl leading-none sm:text-7xl">{c.checkoutReview}</h1>
               <div className="mt-10 border-y border-[#312b25]/15 py-6">
-                <div className="flex items-start gap-4"><MapPin size={18} className="mt-1 shrink-0 text-[#9f523d]" /><div><p className="font-medium">{form.customerName}</p><p className="mt-1 text-sm leading-6 text-[#75685d]">{form.customerPhone}<br />{form.city} — {form.address}</p><a href={form.customerLocationUrl} target="_blank" rel="noreferrer" className="mt-2 inline-flex items-center gap-1 text-xs text-[#9f523d] hover:underline"><ExternalLink size={12} />{c.locationReady}</a></div></div>
+                <div className="flex items-start gap-4"><MapPin size={18} className="mt-1 shrink-0 text-[#9f523d]" /><div><p className="font-medium">{form.customerName}</p><p className="mt-1 text-sm leading-6 text-[#75685d]">{form.customerPhone}<br />{form.city} — {form.area} — {form.address}</p><a href={form.customerLocationUrl} target="_blank" rel="noreferrer" className="mt-2 inline-flex items-center gap-1 text-xs text-[#9f523d] hover:underline"><ExternalLink size={12} />{c.locationReady}</a></div></div>
               </div>
               <div className="mt-8">
                 <p className="font-mono-ui text-[10px] uppercase tracking-[.18em] text-[#9f523d]">{c.payment}</p>
