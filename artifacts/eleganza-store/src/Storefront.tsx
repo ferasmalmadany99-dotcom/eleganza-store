@@ -6,8 +6,10 @@ import {
   Check,
   ChevronDown,
   ChevronUp,
+  ExternalLink,
   Heart,
   LoaderCircle,
+  LocateFixed,
   MapPin,
   Menu,
   Minus,
@@ -339,6 +341,13 @@ const copy = {
     customerPhonePlaceholder: '+218 91 000 0000',
     customerCityPlaceholder: 'Tripoli',
     customerAddressPlaceholder: 'Street, building and nearby landmark',
+    customerLocation: 'Location on Google Maps',
+    customerLocationHint: 'Open Google Maps, choose the delivery point, then paste the shared link here.',
+    openGoogleMaps: 'Open Google Maps',
+    useCurrentLocation: 'Use my current location',
+    locationLinkPlaceholder: 'Paste the Google Maps shared link',
+    locationReady: 'Location link added',
+    locationError: 'We could not access your location. Open Google Maps and paste the shared link instead.',
     continueReview: 'Review order',
     back: 'Back',
     payment: 'Payment method',
@@ -441,6 +450,13 @@ const copy = {
     customerPhonePlaceholder: '+218 91 000 0000',
     customerCityPlaceholder: 'طرابلس',
     customerAddressPlaceholder: 'الشارع، المبنى، وأقرب معلم',
+    customerLocation: 'موقع التوصيل على Google Maps',
+    customerLocationHint: 'افتح Google Maps وحدد نقطة التوصيل، ثم الصق رابط المشاركة هنا.',
+    openGoogleMaps: 'فتح Google Maps',
+    useCurrentLocation: 'استخدام موقعي الحالي',
+    locationLinkPlaceholder: 'الصق رابط الموقع من Google Maps',
+    locationReady: 'تمت إضافة رابط الموقع',
+    locationError: 'تعذر الوصول إلى موقعك. افتح Google Maps والصق رابط المشاركة بدلًا من ذلك.',
     continueReview: 'مراجعة الطلب',
     back: 'رجوع',
     payment: 'طريقة الدفع',
@@ -978,10 +994,26 @@ function CheckoutPanel({
     customerPhone: '',
     city: '',
     address: '',
+    customerLocationUrl: '',
   });
+  const [locationError, setLocationError] = useState('');
   const [orderNumber, setOrderNumber] = useState('');
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const updateField = (field: keyof typeof form, value: string) => setForm((current) => ({ ...current, [field]: value }));
+  const mapSearchUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${form.address}, ${form.city}`)}`;
+
+  const useCurrentLocation = () => {
+    setLocationError('');
+    if (!navigator.geolocation) {
+      setLocationError(c.locationError);
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => updateField('customerLocationUrl', `https://www.google.com/maps/search/?api=1&query=${coords.latitude},${coords.longitude}`),
+      () => setLocationError(c.locationError),
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 },
+    );
+  };
 
   const continueToReview = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -995,6 +1027,7 @@ function CheckoutPanel({
           customerName: form.customerName.trim(),
           customerPhone: form.customerPhone.trim(),
           customerAddress: `${form.city.trim()} — ${form.address.trim()}`,
+          customerLocationUrl: form.customerLocationUrl.trim(),
           paymentMethod: 'cod',
           items: items.map((item) => ({ productId: item.serverProductId, quantity: item.quantity })),
         },
@@ -1042,6 +1075,18 @@ function CheckoutPanel({
                 <label className="text-sm"><span>{c.customerPhone}</span><span className="relative block"><Phone size={15} className="absolute start-4 top-1/2 -translate-y-1/2 text-[#9f523d]" /><input className={`${inputClass} mt-2 ps-10`} required minLength={5} value={form.customerPhone} onChange={(event) => updateField('customerPhone', event.target.value)} placeholder={c.customerPhonePlaceholder} type="tel" dir="ltr" data-testid="input-checkout-phone" /></span></label>
                 <label className="text-sm">{c.customerCity}<input className={inputClass} required minLength={2} value={form.city} onChange={(event) => updateField('city', event.target.value)} placeholder={c.customerCityPlaceholder} data-testid="input-checkout-city" /></label>
                 <label className="text-sm sm:col-span-2"><span className="flex items-center gap-2"><MapPin size={15} className="text-[#9f523d]" />{c.customerAddress}</span><textarea className={`${inputClass} min-h-28 resize-y`} required minLength={5} value={form.address} onChange={(event) => updateField('address', event.target.value)} placeholder={c.customerAddressPlaceholder} data-testid="input-checkout-address" /></label>
+                <div className="border border-[#312b25]/15 bg-[#efe4d6] p-4 sm:col-span-2">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div><p className="flex items-center gap-2 text-sm font-medium"><LocateFixed size={15} className="text-[#9f523d]" />{c.customerLocation}</p><p className="mt-1 max-w-[520px] text-xs leading-5 text-[#75685d]">{c.customerLocationHint}</p></div>
+                    <div className="flex flex-wrap gap-2">
+                      <a href={mapSearchUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 border border-[#312b25]/20 px-3 py-2 font-mono-ui text-[9px] uppercase tracking-[.12em] hover:border-[#9f523d] hover:text-[#9f523d]" data-testid="link-open-google-maps"><ExternalLink size={13} />{c.openGoogleMaps}</a>
+                      <button type="button" onClick={useCurrentLocation} className="inline-flex items-center gap-2 border border-[#312b25]/20 px-3 py-2 font-mono-ui text-[9px] uppercase tracking-[.12em] hover:border-[#9f523d] hover:text-[#9f523d]" data-testid="button-use-current-location"><LocateFixed size={13} />{c.useCurrentLocation}</button>
+                    </div>
+                  </div>
+                  <input className={inputClass} required type="url" value={form.customerLocationUrl} onChange={(event) => { setLocationError(''); updateField('customerLocationUrl', event.target.value); }} placeholder={c.locationLinkPlaceholder} data-testid="input-checkout-location" />
+                  {form.customerLocationUrl && <a href={form.customerLocationUrl} target="_blank" rel="noreferrer" className="mt-2 inline-flex items-center gap-2 text-xs text-[#9f523d] hover:underline"><Check size={13} />{c.locationReady}</a>}
+                  {locationError && <p className="mt-2 text-xs leading-5 text-[#8b4037]" role="alert">{locationError}</p>}
+                </div>
               </div>
               <button type="submit" className="mt-8 flex w-full items-center justify-center gap-3 bg-[#9f523d] py-4 font-mono-ui text-[10px] uppercase tracking-[.2em] text-[#fff5e8] transition-colors hover:bg-[#7f3f31] sm:w-auto sm:px-10" data-testid="button-checkout-review">{c.continueReview}<ArrowRight size={15} /></button>
             </section>
@@ -1055,7 +1100,7 @@ function CheckoutPanel({
               <p className="font-mono-ui text-[10px] uppercase tracking-[.22em] text-[#9f523d]">02 / {c.checkoutReview}</p>
               <h1 className="mt-4 font-display text-5xl leading-none sm:text-7xl">{c.checkoutReview}</h1>
               <div className="mt-10 border-y border-[#312b25]/15 py-6">
-                <div className="flex items-start gap-4"><MapPin size={18} className="mt-1 shrink-0 text-[#9f523d]" /><div><p className="font-medium">{form.customerName}</p><p className="mt-1 text-sm leading-6 text-[#75685d]">{form.customerPhone}<br />{form.city} — {form.address}</p></div></div>
+                <div className="flex items-start gap-4"><MapPin size={18} className="mt-1 shrink-0 text-[#9f523d]" /><div><p className="font-medium">{form.customerName}</p><p className="mt-1 text-sm leading-6 text-[#75685d]">{form.customerPhone}<br />{form.city} — {form.address}</p><a href={form.customerLocationUrl} target="_blank" rel="noreferrer" className="mt-2 inline-flex items-center gap-1 text-xs text-[#9f523d] hover:underline"><ExternalLink size={12} />{c.locationReady}</a></div></div>
               </div>
               <div className="mt-8">
                 <p className="font-mono-ui text-[10px] uppercase tracking-[.18em] text-[#9f523d]">{c.payment}</p>
@@ -1430,7 +1475,7 @@ function Storefront() {
 
       {notice && <div className="fixed bottom-6 left-1/2 z-[60] flex w-[calc(100%-2rem)] max-w-md -translate-x-1/2 items-center justify-center gap-3 bg-[#312b25] px-6 py-4 text-center text-sm font-medium leading-6 text-[#fff8ed] shadow-2xl sm:w-auto sm:min-w-[360px] sm:text-base" role="status" aria-live="polite" data-testid="status-notice"><Sparkles size={18} className="shrink-0 text-[#d18c6d]" />{notice}</div>}
        {bagOpen && <BagDrawer items={bag.map(withCurrentCartStock)} language={language} c={c} onClose={() => setBagOpen(false)} onUpdate={updateQuantity} onRemove={(id) => setBag((current) => current.filter((item) => item.id !== id))} onCheckout={openCheckout} />}
-       {checkoutOpen && checkoutItems.length > 0 && <CheckoutPanel items={checkoutItems} language={language} c={c} onClose={() => setCheckoutOpen(false)} onSubmitted={() => setBag([])} />}
+       {checkoutOpen && checkoutItems.length > 0 && <CheckoutPanel items={checkoutItems} language={language} c={c} onClose={() => { setCheckoutOpen(false); setBag([]); }} onSubmitted={() => undefined} />}
       {favoritesOpen && <FavoritesDrawer items={favoriteProducts} language={language} c={c} onClose={() => setFavoritesOpen(false)} onRemove={toggleFavorite} onSelect={(product) => { setFavoritesOpen(false); setSelectedProduct(product); }} />}
       {searchOpen && <SearchPanel products={products} c={c} language={language} onClose={() => setSearchOpen(false)} onSelect={(product) => { setSearchOpen(false); setSelectedProduct(product); }} />}
       {currentSelectedProduct && <ProductDetail product={currentSelectedProduct} language={language} c={c} favorite={favorites.includes(currentSelectedProduct.id)} onFavorite={() => toggleFavorite(currentSelectedProduct.id)} onAdd={() => { if (addToBag(currentSelectedProduct)) setSelectedProduct(null); }} onClose={() => setSelectedProduct(null)} />}
