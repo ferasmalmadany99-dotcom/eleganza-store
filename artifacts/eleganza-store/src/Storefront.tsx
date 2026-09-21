@@ -69,6 +69,7 @@ type Language = 'en' | 'ar';
 type Product = {
   id: string;
   name: string;
+  nameAr?: string;
   category: Exclude<Category, 'All'>;
   audience?: Exclude<Audience, 'All'>;
   price: number;
@@ -89,6 +90,11 @@ type StorefrontInventoryProduct = {
   sku: string;
   nameEn: string;
   nameAr: string;
+  category: string;
+  descriptionEn?: string | null;
+  descriptionAr?: string | null;
+  imageUrls?: string[];
+  audience?: 'men' | 'women';
   salePriceMinor: number;
   quantityOnHand: number;
 };
@@ -707,7 +713,9 @@ const arabicProductCopy: Record<string, Pick<Product, 'material' | 'color' | 'no
 };
 
 const getProductCopy = (product: Product, language: Language) =>
-  language === 'ar' ? arabicProductCopy[product.id] ?? product : product;
+  language === 'ar'
+    ? { ...product, ...arabicProductCopy[product.id], name: product.nameAr || product.name }
+    : product;
 
 const money = (value: number) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value);
@@ -764,6 +772,34 @@ async function downloadReceiptPdf({
 }
 
 const normalizeProductName = (name: string) => name.trim().toLocaleLowerCase();
+
+const serverCategoryToStorefrontCategory = (category: string): Product['category'] =>
+  category === 'fragrance' ? 'Perfume' : category === 'accessories' ? 'Accessories' : 'Makeup';
+
+const serverAudienceToStorefrontAudience = (audience: StorefrontInventoryProduct['audience']): Product['audience'] =>
+  audience === 'men' ? 'Men' : 'Women';
+
+const serverProductToStorefrontProduct = (serverProduct: StorefrontInventoryProduct): Product => {
+  const category = serverCategoryToStorefrontCategory(serverProduct.category);
+  const fallbackImage = category === 'Perfume' ? perfumeImage : category === 'Accessories' ? jewelryImage : makeupImage;
+  const image = serverProduct.imageUrls?.[0] || fallbackImage;
+  return {
+    id: `server-${serverProduct.id}`,
+    name: serverProduct.nameEn || serverProduct.nameAr || serverProduct.sku,
+    nameAr: serverProduct.nameAr || undefined,
+    category,
+    audience: serverAudienceToStorefrontAudience(serverProduct.audience),
+    price: Math.max(0, serverProduct.salePriceMinor) / 100,
+    stock: Math.max(0, serverProduct.quantityOnHand),
+    material: serverProduct.sku,
+    color: category,
+    image,
+    image480: image,
+    image960: image,
+    note: serverProduct.descriptionEn || 'A considered addition to the Eleganza collection.',
+    badge: 'New',
+  };
+};
 
 function BrandName({ compact = false }: { compact?: boolean }) {
   return (
@@ -1441,6 +1477,7 @@ function Storefront() {
   const [selectedArticleId, setSelectedArticleId] = useState<ArticleId | null>(null);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [notice, setNotice] = useState('');
+  const [catalogProducts, setCatalogProducts] = useState<Product[]>(products);
   const [inventoryByName, setInventoryByName] = useState<Record<string, { id: number; quantityOnHand: number; salePriceMinor: number }>>({});
   const [inventoryLoaded, setInventoryLoaded] = useState(false);
   const c = copy[language];
@@ -1464,6 +1501,17 @@ function Storefront() {
         if (!response.ok) throw new Error(`Inventory request failed with ${response.status}`);
         const data = await response.json() as StorefrontInventoryProduct[];
         if (disposed) return;
+        const nextCatalog = [...products];
+        for (const serverProduct of data) {
+          const matchingIndex = nextCatalog.findIndex((product) =>
+            normalizeProductName(product.name) === normalizeProductName(serverProduct.nameEn)
+            || (serverProduct.nameAr && normalizeProductName(product.name) === normalizeProductName(serverProduct.nameAr)),
+          );
+          if (matchingIndex === -1) {
+            nextCatalog.push(serverProductToStorefrontProduct(serverProduct));
+          }
+        }
+        setCatalogProducts(nextCatalog);
         const next: Record<string, { id: number; quantityOnHand: number; salePriceMinor: number }> = {};
         for (const product of data) {
           const quantity = Math.max(0, Number(product.quantityOnHand) || 0);
@@ -1507,17 +1555,17 @@ function Storefront() {
 
   const shownProducts = useMemo(() => {
     const categoryProducts = activeFilter === 'All'
-      ? products
+      ? catalogProducts
       : activeFilter === 'New in'
-        ? products.filter((product) => product.badge === 'New' || product.badge === 'Edition 01')
-        : products.filter((product) => product.category === activeFilter);
+        ? catalogProducts.filter((product) => product.badge === 'New' || product.badge === 'Edition 01')
+        : catalogProducts.filter((product) => product.category === activeFilter);
     const filtered = activeAudience !== 'All' && (activeFilter === 'Perfume' || activeFilter === 'Accessories')
       ? categoryProducts.filter((product) => product.audience === activeAudience)
       : categoryProducts;
     return filtered.map(withCurrentStock);
-  }, [activeAudience, activeFilter, inventoryByName, inventoryLoaded]);
+  }, [activeAudience, activeFilter, catalogProducts, inventoryByName, inventoryLoaded]);
   const bagCount = bag.reduce((sum, item) => sum + item.quantity, 0);
-  const favoriteProducts = products.filter((product) => favorites.includes(product.id)).map(withCurrentStock);
+  const favoriteProducts = catalogProducts.filter((product) => favorites.includes(product.id)).map(withCurrentStock);
   const currentSelectedProduct = selectedProduct ? withCurrentStock(selectedProduct) : null;
 
   const notify = (message: string) => {
@@ -1587,7 +1635,7 @@ function Storefront() {
           </div>
            <div className="mt-14 flex items-center justify-between border-y border-[#312b25]/15 py-4">
              <div className="no-scrollbar flex gap-6 overflow-auto">{filters.map((filter) => <button key={filter} onClick={() => { setActiveFilter(filter); setActiveAudience('All'); }} className={`whitespace-nowrap font-mono-ui text-[10px] uppercase tracking-[.16em] transition-colors ${activeFilter === filter ? 'text-[#9f523d]' : 'text-[#88796c] hover:text-[#312b25]'}`} data-testid={`button-filter-${filter.toLowerCase().replace(' ', '-')}`}>{categoryLabels[language][filter]}</button>)}</div>
-            <span className="hidden font-mono-ui text-[10px] uppercase tracking-[.14em] text-[#9b8b7e] sm:block">{String(shownProducts.length).padStart(2, '0')} / {String(products.length).padStart(2, '0')}</span>
+             <span className="hidden font-mono-ui text-[10px] uppercase tracking-[.14em] text-[#9b8b7e] sm:block">{String(shownProducts.length).padStart(2, '0')} / {String(catalogProducts.length).padStart(2, '0')}</span>
           </div>
            {(activeFilter === 'Perfume' || activeFilter === 'Accessories') && <div className="mt-5 flex flex-wrap items-center gap-5" aria-label={c.chooseAudience}><span className="font-mono-ui text-[9px] uppercase tracking-[.18em] text-[#9b8b7e]">{c.chooseAudience}</span>{audienceFilters.map((audience) => <button key={audience} onClick={() => setActiveAudience(audience)} className={`font-mono-ui text-[10px] uppercase tracking-[.16em] transition-colors ${activeAudience === audience ? 'text-[#9f523d]' : 'text-[#88796c] hover:text-[#312b25]'}`} data-testid={`button-audience-${audience.toLowerCase()}`}>{audienceLabels[language][audience]}</button>)}</div>}
           <div className="mt-8 grid gap-x-5 gap-y-14 sm:grid-cols-2 lg:grid-cols-4">{shownProducts.map((product) => <ProductCard key={product.id} product={product} language={language} c={c} favorite={favorites.includes(product.id)} onFavorite={() => toggleFavorite(product.id)} onSelect={() => setSelectedProduct(product)} onAdd={() => addToBag(product)} />)}</div>
@@ -1630,7 +1678,7 @@ function Storefront() {
        {bagOpen && <BagDrawer items={bag.map(withCurrentCartStock)} language={language} c={c} onClose={() => setBagOpen(false)} onUpdate={updateQuantity} onRemove={(id) => setBag((current) => current.filter((item) => item.id !== id))} onCheckout={openCheckout} />}
        {checkoutOpen && checkoutItems.length > 0 && <CheckoutPanel items={checkoutItems} language={language} c={c} onClose={() => { setCheckoutOpen(false); setBag([]); }} onSubmitted={() => undefined} />}
       {favoritesOpen && <FavoritesDrawer items={favoriteProducts} language={language} c={c} onClose={() => setFavoritesOpen(false)} onRemove={toggleFavorite} onSelect={(product) => { setFavoritesOpen(false); setSelectedProduct(product); }} />}
-      {searchOpen && <SearchPanel products={products} c={c} language={language} onClose={() => setSearchOpen(false)} onSelect={(product) => { setSearchOpen(false); setSelectedProduct(product); }} />}
+       {searchOpen && <SearchPanel products={catalogProducts} c={c} language={language} onClose={() => setSearchOpen(false)} onSelect={(product) => { setSearchOpen(false); setSelectedProduct(product); }} />}
       {currentSelectedProduct && <ProductDetail product={currentSelectedProduct} language={language} c={c} favorite={favorites.includes(currentSelectedProduct.id)} onFavorite={() => toggleFavorite(currentSelectedProduct.id)} onAdd={() => { if (addToBag(currentSelectedProduct)) setSelectedProduct(null); }} onClose={() => setSelectedProduct(null)} />}
       {journalIndexOpen && !selectedArticle && <JournalIndex entries={articles[language]} c={c} onClose={() => setJournalIndexOpen(false)} onSelect={setSelectedArticleId} />}
       {selectedArticle && <ArticleReader article={selectedArticle} c={c} onClose={() => setSelectedArticleId(null)} />}
