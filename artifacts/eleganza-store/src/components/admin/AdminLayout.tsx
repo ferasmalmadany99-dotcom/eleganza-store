@@ -56,7 +56,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   const role = session.data?.role ?? "viewer";
-  const permissions = session.data?.permissions ?? [role];
+  const permissions = session.data?.permissions?.length ? session.data.permissions : [role];
   const dir = language === "ar" ? "rtl" : "ltr";
   const visibleNavigation = navigation.filter((item) => !item.capability || can(permissions, item.capability));
 
