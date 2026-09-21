@@ -3,6 +3,7 @@ import { desc, eq } from "drizzle-orm";
 import { db, orderItemsTable, ordersTable, productsTable } from "@workspace/db";
 import { CreateStorefrontOrderBody, CreateStorefrontOrderResponse } from "@workspace/api-zod";
 import { writeAudit } from "../lib/audit";
+import { draftOrderNumber, salesInvoiceNumber } from "../lib/invoice";
 
 const router: IRouter = Router();
 
@@ -66,8 +67,8 @@ router.post("/orders", async (req, res): Promise<void> => {
     }
 
     const subtotalMinor = resolved.reduce((sum, item) => sum + item.quantity * item.product.salePriceMinor, 0);
-    const [order] = await tx.insert(ordersTable).values({
-      orderNumber: `ELZ-${Date.now().toString(36).toUpperCase()}`,
+    const [draftOrder] = await tx.insert(ordersTable).values({
+      orderNumber: draftOrderNumber(),
       status: "pending",
       paymentMethod: "cod",
       customerName: parsed.data.customerName.trim(),
@@ -77,6 +78,10 @@ router.post("/orders", async (req, res): Promise<void> => {
       shippingMinor: 0,
       totalMinor: subtotalMinor,
     }).returning();
+    const [order] = await tx.update(ordersTable)
+      .set({ orderNumber: salesInvoiceNumber(draftOrder.id) })
+      .where(eq(ordersTable.id, draftOrder.id))
+      .returning();
 
     const items = [];
     for (const item of resolved) {

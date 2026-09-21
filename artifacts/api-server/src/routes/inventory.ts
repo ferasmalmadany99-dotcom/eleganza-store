@@ -9,6 +9,7 @@ import {
 } from "@workspace/api-zod";
 import { requireAuth, requireInventory, requireManager } from "../middlewares/auth";
 import { writeAudit } from "../lib/audit";
+import { salesInvoiceNumber } from "../lib/invoice";
 
 const router: IRouter = Router();
 router.use(requireAuth);
@@ -26,7 +27,12 @@ router.get("/inventory/movements", async (req, res): Promise<void> => {
     .leftJoin(ordersTable, eq(inventoryMovementsTable.orderId, ordersTable.id))
     .where(query.data.productId ? eq(inventoryMovementsTable.productId, query.data.productId) : undefined)
     .orderBy(desc(inventoryMovementsTable.createdAt)).limit(query.data.limit).offset(query.data.offset);
-  res.json(ListInventoryMovementsResponse.parse(movements.map(({ movement, productNameEn, productNameAr, orderNumber }) => ({ ...movement, productNameEn, productNameAr, invoiceReference: movement.invoiceReference ?? orderNumber }))));
+  res.json(ListInventoryMovementsResponse.parse(movements.map(({ movement, productNameEn, productNameAr, orderNumber }) => ({
+    ...movement,
+    productNameEn,
+    productNameAr,
+    invoiceReference: movement.orderId ? salesInvoiceNumber(movement.orderId) : movement.invoiceReference ?? orderNumber,
+  }))));
 });
 
 router.post("/inventory/movements", requireInventory, async (req, res): Promise<void> => {

@@ -16,6 +16,7 @@ import { chartAccountsTable, db, journalEntriesTable, journalLinesTable } from "
 import { requireManager } from "../middlewares/auth";
 import { ensureDefaultAccounts, createJournalEntry } from "../lib/accounting";
 import { writeAudit } from "../lib/audit";
+import { salesInvoiceNumber } from "../lib/invoice";
 
 const router: IRouter = Router();
 router.use(requireManager);
@@ -65,7 +66,14 @@ router.get("/journal", async (req, res): Promise<void> => {
       memo: journalLinesTable.memo,
     }).from(journalLinesTable).where(eq(journalLinesTable.journalEntryId, entry.id)),
   })));
-  res.json(ListJournalEntriesResponse.parse(withLines));
+  res.json(ListJournalEntriesResponse.parse(withLines.map((entry) => ({
+    ...entry,
+    description: entry.referenceType === "order"
+      ? `Sale ${salesInvoiceNumber(Number(entry.referenceId))}`
+      : entry.referenceType === "order_return"
+        ? `Return ${salesInvoiceNumber(Number(entry.referenceId))}`
+        : entry.description,
+  }))));
 });
 
 router.post("/journal", async (req, res): Promise<void> => {

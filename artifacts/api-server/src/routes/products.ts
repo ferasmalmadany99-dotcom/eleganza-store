@@ -14,6 +14,7 @@ import {
 } from "@workspace/api-zod";
 import { requireAuth, requireManager } from "../middlewares/auth";
 import { writeAudit } from "../lib/audit";
+import { salesInvoiceNumber } from "../lib/invoice";
 
 const router: IRouter = Router();
 
@@ -46,7 +47,7 @@ router.get("/products/:id/report", requireAuth, async (req, res): Promise<void> 
     .orderBy(desc(inventoryMovementsTable.createdAt), desc(inventoryMovementsTable.id));
   const movements = movementRows.map(({ movement, orderNumber }) => ({
     ...movement,
-    invoiceReference: movement.invoiceReference ?? orderNumber,
+    invoiceReference: movement.orderId ? salesInvoiceNumber(movement.orderId) : movement.invoiceReference ?? orderNumber,
     productNameEn: product.nameEn,
     productNameAr: product.nameAr,
     totalValueMinor: Math.abs(movement.quantity) * (movement.unitCostMinor ?? product.costMinor),

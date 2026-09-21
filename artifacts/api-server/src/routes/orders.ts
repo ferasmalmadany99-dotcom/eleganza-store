@@ -13,6 +13,7 @@ import {
 import { requireAuth, requireManager, requireSales } from "../middlewares/auth";
 import { writeAudit } from "../lib/audit";
 import { postOrderJournal, postOrderReturnJournal } from "../lib/accounting";
+import { draftOrderNumber, salesInvoiceNumber } from "../lib/invoice";
 
 const router: IRouter = Router();
 router.use(requireAuth);
@@ -29,11 +30,15 @@ router.get("/orders", async (req, res): Promise<void> => {
   if (!query.success) { res.status(400).json({ error: query.error.message }); return; }
   const filters = [];
   if (query.data.status) filters.push(eq(ordersTable.status, query.data.status));
-  if (query.data.invoiceNumber) filters.push(ilike(ordersTable.orderNumber, `%${query.data.invoiceNumber}%`));
+  if (query.data.invoiceNumber) {
+    const saleNumber = /^sale\s+(\d+)$/i.exec(query.data.invoiceNumber.trim());
+    filters.push(saleNumber ? eq(ordersTable.id, Number(saleNumber[1])) : ilike(ordersTable.orderNumber, `%${query.data.invoiceNumber}%`));
+  }
   const orders = await db.select().from(ordersTable)
     .where(filters.length ? and(...filters) : undefined)
     .orderBy(desc(ordersTable.createdAt)).limit(query.data.limit).offset(query.data.offset);
-  res.json(ListOrdersResponse.parse(await withItems(orders)));
+  const ordersWithItems = await withItems(orders);
+  res.json(ListOrdersResponse.parse(ordersWithItems.map((order) => ({ ...order, orderNumber: salesInvoiceNumber(order.id) }))));
 });
 
 router.post("/orders", requireSales, async (req, res): Promise<void> => {
@@ -53,8 +58,8 @@ router.post("/orders", requireSales, async (req, res): Promise<void> => {
     }
     const subtotalMinor = resolved.reduce((sum, item) => sum + item.quantity * item.unitPriceMinor, 0);
     const shippingMinor = parsed.data.shippingMinor;
-    const [order] = await tx.insert(ordersTable).values({
-      orderNumber: `ELZ-${Date.now().toString(36).toUpperCase()}`,
+    const [draftOrder] = await tx.insert(ordersTable).values({
+      orderNumber: draftOrderNumber(),
       status: initialStatus,
       paymentMethod: parsed.data.paymentMethod,
       customerName: parsed.data.customerName,
@@ -63,6 +68,10 @@ router.post("/orders", requireSales, async (req, res): Promise<void> => {
       subtotalMinor, shippingMinor, totalMinor: subtotalMinor + shippingMinor,
       createdByStaffId: req.staff?.id,
     }).returning();
+    const [order] = await tx.update(ordersTable)
+      .set({ orderNumber: salesInvoiceNumber(draftOrder.id) })
+      .where(eq(ordersTable.id, draftOrder.id))
+      .returning();
     const items = [];
     for (const item of resolved) {
       const [createdItem] = await tx.insert(orderItemsTable).values({
@@ -151,7 +160,7 @@ router.patch("/orders/:id/status", requireManager, async (req, res): Promise<voi
   const enteredSoldState = parsed.data.status === "confirmed" || parsed.data.status === "processing" || parsed.data.status === "completed";
   if (enteredSoldState) await postOrderJournal(result.order.id, req.staff?.id);
   if (parsed.data.status === "returned") await postOrderReturnJournal(result.order.id, req.staff?.id);
-  res.json(UpdateOrderStatusResponse.parse({ ...result.order, items: result.items }));
+  res.json(UpdateOrderStatusResponse.parse({ ...result.order, orderNumber: salesInvoiceNumber(result.order.id), items: result.items }));
 });
 
 export default router;

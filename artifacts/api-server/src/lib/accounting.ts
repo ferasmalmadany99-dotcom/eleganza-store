@@ -9,6 +9,7 @@ import {
   productsTable,
   type AccountType,
 } from "@workspace/db";
+import { salesInvoiceNumber } from "./invoice";
 
 export const DEFAULT_ACCOUNTS = [
   { code: "1000", nameEn: "Cash", nameAr: "النقدية", type: "asset" as AccountType },
@@ -109,7 +110,7 @@ export async function postOrderJournal(orderId: number, staffId?: number) {
   }
   await createJournalEntry({
     entryDate: order.createdAt.toISOString().slice(0, 10),
-    description: `Sale ${order.orderNumber}`,
+    description: `Sale ${salesInvoiceNumber(order.id)}`,
     referenceType: "order",
     referenceId: String(order.id),
     createdByStaffId: staffId,
@@ -141,7 +142,7 @@ export async function postOrderReturnJournal(orderId: number, staffId?: number) 
   }
   await createJournalEntry({
     entryDate: new Date().toISOString().slice(0, 10),
-    description: `Return ${order.orderNumber}`,
+    description: `Return ${salesInvoiceNumber(order.id)}`,
     referenceType: "order_return",
     referenceId: String(order.id),
     createdByStaffId: staffId,
