@@ -15,6 +15,7 @@ export const inventoryMovementsTable = pgTable("inventory_movements", {
   quantityBefore: integer("quantity_before").notNull(),
   quantityAfter: integer("quantity_after").notNull(),
   note: text("note"),
+  invoiceReference: text("invoice_reference"),
   orderId: integer("order_id"),
   createdByStaffId: integer("created_by_staff_id").references(() => staffTable.id),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

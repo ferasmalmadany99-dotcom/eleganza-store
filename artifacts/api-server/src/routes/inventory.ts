@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { desc, eq } from "drizzle-orm";
-import { db, inventoryMovementsTable, productsTable, journalEntriesTable, journalLinesTable } from "@workspace/db";
+import { db, inventoryMovementsTable, ordersTable, productsTable, journalEntriesTable, journalLinesTable } from "@workspace/db";
 import {
   CreateInventoryMovementBody,
   CreateInventoryMovementResponse,
@@ -20,11 +20,13 @@ router.get("/inventory/movements", async (req, res): Promise<void> => {
     movement: inventoryMovementsTable,
     productNameEn: productsTable.nameEn,
     productNameAr: productsTable.nameAr,
+    orderNumber: ordersTable.orderNumber,
   }).from(inventoryMovementsTable)
     .leftJoin(productsTable, eq(inventoryMovementsTable.productId, productsTable.id))
+    .leftJoin(ordersTable, eq(inventoryMovementsTable.orderId, ordersTable.id))
     .where(query.data.productId ? eq(inventoryMovementsTable.productId, query.data.productId) : undefined)
     .orderBy(desc(inventoryMovementsTable.createdAt)).limit(query.data.limit).offset(query.data.offset);
-  res.json(ListInventoryMovementsResponse.parse(movements.map(({ movement, productNameEn, productNameAr }) => ({ ...movement, productNameEn, productNameAr }))));
+  res.json(ListInventoryMovementsResponse.parse(movements.map(({ movement, productNameEn, productNameAr, orderNumber }) => ({ ...movement, productNameEn, productNameAr, invoiceReference: movement.invoiceReference ?? orderNumber }))));
 });
 
 router.post("/inventory/movements", requireInventory, async (req, res): Promise<void> => {
@@ -56,7 +58,7 @@ router.post("/inventory/movements", requireInventory, async (req, res): Promise<
       productId: product.id, type: parsed.data.type, quantity: delta,
         unitCostMinor,
       quantityBefore: product.quantityOnHand, quantityAfter: after,
-      note: parsed.data.note, orderId: parsed.data.orderId, createdByStaffId: req.staff?.id,
+      note: parsed.data.note, invoiceReference: parsed.data.invoiceReference, orderId: parsed.data.orderId, createdByStaffId: req.staff?.id,
     }).returning();
     return { created, updated };
   }).catch((error: unknown) => {

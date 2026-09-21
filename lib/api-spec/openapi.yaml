@@ -637,6 +637,7 @@ components:
         quantityBefore: { type: integer }
         quantityAfter: { type: integer }
         note: { type: ["string", "null"] }
+        invoiceReference: { type: ["string", "null"] }
         orderId: { type: ["integer", "null"] }
         createdByStaffId: { type: ["integer", "null"] }
         createdAt: { type: string, format: date-time }
@@ -649,6 +650,7 @@ components:
         quantity: { type: integer }
         unitCostMinor: { type: integer, minimum: 0 }
         note: { type: string }
+        invoiceReference: { type: string }
         orderId: { type: integer }
     AccountType:
       type: string

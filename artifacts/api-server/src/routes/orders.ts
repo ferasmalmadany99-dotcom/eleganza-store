@@ -74,7 +74,7 @@ router.post("/orders", requireSales, async (req, res): Promise<void> => {
         await tx.insert(inventoryMovementsTable).values({
           productId: item.product.id, type: "sale", quantity: -item.quantity,
           quantityBefore: item.product.quantityOnHand, quantityAfter: after,
-          orderId: order.id, createdByStaffId: req.staff?.id,
+          invoiceReference: order.orderNumber, orderId: order.id, createdByStaffId: req.staff?.id,
         });
       }
     }
@@ -119,7 +119,7 @@ router.patch("/orders/:id/status", requireManager, async (req, res): Promise<voi
         await tx.insert(inventoryMovementsTable).values({
           productId: product.id, type: "sale", quantity: -item.quantity,
           quantityBefore: product.quantityOnHand, quantityAfter: after,
-          orderId: order.id, createdByStaffId: req.staff?.id,
+          invoiceReference: order.orderNumber, orderId: order.id, createdByStaffId: req.staff?.id,
         });
       }
     } else if (wasSold && !willBeSold && (parsed.data.status === "cancelled" || parsed.data.status === "returned")) {
@@ -131,7 +131,7 @@ router.patch("/orders/:id/status", requireManager, async (req, res): Promise<voi
         await tx.insert(inventoryMovementsTable).values({
           productId: product.id, type: "return", quantity: item.quantity,
           quantityBefore: product.quantityOnHand, quantityAfter: after,
-          orderId: order.id, createdByStaffId: req.staff?.id, note: parsed.data.status,
+          invoiceReference: order.orderNumber, orderId: order.id, createdByStaffId: req.staff?.id, note: parsed.data.status,
         });
       }
     }

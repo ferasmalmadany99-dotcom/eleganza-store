@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { and, desc, eq, ilike } from "drizzle-orm";
-import { db, inventoryMovementsTable, productsTable } from "@workspace/db";
+import { db, inventoryMovementsTable, ordersTable, productsTable } from "@workspace/db";
 import {
   CreateProductBody,
   CreateProductResponse,
@@ -37,11 +37,16 @@ router.get("/products/:id/report", requireAuth, async (req, res): Promise<void> 
   const [product] = await db.select().from(productsTable).where(eq(productsTable.id, params.data.id)).limit(1);
   if (!product) { res.status(404).json({ error: "Product not found" }); return; }
 
-  const movementRows = await db.select().from(inventoryMovementsTable)
+  const movementRows = await db.select({
+    movement: inventoryMovementsTable,
+    orderNumber: ordersTable.orderNumber,
+  }).from(inventoryMovementsTable)
+    .leftJoin(ordersTable, eq(inventoryMovementsTable.orderId, ordersTable.id))
     .where(eq(inventoryMovementsTable.productId, product.id))
     .orderBy(desc(inventoryMovementsTable.createdAt), desc(inventoryMovementsTable.id));
-  const movements = movementRows.map((movement) => ({
+  const movements = movementRows.map(({ movement, orderNumber }) => ({
     ...movement,
+    invoiceReference: movement.invoiceReference ?? orderNumber,
     productNameEn: product.nameEn,
     productNameAr: product.nameAr,
     totalValueMinor: Math.abs(movement.quantity) * (movement.unitCostMinor ?? product.costMinor),
@@ -58,7 +63,7 @@ router.get("/products/:id/report", requireAuth, async (req, res): Promise<void> 
   let weightedCostTotalMinor = 0;
   let weightedCostQuantity = 0;
 
-  for (const movement of movementRows) {
+  for (const { movement } of movementRows) {
     const quantity = Math.abs(movement.quantity);
     if (movement.type === "purchase") {
       purchaseQuantity += quantity;

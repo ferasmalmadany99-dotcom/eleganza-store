@@ -60,6 +60,7 @@ export const GetDashboardSummaryResponse = zod.object({
   "quantityBefore": zod.number().int(),
   "quantityAfter": zod.number().int(),
   "note": zod.string().nullish(),
+  "invoiceReference": zod.string().nullish(),
   "orderId": zod.number().int().nullish(),
   "createdByStaffId": zod.number().int().nullish(),
   "createdAt": zod.coerce.date()
@@ -271,6 +272,7 @@ export const GetProductReportResponse = zod.object({
   "quantityBefore": zod.number().int(),
   "quantityAfter": zod.number().int(),
   "note": zod.string().nullish(),
+  "invoiceReference": zod.string().nullish(),
   "orderId": zod.number().int().nullish(),
   "createdByStaffId": zod.number().int().nullish(),
   "createdAt": zod.coerce.date()
@@ -312,6 +314,7 @@ export const ListInventoryMovementsResponseItem = zod.object({
   "quantityBefore": zod.number().int(),
   "quantityAfter": zod.number().int(),
   "note": zod.string().nullish(),
+  "invoiceReference": zod.string().nullish(),
   "orderId": zod.number().int().nullish(),
   "createdByStaffId": zod.number().int().nullish(),
   "createdAt": zod.coerce.date()
@@ -332,6 +335,7 @@ export const CreateInventoryMovementBody = zod.object({
   "quantity": zod.number().int(),
   "unitCostMinor": zod.number().int().min(createInventoryMovementBodyUnitCostMinorMin).optional(),
   "note": zod.string().optional(),
+  "invoiceReference": zod.string().optional(),
   "orderId": zod.number().int().optional()
 })
 
@@ -350,6 +354,7 @@ export const CreateInventoryMovementResponse = zod.object({
   "quantityBefore": zod.number().int(),
   "quantityAfter": zod.number().int(),
   "note": zod.string().nullish(),
+  "invoiceReference": zod.string().nullish(),
   "orderId": zod.number().int().nullish(),
   "createdByStaffId": zod.number().int().nullish(),
   "createdAt": zod.coerce.date()

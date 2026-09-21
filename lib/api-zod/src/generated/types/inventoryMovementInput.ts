@@ -14,5 +14,6 @@ export interface InventoryMovementInput {
   /** @minimum 0 */
   unitCostMinor?: number;
   note?: string;
+  invoiceReference?: string;
   orderId?: number;
 }

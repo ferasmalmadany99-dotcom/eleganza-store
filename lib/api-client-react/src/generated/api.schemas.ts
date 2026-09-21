@@ -237,6 +237,8 @@ export interface InventoryMovement {
   /** @nullable */
   note?: string | null;
   /** @nullable */
+  invoiceReference?: string | null;
+  /** @nullable */
   orderId?: number | null;
   /** @nullable */
   createdByStaffId?: number | null;
@@ -261,6 +263,7 @@ export interface InventoryMovementInput {
   /** @minimum 0 */
   unitCostMinor?: number;
   note?: string;
+  invoiceReference?: string;
   orderId?: number;
 }
 

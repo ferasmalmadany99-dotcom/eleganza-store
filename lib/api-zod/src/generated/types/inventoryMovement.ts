@@ -26,6 +26,8 @@ export interface InventoryMovement {
   /** @nullable */
   note?: string | null;
   /** @nullable */
+  invoiceReference?: string | null;
+  /** @nullable */
   orderId?: number | null;
   /** @nullable */
   createdByStaffId?: number | null;
