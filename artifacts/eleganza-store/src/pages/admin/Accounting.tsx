@@ -356,7 +356,7 @@ function AccountingJournal() {
       const matchesDate = !journalFilters.date || entryDate === journalFilters.date;
       const matchesAmount = amount === null || (Number.isFinite(amount) && entryAmount(entry) === Math.round(amount * 100));
       const matchesInvoice = !invoiceQuery || searchableInvoice.includes(invoiceQuery);
-      const matchesEntryNumber = !entryQuery || entry.entryNumber.toLocaleLowerCase().includes(entryQuery);
+      const matchesEntryNumber = !entryQuery || String(entry.id).includes(entryQuery);
       return matchesDate && matchesAmount && matchesInvoice && matchesEntryNumber;
     });
   }, [journal.data, journalFilters]);
