@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
+import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
 import {
   ArrowDownRight,
   ArrowLeft,
@@ -354,7 +356,7 @@ const copy = {
     locationError: 'We could not access your location. Open Google Maps and paste the shared link instead.',
     checkoutRequiredFields: 'Please complete every delivery field before continuing.',
     downloadReceipt: 'Download receipt PDF',
-    receiptDownloadHint: 'In the print window, choose Save as PDF.',
+    receiptDownloadHint: 'The PDF download starts automatically.',
     quantity: 'Quantity',
     continueReview: 'Review order',
     back: 'Back',
@@ -470,7 +472,7 @@ const copy = {
     locationError: 'تعذر الوصول إلى موقعك. افتح Google Maps والصق رابط المشاركة بدلًا من ذلك.',
     checkoutRequiredFields: 'يرجى إكمال جميع خانات بيانات التوصيل قبل المتابعة.',
     downloadReceipt: 'تنزيل إيصال الطلب PDF',
-    receiptDownloadHint: 'في نافذة الطباعة اختر «حفظ بصيغة PDF».',
+    receiptDownloadHint: 'سيبدأ تنزيل ملف PDF تلقائيًا.',
     quantity: 'الكمية',
     continueReview: 'مراجعة الطلب',
     back: 'رجوع',
@@ -677,7 +679,7 @@ const money = (value: number) =>
 const escapeHtml = (value: string) =>
   value.replace(/[&<>"']/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' })[character] ?? character);
 
-function downloadReceiptPdf({
+async function downloadReceiptPdf({
   orderNumber,
   items,
   subtotal,
@@ -692,14 +694,35 @@ function downloadReceiptPdf({
   language: Language;
   c: Copy;
 }) {
-  const receiptWindow = window.open('', '_blank', 'width=760,height=900');
-  if (!receiptWindow) return;
   const itemRows = items.map((item) => `<tr><td>${escapeHtml(item.name)}</td><td>${item.quantity}</td><td>${escapeHtml(money(item.price * item.quantity))}</td></tr>`).join('');
   const direction = language === 'ar' ? 'rtl' : 'ltr';
-  receiptWindow.document.write(`<!doctype html><html lang="${language}" dir="${direction}"><head><meta charset="utf-8"><title>${escapeHtml(c.downloadReceipt)} — ${escapeHtml(orderNumber)}</title><style>
-    :root{color-scheme:light}*{box-sizing:border-box}body{margin:0;background:#f8f0e6;color:#312b25;font-family:Arial,sans-serif;padding:40px}main{max-width:720px;margin:0 auto;background:#fffaf3;padding:40px;border:1px solid #ded0c1}header{display:flex;justify-content:space-between;gap:24px;align-items:flex-start;border-bottom:2px solid #9f523d;padding-bottom:24px}h1{font-family:Georgia,serif;font-size:36px;font-weight:400;margin:0 0 8px}p{line-height:1.6;margin:5px 0}.eyebrow{color:#9f523d;font-size:11px;letter-spacing:.16em;text-transform:uppercase}.order-number{font-size:16px;color:#9f523d;font-weight:bold;direction:ltr}.section{margin-top:28px}.section-title{font-size:11px;color:#9f523d;letter-spacing:.14em;text-transform:uppercase;margin-bottom:12px}dl{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:0}dt{font-size:11px;color:#8b7b6e}dd{margin:4px 0 0;font-size:14px}table{width:100%;border-collapse:collapse;font-size:14px}th,td{text-align:start;border-bottom:1px solid #e5dacf;padding:12px 4px}th{font-size:11px;color:#8b7b6e;text-transform:uppercase}.total{display:flex;justify-content:space-between;border-top:2px solid #312b25;margin-top:20px;padding-top:16px;font-size:20px}.print-button{display:block;margin:28px auto 0;background:#9f523d;color:#fff;padding:12px 20px;border:0;font-size:13px;cursor:pointer}@media print{body{background:#fff;padding:0}main{border:0;max-width:none;padding:0}.print-button{display:none}}
-  </style></head><body><main><header><div><p class="eyebrow">Eleganza / ${escapeHtml(c.checkoutSuccess)}</p><h1>${escapeHtml(c.checkoutSuccess)}</h1><p>${escapeHtml(c.cashOnDeliveryDetail)}</p></div><div><p class="eyebrow">${escapeHtml(c.orderNumber)}</p><p class="order-number">${escapeHtml(orderNumber)}</p></div></header><section class="section"><p class="section-title">${escapeHtml(c.checkoutDetails)}</p><dl><div><dt>${escapeHtml(c.customerName)}</dt><dd>${escapeHtml(form.customerName)}</dd></div><div><dt>${escapeHtml(c.customerPhone)}</dt><dd dir="ltr">${escapeHtml(form.customerPhone)}</dd></div><div><dt>${escapeHtml(c.customerCity)}</dt><dd>${escapeHtml(form.city)}</dd></div><div><dt>${escapeHtml(c.customerAddress)}</dt><dd>${escapeHtml(form.address)}</dd></div></dl><p style="margin-top:14px;font-size:12px;word-break:break-all"><strong>${escapeHtml(c.customerLocation)}</strong><br>${escapeHtml(form.customerLocationUrl)}</p></section><section class="section"><p class="section-title">${escapeHtml(c.theBag)}</p><table><thead><tr><th>${escapeHtml(c.included)}</th><th>${escapeHtml(c.quantity)}</th><th>${escapeHtml(c.subtotal)}</th></tr></thead><tbody>${itemRows}</tbody></table><div class="total"><span>${escapeHtml(c.subtotal)}</span><strong>${escapeHtml(money(subtotal))}</strong></div></section><button class="print-button" onclick="window.print()">${escapeHtml(c.downloadReceipt)}</button></main><script>window.onload=function(){window.focus();window.print()}</script></body></html>`);
-  receiptWindow.document.close();
+  const receipt = document.createElement('div');
+  receipt.style.cssText = `position:fixed;left:-10000px;top:0;width:794px;padding:48px;background:#fffaf3;color:#312b25;font-family:Arial,sans-serif;direction:${direction};`;
+  receipt.innerHTML = `<div style="border:1px solid #ded0c1;padding:40px"><div style="display:flex;justify-content:space-between;gap:24px;align-items:flex-start;border-bottom:2px solid #9f523d;padding-bottom:24px"><div><p style="color:#9f523d;font-size:11px;letter-spacing:.16em;text-transform:uppercase;margin:0 0 8px">Eleganza / ${escapeHtml(c.checkoutSuccess)}</p><h1 style="font-family:Georgia,serif;font-size:36px;font-weight:400;margin:0 0 8px">${escapeHtml(c.checkoutSuccess)}</h1><p style="line-height:1.6;margin:5px 0">${escapeHtml(c.cashOnDeliveryDetail)}</p></div><div><p style="color:#9f523d;font-size:11px;letter-spacing:.16em;text-transform:uppercase;margin:0 0 8px">${escapeHtml(c.orderNumber)}</p><p style="font-size:16px;color:#9f523d;font-weight:bold;direction:ltr;margin:0">${escapeHtml(orderNumber)}</p></div></div><section style="margin-top:28px"><p style="font-size:11px;color:#9f523d;letter-spacing:.14em;text-transform:uppercase;margin:0 0 12px">${escapeHtml(c.checkoutDetails)}</p><table style="width:100%;border-collapse:collapse;font-size:14px"><tbody><tr><td style="padding:8px 4px;border-bottom:1px solid #e5dacf"><strong>${escapeHtml(c.customerName)}</strong><br>${escapeHtml(form.customerName)}</td><td style="padding:8px 4px;border-bottom:1px solid #e5dacf"><strong>${escapeHtml(c.customerPhone)}</strong><br><span dir="ltr">${escapeHtml(form.customerPhone)}</span></td></tr><tr><td style="padding:8px 4px;border-bottom:1px solid #e5dacf"><strong>${escapeHtml(c.customerCity)}</strong><br>${escapeHtml(form.city)}</td><td style="padding:8px 4px;border-bottom:1px solid #e5dacf"><strong>${escapeHtml(c.customerAddress)}</strong><br>${escapeHtml(form.address)}</td></tr></tbody></table><p style="margin:14px 0 0;font-size:12px;word-break:break-all"><strong>${escapeHtml(c.customerLocation)}</strong><br>${escapeHtml(form.customerLocationUrl)}</p></section><section style="margin-top:28px"><p style="font-size:11px;color:#9f523d;letter-spacing:.14em;text-transform:uppercase;margin:0 0 12px">${escapeHtml(c.theBag)}</p><table style="width:100%;border-collapse:collapse;font-size:14px"><thead><tr><th style="text-align:start;border-bottom:1px solid #e5dacf;padding:12px 4px;font-size:11px;color:#8b7b6e">${escapeHtml(c.included)}</th><th style="text-align:start;border-bottom:1px solid #e5dacf;padding:12px 4px;font-size:11px;color:#8b7b6e">${escapeHtml(c.quantity)}</th><th style="text-align:start;border-bottom:1px solid #e5dacf;padding:12px 4px;font-size:11px;color:#8b7b6e">${escapeHtml(c.subtotal)}</th></tr></thead><tbody>${itemRows}</tbody></table><div style="display:flex;justify-content:space-between;border-top:2px solid #312b25;margin-top:20px;padding-top:16px;font-size:20px"><span>${escapeHtml(c.subtotal)}</span><strong>${escapeHtml(money(subtotal))}</strong></div></section></div>`;
+  document.body.appendChild(receipt);
+  try {
+    await document.fonts?.ready;
+    const canvas = await html2canvas(receipt, { scale: 2, backgroundColor: '#fffaf3', useCORS: true });
+    const pdf = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'a4' });
+    const margin = 32;
+    const pageWidth = pdf.internal.pageSize.getWidth() - margin * 2;
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const imageHeight = canvas.height * pageWidth / canvas.width;
+    const imageData = canvas.toDataURL('image/png');
+    let remainingHeight = imageHeight;
+    let offsetY = margin;
+    pdf.addImage(imageData, 'PNG', margin, offsetY, pageWidth, imageHeight);
+    remainingHeight -= pageHeight - margin * 2;
+    while (remainingHeight > 0) {
+      pdf.addPage();
+      offsetY = margin - (imageHeight - remainingHeight);
+      pdf.addImage(imageData, 'PNG', margin, offsetY, pageWidth, imageHeight);
+      remainingHeight -= pageHeight - margin * 2;
+    }
+    pdf.save(`eleganza-receipt-${orderNumber}.pdf`);
+  } finally {
+    receipt.remove();
+  }
 }
 
 const normalizeProductName = (name: string) => name.trim().toLocaleLowerCase();

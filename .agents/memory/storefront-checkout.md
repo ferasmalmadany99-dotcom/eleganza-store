@@ -23,9 +23,9 @@ All delivery fields are mandatory at both client and server boundaries; whitespa
 
 After a successful customer order, the receipt is offered from the success screen through a printable PDF flow. The receipt includes the order number, customer delivery details, items, total, and cash-on-delivery method.
 
-**Why:** Browser-only receipt generation avoids adding a PDF dependency while still allowing the customer to choose “Save as PDF” from the print dialog.
+**Why:** The receipt must download from the success screen without opening a print dialog, while preserving the storefront's Arabic and English content.
 
-**How to apply:** Keep receipt content escaped before writing it into the print window, and retain the success screen until the customer closes checkout.
+**How to apply:** Keep receipt content escaped before rendering it into the temporary PDF canvas, and retain the success screen until the customer closes checkout.
 
 The checkout UI must provide an explicit save action after a customer returns from Google Maps; entering a link alone is not treated as a confirmed location.
 
