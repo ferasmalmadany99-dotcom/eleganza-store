@@ -113,7 +113,7 @@ router.get("/products/:id/report", requireAuth, async (req, res): Promise<void> 
 
 router.post("/products", requireAuth, requireManager, async (req, res): Promise<void> => {
   const parsed = CreateProductBody.safeParse(req.body);
-  if (!parsed.success) { res.status(400).json({ error: parsed.error.message }); return; }
+  if (!parsed.success) { res.status(400).json({ error: parsed.error.issues.map((issue) => `${issue.path.join(".") || "request"}: ${issue.message}`).join("; ") }); return; }
   const [product] = await db.insert(productsTable).values(parsed.data).returning();
   await writeAudit(req.staff?.id, "create", "product", product.id, { sku: product.sku });
   res.status(201).json(CreateProductResponse.parse(product));
@@ -123,7 +123,10 @@ router.patch("/products/:id", requireAuth, requireManager, async (req, res): Pro
   const params = UpdateProductParams.safeParse(req.params);
   const parsed = UpdateProductBody.safeParse(req.body);
   if (!params.success || !parsed.success) {
-    const error = !params.success ? params.error.message : "Invalid request body";
+    const validationError = !parsed.success
+      ? parsed.error.issues.map((issue) => `${issue.path.join(".") || "request"}: ${issue.message}`).join("; ")
+      : undefined;
+    const error = !params.success ? params.error.message : validationError ?? "Invalid request body";
     res.status(400).json({ error }); return;
   }
   const [product] = await db.update(productsTable).set(parsed.data)
