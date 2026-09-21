@@ -7,9 +7,9 @@ import { buttonClass, can, dateLabel, EmptyState, ErrorState, Field, getErrorMes
 const emptyForm: ProductInput = { sku: "", nameEn: "", nameAr: "", category: "fragrance", audience: "women", salePriceMinor: 0, costMinor: 0, reorderThreshold: 3, quantityOnHand: 0, imageUrls: [], active: true };
 
 export default function Products() {
-  const { language, permissions } = useAdmin();
+  const { language, permissions, role } = useAdmin();
   const isAr = language === "ar";
-  const canEdit = can(permissions, "manager");
+  const canEdit = role === "owner" || can(permissions, "manager");
   const [search, setSearch] = useState("");
   const [editing, setEditing] = useState<Product | null>(null);
   const [creating, setCreating] = useState(false);
