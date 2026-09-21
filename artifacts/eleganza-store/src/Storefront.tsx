@@ -1,6 +1,4 @@
 import { useEffect, useMemo, useState } from 'react';
-import html2canvas from 'html2canvas';
-import { jsPDF } from 'jspdf';
 import {
   ArrowDownRight,
   ArrowLeft,
@@ -24,6 +22,7 @@ import {
   X,
 } from 'lucide-react';
 import { useCreateStorefrontOrder } from '@workspace/api-client-react';
+import { downloadPaginatedPdf } from './lib/paginatedPdf';
 import heroImage from './assets/beauty-hero.jpg';
 import perfumeImage from './assets/perfume-product.jpg';
 import perfumeImage480 from './assets/perfume-product-480.jpg';
