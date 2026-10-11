@@ -82,7 +82,7 @@ export default function Customers() {
       {customers.isError && <ErrorState error={customers.error} onRetry={() => customers.refetch()} />}
       {!customers.isLoading && !customers.isError && filtered.length === 0 && <EmptyState icon={<Users className="h-5 w-5" />} title={search ? (isAr ? "لا توجد نتائج" : "No matches") : (isAr ? "لا يوجد زبائن بعد" : "No customers yet")} detail={search ? (isAr ? "جرّب اسمًا أو رقم هاتف مختلفًا." : "Try another name or phone number.") : (isAr ? "سيظهر الزبائن هنا بعد تسجيل طلباتهم." : "Customers will appear here after their orders are recorded.")} />}
       {filtered.length > 0 && <div className="overflow-x-auto">
-        <table className="w-full min-w-[760px] text-sm">
+        <table className="w-full min-w-[900px] text-sm">
           <thead className="border-b border-border text-xs text-muted-foreground">
             <tr>
               <th className="px-3 py-3 text-start">{isAr ? "الزبون" : "Customer"}</th>
