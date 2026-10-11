@@ -491,6 +491,40 @@ export const ListCustomersResponse = zod.array(ListCustomersResponseItem)
 
 
 /**
+ * @summary List a customer's order history
+ */
+export const ListCustomerOrdersParams = zod.object({
+  "customerId": zod.coerce.string()
+})
+
+export const ListCustomerOrdersResponseItem = zod.object({
+  "id": zod.number().int(),
+  "orderNumber": zod.string(),
+  "status": zod.enum(['pending', 'confirmed', 'processing', 'completed', 'cancelled', 'returned']),
+  "paymentMethod": zod.enum(['cod', 'shopify', 'electronic']),
+  "customerName": zod.string(),
+  "customerPhone": zod.string().nullish(),
+  "customerAddress": zod.string().nullish(),
+  "subtotalMinor": zod.number().int(),
+  "shippingMinor": zod.number().int(),
+  "totalMinor": zod.number().int(),
+  "shopifyOrderId": zod.string().nullish(),
+  "createdByStaffId": zod.number().int().nullish(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date(),
+  "items": zod.array(zod.object({
+  "id": zod.number().int(),
+  "orderId": zod.number().int(),
+  "productId": zod.number().int(),
+  "quantity": zod.number().int(),
+  "unitPriceMinor": zod.number().int(),
+  "unitCostMinor": zod.number().int()
+}))
+})
+export const ListCustomerOrdersResponse = zod.array(ListCustomerOrdersResponseItem)
+
+
+/**
  * @summary Update order status
  */
 export const UpdateOrderStatusParams = zod.object({

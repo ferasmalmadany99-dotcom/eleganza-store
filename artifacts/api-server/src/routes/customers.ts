@@ -1,14 +1,17 @@
-import { count, desc, max, sql } from "drizzle-orm";
+import { count, desc, eq, max, sql } from "drizzle-orm";
 import { Router, type IRouter } from "express";
-import { db, ordersTable } from "@workspace/db";
-import { ListCustomersResponse } from "@workspace/api-zod";
+import { db, orderItemsTable, ordersTable } from "@workspace/db";
+import { ListCustomersResponse, ListOrdersResponse } from "@workspace/api-zod";
 import { requireAuth, requireSales } from "../middlewares/auth";
+import { salesInvoiceNumber } from "../lib/invoice";
 
 const router: IRouter = Router();
 router.use(requireAuth);
 
+const customerKeyExpression = () => sql<string>`COALESCE(NULLIF(regexp_replace(COALESCE(${ordersTable.customerPhone}, ''), '[^0-9]', '', 'g'), ''), LOWER(BTRIM(${ordersTable.customerName})) || '|' || LOWER(BTRIM(COALESCE(${ordersTable.customerAddress}, ''))))`;
+
 router.get("/customers", requireSales, async (_req, res): Promise<void> => {
-  const customerKey = sql<string>`COALESCE(NULLIF(regexp_replace(COALESCE(${ordersTable.customerPhone}, ''), '[^0-9]', '', 'g'), ''), LOWER(BTRIM(${ordersTable.customerName})) || '|' || LOWER(BTRIM(COALESCE(${ordersTable.customerAddress}, ''))))`;
+  const customerKey = customerKeyExpression();
   const latestOrder = max(ordersTable.createdAt);
   const rows = await db.select({
     id: customerKey,
@@ -25,6 +28,18 @@ router.get("/customers", requireSales, async (_req, res): Promise<void> => {
     totalSpentMinor: Number(customer.totalSpentMinor),
     lastOrderAt: customer.lastOrderAt?.toISOString() ?? new Date(0).toISOString(),
   }))));
+});
+
+router.get("/customers/:customerId/orders", requireSales, async (req, res): Promise<void> => {
+  const orders = await db.select().from(ordersTable)
+    .where(eq(customerKeyExpression(), req.params.customerId))
+    .orderBy(desc(ordersTable.createdAt));
+  const ordersWithItems = await Promise.all(orders.map(async (order) => ({
+    ...order,
+    orderNumber: salesInvoiceNumber(order.id),
+    items: await db.select().from(orderItemsTable).where(eq(orderItemsTable.orderId, order.id)),
+  })));
+  res.json(ListOrdersResponse.parse(ordersWithItems));
 });
 
 export default router;

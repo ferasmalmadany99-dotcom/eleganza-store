@@ -224,6 +224,24 @@ paths:
               schema:
                 type: array
                 items: { $ref: "#/components/schemas/Customer" }
+  /customers/{customerId}/orders:
+    get:
+      operationId: listCustomerOrders
+      tags: [customers]
+      summary: List a customer's order history
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Customer purchase history
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Order" }
   /orders/{id}/status:
     patch:
       operationId: updateOrderStatus
