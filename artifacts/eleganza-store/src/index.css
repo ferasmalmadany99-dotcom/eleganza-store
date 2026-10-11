@@ -201,6 +201,7 @@
   .admin-fixed-layout [class~="lg:justify-end"] { justify-content: flex-end !important; }
   .admin-fixed-layout [class~="sm:grid-cols-2"],
   .admin-fixed-layout [class~="md:grid-cols-2"],
+  .admin-fixed-layout [class~="lg:grid-cols-2"],
   .admin-fixed-layout [class~="xl:grid-cols-2"] { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
   .admin-fixed-layout [class~="sm:grid-cols-3"] { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
   .admin-fixed-layout [class~="sm:grid-cols-4"],
@@ -208,8 +209,10 @@
   .admin-fixed-layout [class~="xl:grid-cols-[220px_1fr]"] { grid-template-columns: 220px minmax(0, 1fr) !important; }
   .admin-fixed-layout [class~="xl:grid-cols-[1.25fr_.75fr]"] { grid-template-columns: 1.25fr .75fr !important; }
   .admin-fixed-layout [class~="xl:grid-cols-[1fr_1.25fr]"] { grid-template-columns: 1fr 1.25fr !important; }
+  .admin-fixed-layout [class~="lg:grid-cols-[1fr_1.25fr]"] { grid-template-columns: 1fr 1.25fr !important; }
   .admin-fixed-layout [class~="lg:grid-cols-[1fr_auto_auto]"] { grid-template-columns: 1fr auto auto !important; }
   .admin-fixed-layout [class~="sm:grid-cols-[1fr_auto]"] { grid-template-columns: 1fr auto !important; }
+  .admin-fixed-layout [class~="sm:grid-cols-[1fr_auto_auto]"] { grid-template-columns: 1fr auto auto !important; }
   .admin-fixed-layout [class~="sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]"] { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto !important; }
   .admin-fixed-layout [class~="md:col-span-2"],
   .admin-fixed-layout [class~="sm:col-span-2"] { grid-column: span 2 / span 2 !important; }
@@ -219,6 +222,8 @@
   .admin-fixed-layout [class~="sm:p-6"] { padding: 1.5rem !important; }
   .admin-fixed-layout [class~="sm:p-7"] { padding: 1.75rem !important; }
   .admin-fixed-layout [class~="sm:p-8"] { padding: 2rem !important; }
+  .admin-fixed-layout [class~="sm:mb-0"] { margin-bottom: 0 !important; }
+  .admin-fixed-layout [class~="sm:space-x-0"] > :not([hidden]) ~ :not([hidden]) { margin-inline-start: 0 !important; }
   .admin-fixed-layout [class~="lg:p-10"] { padding: 2.5rem !important; }
   .admin-fixed-layout [class~="sm:pt-6"] { padding-top: 1.5rem !important; }
   .admin-fixed-layout [class~="sm:px-10"] { padding-inline: 2.5rem !important; }
