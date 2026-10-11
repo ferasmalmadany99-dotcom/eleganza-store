@@ -68,7 +68,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <AdminContext.Provider value={{ language, setLanguage, dir, role, permissions }}>
-      <div dir={dir} className="admin-shell admin-fixed-layout min-h-screen bg-background text-foreground">
+      <div dir={dir} className="admin-shell min-h-screen bg-background text-foreground">
         <aside className={`admin-sidebar-scroll fixed inset-y-0 start-0 ${navigationOpen ? "z-50" : "z-40"} w-72 overflow-y-auto overscroll-contain border-e border-border bg-card transition-transform lg:!translate-x-0 ${mobileOpen ? "translate-x-0" : "ltr:-translate-x-full rtl:translate-x-full"}`}>
           <div className="flex min-h-full flex-col bg-card p-6">
             <div className="flex items-start justify-between">
@@ -112,8 +112,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </aside>
         {mobileOpen && <button aria-label="Close navigation" className="fixed inset-0 z-30 bg-foreground/20 lg:hidden" onClick={() => setMobileOpen(false)} />}
         {navigationOpen && <button type="button" aria-label={language === "ar" ? "إغلاق خيارات القائمة" : "Close navigation options"} className="fixed inset-0 z-40 bg-foreground/20" onClick={() => setNavigationOpen(false)} />}
-        <main className="min-h-screen min-w-[1152px] ps-72">
-          <header className="sticky top-0 z-20 flex min-h-16 items-center justify-between gap-4 border-b border-border bg-background/90 px-10 py-3 backdrop-blur">
+        <main className="min-h-screen min-w-0 lg:ps-72">
+          <header className="sticky top-0 z-20 flex min-h-16 items-center justify-between gap-4 border-b border-border bg-background/90 px-5 py-3 backdrop-blur lg:px-10">
             <button className="lg:hidden" onClick={() => setMobileOpen(true)} aria-label="Open navigation"><Menu className="h-5 w-5" /></button>
             <div><p className="font-mono-ui text-xs font-semibold uppercase tracking-[.18em] text-primary">{language === "ar" ? "عمليات Eleganza" : "Eleganza operations"}</p><p className="text-xs text-muted-foreground">{language === "ar" ? "مساحة العمل الفعلية — التغييرات محفوظة" : "Live workspace — changes are saved"}</p></div>
             <div className="ms-auto flex items-center gap-3 text-xs text-muted-foreground">
@@ -131,7 +131,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <span className="hidden sm:inline">{language === "ar" ? "بيئة التطوير" : "Development environment"}</span>
             </div>
           </header>
-          <div className="mx-auto max-w-[1500px] p-10">
+          <div className="mx-auto min-w-0 max-w-[1500px] p-5 lg:p-10">
             <div className="mb-8 border border-primary/25 bg-primary/5 px-5 py-4">
               <p className="font-mono-ui text-xs font-semibold uppercase tracking-[.2em] text-primary">{language === "ar" ? "مساحة الإدارة الفعلية" : "Live operations desk"}</p>
               <p className="mt-2 text-sm leading-6 text-muted-foreground">{language === "ar" ? "هذه المساحة محمية بتسجيل الدخول، وكل التغييرات تحفظ في قاعدة البيانات بحسب صلاحياتك." : "This workspace is protected by sign-in, and changes are saved to the database according to your permissions."}</p>
