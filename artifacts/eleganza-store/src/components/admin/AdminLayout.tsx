@@ -9,6 +9,7 @@ import {
   Menu,
   Package,
   ReceiptText,
+  Settings,
   ScrollText,
   ShoppingBag,
   Store,
@@ -103,6 +104,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <div className="mt-4 shrink-0 border-t border-primary/20 pt-4">
               <p className="mb-2 px-2 font-mono-ui text-xs font-semibold uppercase tracking-[.16em] text-muted-foreground">{language === "ar" ? "إجراءات ثابتة" : "Fixed actions"}</p>
               <div className="grid gap-1 rounded-2xl border border-border bg-muted/20 p-2">
+                {can(permissions, "owner") && <Link href="/admin/system" aria-current={location.startsWith("/admin/system") ? "page" : undefined} className={`flex w-full items-center gap-3 px-2 py-2.5 text-sm ${location.startsWith("/admin/system") ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}><Settings className="h-4 w-4" />{language === "ar" ? "النظام والإعدادات" : "System settings"}</Link>}
                 <Link href="/" className="flex w-full items-center gap-3 px-2 py-2.5 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"><Store className="h-4 w-4" />{language === "ar" ? "المتجر العام" : "Public storefront"}<ExternalLink className="ms-auto h-3.5 w-3.5" /></Link>
                 <button className="flex w-full items-center gap-3 px-2 py-2.5 text-sm text-muted-foreground hover:bg-muted hover:text-foreground" onClick={() => setLanguage(language === "en" ? "ar" : "en")}><Globe2 className="h-4 w-4" />{language === "en" ? "العربية" : "English"}</button>
                 <button className="flex w-full items-center gap-3 px-2 py-2.5 text-sm text-muted-foreground hover:bg-muted hover:text-foreground" onClick={() => signOut({ redirectUrl: "/" })}><LogOut className="h-4 w-4" />{language === "ar" ? "تسجيل الخروج" : "Sign out"}</button>

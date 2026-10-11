@@ -52,7 +52,9 @@ import type {
   StaffInviteResponse,
   StaffUpdate,
   StorefrontOrderInput,
-  SyncResult
+  SyncResult,
+  SystemResetInput,
+  SystemResetResult
 } from './api.schemas';
 
 import { customFetch } from '../custom-fetch';
@@ -1755,6 +1757,94 @@ export function useListAuditLogs<TData = Awaited<ReturnType<typeof listAuditLogs
 
 
 
+
+export const getResetSystemDataUrl = () => {
+
+
+
+
+  return `/api/system/reset`
+}
+
+/**
+ * @summary Delete selected operational data while preserving staff and audit records
+ */
+export const resetSystemData = async (systemResetInput: SystemResetInput, options?: Parameters<typeof customFetch>[1]): Promise<SystemResetResult> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<SystemResetResult>(getResetSystemDataUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(systemResetInput)
+  }
+);}
+
+
+
+
+
+export const getResetSystemDataMutationKey = () => ['resetSystemData'] as const;
+
+export const getResetSystemDataMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof resetSystemData>>, TError,ResetSystemDataMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof resetSystemData>>, TError,ResetSystemDataMutationVariables, TContext> => {
+
+const mutationKey = getResetSystemDataMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof resetSystemData>>, ResetSystemDataMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  resetSystemData(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ResetSystemDataMutationResult = NonNullable<Awaited<ReturnType<typeof resetSystemData>>>
+    export type ResetSystemDataMutationBody = BodyType<SystemResetInput>
+    export type ResetSystemDataMutationError = ErrorType<unknown>
+    export type ResetSystemDataMutationVariables = {data: BodyType<SystemResetInput>}
+
+    /**
+ * @summary Delete selected operational data while preserving staff and audit records
+ */
+export const useResetSystemData = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof resetSystemData>>, TError,ResetSystemDataMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof resetSystemData>>,
+        TError,
+        ResetSystemDataMutationVariables,
+        TContext
+      > => {
+      return useMutation(getResetSystemDataMutationOptions(options));
+    }
 
 export const getSyncShopifyUrl = () => {
 

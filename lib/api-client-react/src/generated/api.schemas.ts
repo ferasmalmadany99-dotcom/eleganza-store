@@ -9,6 +9,42 @@ export interface HealthStatus {
   status: string;
 }
 
+export type SystemResetInputGroupsItem = typeof SystemResetInputGroupsItem[keyof typeof SystemResetInputGroupsItem];
+
+
+export const SystemResetInputGroupsItem = {
+  products: 'products',
+  inventory: 'inventory',
+  orders: 'orders',
+  expenses: 'expenses',
+  accounting: 'accounting',
+} as const;
+
+export type SystemResetInputConfirmation = typeof SystemResetInputConfirmation[keyof typeof SystemResetInputConfirmation];
+
+
+export const SystemResetInputConfirmation = {
+  DELETE: 'DELETE',
+} as const;
+
+export interface SystemResetInput {
+  /** @minItems 1 */
+  groups: SystemResetInputGroupsItem[];
+  confirmation: SystemResetInputConfirmation;
+}
+
+export type SystemResetResultDeleted = {
+  orders: number;
+  inventoryMovements: number;
+  products: number;
+  expenses: number;
+  journalEntries: number;
+};
+
+export interface SystemResetResult {
+  deleted: SystemResetResultDeleted;
+}
+
 export type StaffRole = typeof StaffRole[keyof typeof StaffRole];
 
 

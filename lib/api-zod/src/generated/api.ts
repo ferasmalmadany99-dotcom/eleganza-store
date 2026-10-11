@@ -741,6 +741,28 @@ export const ListAuditLogsResponse = zod.array(ListAuditLogsResponseItem)
 
 
 /**
+ * @summary Delete selected operational data while preserving staff and audit records
+ */
+
+
+
+export const ResetSystemDataBody = zod.object({
+  "groups": zod.array(zod.enum(['products', 'inventory', 'orders', 'expenses', 'accounting'])).min(1),
+  "confirmation": zod.enum(['DELETE'])
+})
+
+export const ResetSystemDataResponse = zod.object({
+  "deleted": zod.object({
+  "orders": zod.number().int(),
+  "inventoryMovements": zod.number().int(),
+  "products": zod.number().int(),
+  "expenses": zod.number().int(),
+  "journalEntries": zod.number().int()
+})
+})
+
+
+/**
  * @summary Pull Shopify catalog and inventory mappings
  */
 export const SyncShopifyResponse = zod.object({

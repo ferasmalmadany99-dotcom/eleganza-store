@@ -18,6 +18,7 @@ tags:
   - name: expenses
   - name: staff
   - name: audit
+  - name: system
   - name: storefront
 paths:
   /healthz:
@@ -347,6 +348,22 @@ paths:
               schema:
                 type: array
                 items: { $ref: "#/components/schemas/AuditLog" }
+  /system/reset:
+    post:
+      operationId: resetSystemData
+      tags: [system]
+      summary: Delete selected operational data while preserving staff and audit records
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SystemResetInput" }
+      responses:
+        "200":
+          description: Selected data was deleted
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SystemResetResult" }
   /shopify/sync:
     post:
       operationId: syncShopify
@@ -461,6 +478,29 @@ components:
       required: [status]
       properties:
         status: { type: string }
+    SystemResetInput:
+      type: object
+      required: [groups, confirmation]
+      properties:
+        groups:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items: { type: string, enum: [products, inventory, orders, expenses, accounting] }
+        confirmation: { type: string, enum: [DELETE] }
+    SystemResetResult:
+      type: object
+      required: [deleted]
+      properties:
+        deleted:
+          type: object
+          required: [orders, inventoryMovements, products, expenses, journalEntries]
+          properties:
+            orders: { type: integer }
+            inventoryMovements: { type: integer }
+            products: { type: integer }
+            expenses: { type: integer }
+            journalEntries: { type: integer }
     StaffRole:
       type: string
       enum: [owner, manager, inventory, sales, viewer]
