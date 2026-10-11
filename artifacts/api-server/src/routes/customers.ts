@@ -16,7 +16,7 @@ router.get("/customers", requireSales, async (_req, res): Promise<void> => {
     customerPhone: sql<string | null>`(ARRAY_AGG(${ordersTable.customerPhone} ORDER BY ${ordersTable.createdAt} DESC))[1]`,
     customerAddress: sql<string | null>`(ARRAY_AGG(${ordersTable.customerAddress} ORDER BY ${ordersTable.createdAt} DESC))[1]`,
     orderCount: count(ordersTable.id),
-    totalSpentMinor: sql<number>`COALESCE(SUM(${ordersTable.totalMinor}), 0)`,
+    totalSpentMinor: sql<number>`COALESCE(SUM(${ordersTable.totalMinor}) FILTER (WHERE ${ordersTable.status} NOT IN ('cancelled', 'returned')), 0)`,
     lastOrderAt: latestOrder,
   }).from(ordersTable).groupBy(customerKey).orderBy(desc(latestOrder));
 

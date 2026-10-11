@@ -25,8 +25,8 @@ router.use(expensesRouter);
 router.use(staffRouter);
 router.use(auditRouter);
 router.use(shopifyRouter);
+router.use(customersRouter);
 router.use(accountingRouter);
 router.use(systemRouter);
-router.use(customersRouter);
 
 export default router;
