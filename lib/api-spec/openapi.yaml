@@ -15,6 +15,7 @@ tags:
   - name: products
   - name: inventory
   - name: orders
+  - name: customers
   - name: expenses
   - name: staff
   - name: audit
@@ -210,6 +211,19 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Order" }
+  /customers:
+    get:
+      operationId: listCustomers
+      tags: [customers]
+      summary: List customers summarized from their orders
+      responses:
+        "200":
+          description: Customers derived from order history
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Customer" }
   /orders/{id}/status:
     patch:
       operationId: updateOrderStatus
@@ -834,6 +848,17 @@ components:
         createdAt: { type: string, format: date-time }
         updatedAt: { type: string, format: date-time }
         items: { type: array, items: { $ref: "#/components/schemas/OrderItem" } }
+    Customer:
+      type: object
+      required: [id, customerName, orderCount, totalSpentMinor, lastOrderAt]
+      properties:
+        id: { type: string }
+        customerName: { type: string }
+        customerPhone: { type: ["string", "null"] }
+        customerAddress: { type: ["string", "null"] }
+        orderCount: { type: integer }
+        totalSpentMinor: { type: integer }
+        lastOrderAt: { type: string, format: date-time }
     Expense:
       type: object
       required: [id, description, category, amountMinor, expenseDate, createdAt, updatedAt]

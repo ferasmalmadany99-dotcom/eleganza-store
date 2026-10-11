@@ -476,6 +476,21 @@ export const CreateOrderResponse = zod.object({
 
 
 /**
+ * @summary List customers summarized from their orders
+ */
+export const ListCustomersResponseItem = zod.object({
+  "id": zod.string(),
+  "customerName": zod.string(),
+  "customerPhone": zod.string().nullish(),
+  "customerAddress": zod.string().nullish(),
+  "orderCount": zod.number().int(),
+  "totalSpentMinor": zod.number().int(),
+  "lastOrderAt": zod.coerce.date()
+})
+export const ListCustomersResponse = zod.array(ListCustomersResponseItem)
+
+
+/**
  * @summary Update order status
  */
 export const UpdateOrderStatusParams = zod.object({

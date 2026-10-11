@@ -11,6 +11,7 @@ import auditRouter from "./audit";
 import shopifyRouter from "./shopify";
 import accountingRouter from "./accounting";
 import systemRouter from "./system";
+import customersRouter from "./customers";
 
 const router: IRouter = Router();
 
@@ -26,5 +27,6 @@ router.use(auditRouter);
 router.use(shopifyRouter);
 router.use(accountingRouter);
 router.use(systemRouter);
+router.use(customersRouter);
 
 export default router;

@@ -13,6 +13,7 @@ export * from './accountUpdate';
 export * from './auditLog';
 export * from './auditLogMetadata';
 export * from './createStorefrontOrder409';
+export * from './customer';
 export * from './dashboardSummary';
 export * from './dashboardSummaryOrderCounts';
 export * from './expense';

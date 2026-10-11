@@ -10,6 +10,7 @@ import AdminDashboard from './pages/admin/Dashboard';
 import AdminProducts from './pages/admin/Products';
 import AdminInventory from './pages/admin/Inventory';
 import AdminOrders from './pages/admin/Orders';
+import AdminCustomers from './pages/admin/Customers';
 import AdminExpenses from './pages/admin/Expenses';
 import AdminTeam from './pages/admin/Team';
 import AdminAudit from './pages/admin/Audit';
@@ -197,6 +198,9 @@ function ClerkProviderWithRoutes() {
           </Route>
           <Route path="/admin/orders">
             {() => <AdminRoute component={AdminOrders} />}
+          </Route>
+          <Route path="/admin/customers">
+            {() => <AdminRoute component={AdminCustomers} />}
           </Route>
           <Route path="/admin/expenses">
             {() => <AdminRoute component={AdminExpenses} />}

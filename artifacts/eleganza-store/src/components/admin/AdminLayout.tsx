@@ -27,6 +27,7 @@ const navigation = [
   { href: "/admin/products", label: "Products", arabic: "المنتجات", icon: Package, capability: null },
   { href: "/admin/inventory", label: "Inventory", arabic: "المخزون", icon: Boxes, capability: null },
   { href: "/admin/orders", label: "Orders", arabic: "الطلبات", icon: ShoppingBag, capability: null },
+  { href: "/admin/customers", label: "Customers", arabic: "الزبائن", icon: Users, capability: "sales" as const },
   { href: "/admin/expenses", label: "Expenses", arabic: "المصروفات", icon: ReceiptText, capability: null },
   { href: "/admin/accounting", label: "Accounting", arabic: "المحاسبة", icon: BookOpen, capability: "manager" as const },
   { href: "/admin/team", label: "Team", arabic: "الفريق", icon: Users, capability: "owner" as const },

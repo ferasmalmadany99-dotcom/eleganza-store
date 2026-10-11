@@ -480,6 +480,18 @@ export interface Order {
   items: OrderItem[];
 }
 
+export interface Customer {
+  id: string;
+  customerName: string;
+  /** @nullable */
+  customerPhone?: string | null;
+  /** @nullable */
+  customerAddress?: string | null;
+  orderCount: number;
+  totalSpentMinor: number;
+  lastOrderAt: string;
+}
+
 export interface Expense {
   id: number;
   description: string;
