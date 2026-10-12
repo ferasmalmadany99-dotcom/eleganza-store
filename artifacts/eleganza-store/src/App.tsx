@@ -104,6 +104,24 @@ function SignUpPage() {
   );
 }
 
+function CustomerSignInPage() {
+  const isAr = window.localStorage.getItem("eleganza-language") === "ar";
+  return (
+    <div dir={isAr ? "rtl" : "ltr"} className="flex min-h-[100dvh] items-center justify-center bg-background px-4">
+      <SignIn routing="path" path={`${basePath}/customer-sign-in`} signUpUrl={`${basePath}/customer-sign-up`} forceRedirectUrl={`${basePath}/`} />
+    </div>
+  );
+}
+
+function CustomerSignUpPage() {
+  const isAr = window.localStorage.getItem("eleganza-language") === "ar";
+  return (
+    <div dir={isAr ? "rtl" : "ltr"} className="flex min-h-[100dvh] items-center justify-center bg-background px-4">
+      <SignUp routing="path" path={`${basePath}/customer-sign-up`} signInUrl={`${basePath}/customer-sign-in`} forceRedirectUrl={`${basePath}/`} />
+    </div>
+  );
+}
+
 function ClerkQueryClientCacheInvalidator() {
   const { addListener } = useClerk();
   const queryClient = useQueryClient();
@@ -153,7 +171,9 @@ function AdminRoute({ component: Component }: { component: React.ComponentType }
 }
 
 function ClerkProviderWithRoutes() {
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
+  const isCustomerAuth = location.startsWith("/customer-sign-");
+  const isArabic = window.localStorage.getItem("eleganza-language") === "ar";
 
   return (
     <ClerkProvider
@@ -163,18 +183,22 @@ function ClerkProviderWithRoutes() {
       signInUrl={`${basePath}/sign-in`}
       signUpUrl={`${basePath}/sign-up`}
       localization={{
-        signIn: {
-          start: {
-            title: "Eleganza Operations",
-            subtitle: "Sign in to access your workspace",
+        signIn: isCustomerAuth
+          ? { start: { title: isArabic ? "مرحبًا بعودتك" : "Welcome back", subtitle: isArabic ? "سجّل الدخول لمتابعة التسوق" : "Sign in to continue shopping" } }
+          : {
+              start: {
+                title: "Eleganza Operations",
+                subtitle: "Sign in to access your workspace",
+              },
           },
-        },
-        signUp: {
-          start: {
-            title: "Join Eleganza",
-            subtitle: "Create your workspace account",
+        signUp: isCustomerAuth
+          ? { start: { title: isArabic ? "حساب زبون جديد" : "Create your customer account", subtitle: isArabic ? "أنشئ حسابًا لمتابعة التسوق" : "Create an account to continue shopping" } }
+          : {
+              start: {
+                title: "Join Eleganza",
+                subtitle: "Create your workspace account",
+              },
           },
-        },
       }}
       routerPush={(to) => setLocation(stripBase(to))}
       routerReplace={(to) => setLocation(stripBase(to), { replace: true })}
@@ -183,6 +207,8 @@ function ClerkProviderWithRoutes() {
         <ClerkQueryClientCacheInvalidator />
         <Switch>
           <Route path="/" component={Storefront} />
+          <Route path="/customer-sign-in/*?" component={CustomerSignInPage} />
+          <Route path="/customer-sign-up/*?" component={CustomerSignUpPage} />
           <Route path="/sign-in/*?" component={SignInPage} />
           <Route path="/sign-up/*?" component={SignUpPage} />
           <Route path="/admin-demo" component={AdminDemo} />

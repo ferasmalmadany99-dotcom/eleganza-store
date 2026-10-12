@@ -1,4 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useUser } from '@clerk/react';
+import { useLocation } from 'wouter';
 import {
   ArrowDownRight,
   ArrowLeft,
@@ -64,6 +66,10 @@ import plumElanImage960 from './assets/plum-elan-960.jpg';
 type Category = 'All' | 'New in' | 'Perfume' | 'Makeup' | 'Accessories';
 type Audience = 'All' | 'Men' | 'Women';
 type Language = 'en' | 'ar';
+type StoreCustomerAction =
+  | { kind: 'add-to-bag' | 'toggle-favorite'; productId: string }
+  | { kind: 'open-bag' | 'open-favorites' };
+const pendingCustomerActionKey = 'eleganza-pending-customer-action';
 
 type Product = {
   id: string;
@@ -1462,6 +1468,10 @@ function JournalIndex({ entries, onClose, onSelect, c }: { entries: Article[]; o
 }
 
 function Storefront() {
+  const { isLoaded: clerkLoaded, isSignedIn } = useUser();
+  const [, setLocation] = useLocation();
+  const [customerAuthOpen, setCustomerAuthOpen] = useState(false);
+  const pendingActionHandled = useRef(false);
   const [language, setLanguage] = useState<Language>(() => {
     const requestedLanguage = new URLSearchParams(window.location.search).get('lang');
     if (requestedLanguage === 'ar' || requestedLanguage === 'en') return requestedLanguage;
@@ -1583,8 +1593,22 @@ function Storefront() {
     setNotice(message);
     window.setTimeout(() => setNotice(''), 2600);
   };
-  const toggleFavorite = (id: string) => setFavorites((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id]);
+  const requestCustomerAccount = (action: StoreCustomerAction) => {
+    if (!clerkLoaded) {
+      notify(language === 'ar' ? 'جارٍ التحقق من الحساب، حاول مرة أخرى بعد لحظات.' : 'Checking your account. Please try again in a moment.');
+      return true;
+    }
+    if (isSignedIn) return false;
+    window.sessionStorage.setItem(pendingCustomerActionKey, JSON.stringify(action));
+    setCustomerAuthOpen(true);
+    return true;
+  };
+  const toggleFavorite = (id: string) => {
+    if (requestCustomerAccount({ kind: 'toggle-favorite', productId: id })) return;
+    setFavorites((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id]);
+  };
   const addToBag = (product: Product) => {
+    if (requestCustomerAccount({ kind: 'add-to-bag', productId: product.id })) return false;
     const existing = bag.find((item) => item.id === product.id);
     if (product.stock === 0) {
       notify(language === 'ar' ? `${product.name}: ${c.outOfStockReason}` : `${product.name}: ${c.outOfStockReason}`);
@@ -1601,6 +1625,28 @@ function Storefront() {
     notify(language === 'ar' ? `تمت إضافة ${product.name} إلى السلة بنجاح` : `${product.name} was added to your bag`);
     return true;
   };
+  useEffect(() => {
+    if (!clerkLoaded || !isSignedIn || pendingActionHandled.current) return;
+    const rawAction = window.sessionStorage.getItem(pendingCustomerActionKey);
+    if (!rawAction) return;
+    try {
+      const action = JSON.parse(rawAction) as StoreCustomerAction;
+      if (action.kind === 'add-to-bag' && !inventoryLoaded) return;
+      window.sessionStorage.removeItem(pendingCustomerActionKey);
+      pendingActionHandled.current = true;
+      if (action.kind === 'open-bag') setBagOpen(true);
+      else if (action.kind === 'open-favorites') setFavoritesOpen(true);
+      else if (typeof action.productId === 'string') {
+        if (action.kind === 'toggle-favorite') toggleFavorite(action.productId);
+        if (action.kind === 'add-to-bag') {
+          const product = catalogProducts.find((item) => item.id === action.productId);
+          if (product) addToBag(withCurrentStock(product));
+        }
+      }
+    } catch {
+      window.sessionStorage.removeItem(pendingCustomerActionKey);
+    }
+  }, [catalogProducts, clerkLoaded, inventoryLoaded, isSignedIn]);
   const updateQuantity = (id: string, amount: number) => {
     const item = bag.find((entry) => entry.id === id);
     const availableStock = item && inventoryLoaded ? inventoryByName[normalizeProductName(item.name)]?.quantityOnHand ?? 0 : item?.stock;
