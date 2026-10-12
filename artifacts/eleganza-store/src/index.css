@@ -171,7 +171,9 @@
 @layer utilities {
   .font-display { font-family: var(--app-font-serif); }
   .font-mono-ui { font-family: var(--app-font-mono); font-weight: 500; }
-  .grain:not(.rtl-ui) .brand-name-en { font-family: Didot, 'GFS Didot', 'Bodoni MT', serif; }
+  .grain:not(.rtl-ui) .brand-name-en { font-family: Didot, 'GFS Didot', 'Bodoni MT', serif; font-style: normal; }
+  .grain em,
+  .grain i { font-style: normal; }
   .admin-shell .overflow-x-auto {
     max-width: 100%;
     overscroll-behavior-inline: contain;
