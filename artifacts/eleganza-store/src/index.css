@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Aref+Ruqaa+Ink:wght@400;700&family=Cormorant+Garamond:ital,wght@1,600&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=Noto+Kufi+Arabic:wght@400;500;600&family=Noto+Naskh+Arabic:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Aref+Ruqaa+Ink:wght@400;700&family=Cormorant+Garamond:ital,wght@1,600&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=GFS+Didot&family=Instrument+Serif:ital@0;1&family=Noto+Kufi+Arabic:wght@400;500;600&family=Noto+Naskh+Arabic:wght@400;500;600;700&display=swap');
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @plugin "@tailwindcss/typography";
@@ -118,6 +118,11 @@
 @layer base {
   * { @apply border-border; }
   html { scroll-behavior: smooth; }
+  .grain {
+    --app-font-sans: Didot, 'GFS Didot', 'Bodoni MT', serif;
+    --app-font-serif: Didot, 'GFS Didot', 'Bodoni MT', serif;
+    font-family: var(--app-font-sans);
+  }
   body {
     @apply font-sans antialiased bg-background text-foreground;
     min-width: 320px;
@@ -166,6 +171,7 @@
 @layer utilities {
   .font-display { font-family: var(--app-font-serif); }
   .font-mono-ui { font-family: var(--app-font-mono); font-weight: 500; }
+  .grain:not(.rtl-ui) .brand-name-en { font-family: Didot, 'GFS Didot', 'Bodoni MT', serif; }
   .admin-shell .overflow-x-auto {
     max-width: 100%;
     overscroll-behavior-inline: contain;
