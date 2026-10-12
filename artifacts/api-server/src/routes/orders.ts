@@ -18,6 +18,15 @@ import { draftOrderNumber, salesInvoiceNumber } from "../lib/invoice";
 const router: IRouter = Router();
 router.use(requireAuth);
 
+const allowedOrderStatusTransitions: Record<string, string[]> = {
+  pending: ["confirmed", "cancelled"],
+  confirmed: ["processing", "cancelled"],
+  processing: ["completed", "cancelled"],
+  completed: ["returned"],
+  cancelled: [],
+  returned: [],
+};
+
 async function withItems<T extends { id: number }>(orders: T[]) {
   return Promise.all(orders.map(async (order) => ({
     ...order,
@@ -115,10 +124,7 @@ router.patch("/orders/:id/status", requireManager, async (req, res): Promise<voi
   const result = await db.transaction(async (tx) => {
     const [order] = await tx.select().from(ordersTable).where(eq(ordersTable.id, params.data.id)).for("update");
     if (!order) return "missing" as const;
-    if (order.status === parsed.data.status) {
-      const items = await tx.select().from(orderItemsTable).where(eq(orderItemsTable.orderId, order.id));
-      return { order, items };
-    }
+    if (!allowedOrderStatusTransitions[order.status]?.includes(parsed.data.status)) return "invalid_transition" as const;
     const items = await tx.select().from(orderItemsTable).where(eq(orderItemsTable.orderId, order.id));
     const wasSold = order.status === "confirmed" || order.status === "processing" || order.status === "completed";
     const willBeSold = parsed.data.status === "confirmed" || parsed.data.status === "processing" || parsed.data.status === "completed";
@@ -155,6 +161,7 @@ router.patch("/orders/:id/status", requireManager, async (req, res): Promise<voi
     throw error;
   });
   if (result === "missing") { res.status(404).json({ error: "Order not found" }); return; }
+  if (result === "invalid_transition") { res.status(409).json({ error: "Order status transition is not allowed" }); return; }
   if (result === "negative") { res.status(409).json({ error: "Insufficient stock" }); return; }
   await writeAudit(req.staff?.id, "update_status", "order", result.order.id, { status: parsed.data.status });
   const enteredSoldState = parsed.data.status === "confirmed" || parsed.data.status === "processing" || parsed.data.status === "completed";
