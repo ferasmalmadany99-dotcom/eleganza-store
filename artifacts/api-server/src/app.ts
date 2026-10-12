@@ -37,7 +37,6 @@ app.use(CLERK_PROXY_PATH, clerkProxyMiddleware());
 app.use(cors({ credentials: true, origin: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use("/api/storefront", storefrontRouter);
 app.use(
   clerkMiddleware((req) => ({
     publishableKey: publishableKeyFromHost(
@@ -46,6 +45,7 @@ app.use(
     ),
   })),
 );
+app.use("/api/storefront", storefrontRouter);
 
 app.use("/api", router);
 

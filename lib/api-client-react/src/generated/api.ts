@@ -24,8 +24,10 @@ import type {
   AccountInput,
   AccountUpdate,
   AuditLog,
-  CreateStorefrontOrder409,
+  CreateStorefrontCustomerProfile403,
   Customer,
+  CustomerProfileInput,
+  CustomerProfileResult,
   DashboardSummary,
   Expense,
   ExpenseInput,
@@ -1606,7 +1608,7 @@ return customFetch<Order>(getCreateStorefrontOrderUrl(),
 
 export const getCreateStorefrontOrderMutationKey = () => ['createStorefrontOrder'] as const;
 
-export const getCreateStorefrontOrderMutationOptions = <TError = ErrorType<CreateStorefrontOrder409>,
+export const getCreateStorefrontOrderMutationOptions = <TError = ErrorType<void>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createStorefrontOrder>>, TError,CreateStorefrontOrderMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof createStorefrontOrder>>, TError,CreateStorefrontOrderMutationVariables, TContext> => {
 
@@ -1635,13 +1637,13 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type CreateStorefrontOrderMutationResult = NonNullable<Awaited<ReturnType<typeof createStorefrontOrder>>>
     export type CreateStorefrontOrderMutationBody = BodyType<StorefrontOrderInput>
-    export type CreateStorefrontOrderMutationError = ErrorType<CreateStorefrontOrder409>
+    export type CreateStorefrontOrderMutationError = ErrorType<void>
     export type CreateStorefrontOrderMutationVariables = {data: BodyType<StorefrontOrderInput>}
 
     /**
  * @summary Create a customer storefront order
  */
-export const useCreateStorefrontOrder = <TError = ErrorType<CreateStorefrontOrder409>,
+export const useCreateStorefrontOrder = <TError = ErrorType<void>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createStorefrontOrder>>, TError,CreateStorefrontOrderMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
  ): UseMutationResult<
         Awaited<ReturnType<typeof createStorefrontOrder>>,
@@ -1650,6 +1652,94 @@ export const useCreateStorefrontOrder = <TError = ErrorType<CreateStorefrontOrde
         TContext
       > => {
       return useMutation(getCreateStorefrontOrderMutationOptions(options));
+    }
+
+export const getCreateStorefrontCustomerProfileUrl = () => {
+
+
+
+
+  return `/api/storefront/customers/profile`
+}
+
+/**
+ * @summary Create or update the signed-in customer's profile
+ */
+export const createStorefrontCustomerProfile = async (customerProfileInput: CustomerProfileInput, options?: Parameters<typeof customFetch>[1]): Promise<CustomerProfileResult> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<CustomerProfileResult>(getCreateStorefrontCustomerProfileUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(customerProfileInput)
+  }
+);}
+
+
+
+
+
+export const getCreateStorefrontCustomerProfileMutationKey = () => ['createStorefrontCustomerProfile'] as const;
+
+export const getCreateStorefrontCustomerProfileMutationOptions = <TError = ErrorType<void | CreateStorefrontCustomerProfile403>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createStorefrontCustomerProfile>>, TError,CreateStorefrontCustomerProfileMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createStorefrontCustomerProfile>>, TError,CreateStorefrontCustomerProfileMutationVariables, TContext> => {
+
+const mutationKey = getCreateStorefrontCustomerProfileMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createStorefrontCustomerProfile>>, CreateStorefrontCustomerProfileMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createStorefrontCustomerProfile(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateStorefrontCustomerProfileMutationResult = NonNullable<Awaited<ReturnType<typeof createStorefrontCustomerProfile>>>
+    export type CreateStorefrontCustomerProfileMutationBody = BodyType<CustomerProfileInput>
+    export type CreateStorefrontCustomerProfileMutationError = ErrorType<void | CreateStorefrontCustomerProfile403>
+    export type CreateStorefrontCustomerProfileMutationVariables = {data: BodyType<CustomerProfileInput>}
+
+    /**
+ * @summary Create or update the signed-in customer's profile
+ */
+export const useCreateStorefrontCustomerProfile = <TError = ErrorType<void | CreateStorefrontCustomerProfile403>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createStorefrontCustomerProfile>>, TError,CreateStorefrontCustomerProfileMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createStorefrontCustomerProfile>>,
+        TError,
+        CreateStorefrontCustomerProfileMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateStorefrontCustomerProfileMutationOptions(options));
     }
 
 export const getInviteStaffUrl = () => {

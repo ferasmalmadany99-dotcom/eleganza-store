@@ -3,8 +3,8 @@ name: Storefront customer access
 description: Account requirements for customer actions in the Eleganza public storefront.
 ---
 
-Visitors may browse the store without an account. Adding products to the bag or favorites, and opening those commerce lists, requires the customer to sign in or create an account. After authentication, return to the storefront and resume the action they requested. Customer authentication must redirect to the storefront, not the staff admin route.
+On entry, visitors choose to continue as a guest or create an account. Guests may browse, but adding products to the bag or favorites, opening those commerce lists, and placing orders requires a verified customer account. Customer registration collects full name, phone, email, password, and an email verification code. Save the profile in the admin customer directory even before the first order, and return to the storefront after authentication.
 
-**Why:** The user explicitly chose guest browsing while requiring an account for product-related actions; customer identity must remain separate from staff access.
+**Why:** The user requires a guest path and a separate verified customer account path; registered customers must be visible to staff without receiving staff access.
 
-**How to apply:** Keep the public storefront route ungated. Gate cart and favorites actions with customer-specific sign-in/sign-up routes, preserve the pending action across authentication, and do not grant staff permissions through customer registration.
+**How to apply:** Keep product browsing public. Preserve the requested commerce action through sign-in, persist verified customer profiles independently from orders, associate purchase history by normalized phone, and deny customer accounts access to staff APIs.

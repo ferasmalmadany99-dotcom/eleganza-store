@@ -1,6 +1,6 @@
 import { count, desc, eq, max, sql } from "drizzle-orm";
 import { Router, type IRouter } from "express";
-import { db, orderItemsTable, ordersTable } from "@workspace/db";
+import { db, orderItemsTable, ordersTable, storeCustomersTable } from "@workspace/db";
 import { ListCustomersResponse, ListOrdersResponse } from "@workspace/api-zod";
 import { requireAuth, requireSales } from "../middlewares/auth";
 import { salesInvoiceNumber } from "../lib/invoice";
@@ -23,11 +23,31 @@ router.get("/customers", requireSales, async (_req, res): Promise<void> => {
     lastOrderAt: latestOrder,
   }).from(ordersTable).groupBy(customerKey).orderBy(desc(latestOrder));
 
-  res.json(ListCustomersResponse.parse(rows.map((customer) => ({
+  const customerMap = new Map(rows.map((customer) => [customer.id, {
     ...customer,
+    customerEmail: null as string | null,
+    accountCreatedAt: null as string | null,
     totalSpentMinor: Number(customer.totalSpentMinor),
-    lastOrderAt: customer.lastOrderAt?.toISOString() ?? new Date(0).toISOString(),
-  }))));
+    lastOrderAt: customer.lastOrderAt?.toISOString() ?? null,
+  }]));
+  const accounts = await db.select().from(storeCustomersTable).orderBy(desc(storeCustomersTable.createdAt));
+  for (const account of accounts) {
+    const normalizedPhone = account.customerPhone.replace(/\D/g, "");
+    const id = normalizedPhone || `account:${account.clerkUserId}`;
+    const existing = customerMap.get(id);
+    customerMap.set(id, {
+      id,
+      customerName: account.customerName,
+      customerPhone: account.customerPhone,
+      customerAddress: existing?.customerAddress ?? null,
+      customerEmail: account.customerEmail,
+      accountCreatedAt: account.createdAt.toISOString(),
+      orderCount: existing?.orderCount ?? 0,
+      totalSpentMinor: existing?.totalSpentMinor ?? 0,
+      lastOrderAt: existing?.lastOrderAt ?? null,
+    });
+  }
+  res.json(ListCustomersResponse.parse([...customerMap.values()]));
 });
 
 router.get("/customers/:customerId/orders", requireSales, async (req, res): Promise<void> => {

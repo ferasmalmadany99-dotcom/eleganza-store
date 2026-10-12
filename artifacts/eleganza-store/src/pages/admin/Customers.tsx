@@ -26,6 +26,8 @@ function CustomerDetailsModal({ customer, isAr, language, onClose }: { customer:
       <div className="admin-nav-scroll overflow-y-auto p-5 sm:p-6">
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="border border-border p-4"><p className="text-xs text-muted-foreground">{isAr ? "رقم الهاتف" : "Phone"}</p><p className="mt-2" dir="ltr">{customer.customerPhone ? <a className="text-primary hover:underline" href={`tel:${encodeURIComponent(customer.customerPhone)}`}>{customer.customerPhone}</a> : "—"}</p></div>
+          <div className="border border-border p-4"><p className="text-xs text-muted-foreground">{isAr ? "البريد الإلكتروني" : "Email"}</p><p className="mt-2 break-all" dir="ltr">{customer.customerEmail || "—"}</p></div>
+          <div className="border border-border p-4"><p className="text-xs text-muted-foreground">{isAr ? "تاريخ إنشاء الحساب" : "Account created"}</p><p className="mt-2">{customer.accountCreatedAt ? dateLabel(customer.accountCreatedAt, language) : "—"}</p></div>
           <div className="border border-border p-4"><p className="text-xs text-muted-foreground">{isAr ? "إجمالي المشتريات" : "Total spent"}</p><p className="mt-2 font-mono-ui font-semibold">{money(customer.totalSpentMinor, language)}</p></div>
           <div className="border border-border p-4 sm:col-span-2"><p className="text-xs text-muted-foreground">{isAr ? "العنوان الكامل" : "Full address"}</p><p className="mt-2 whitespace-pre-wrap leading-6">{address || (isAr ? "العنوان غير متوفر" : "Address not provided")}</p>{mapUrl && <a href={mapUrl} target="_blank" rel="noopener noreferrer" className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline"><MapPin className="h-4 w-4" />{isAr ? "فتح موقع الزبون على الخريطة" : "Open customer location"}<ExternalLink className="h-3.5 w-3.5" /></a>}</div>
         </div>
@@ -57,7 +59,7 @@ export default function Customers() {
     const query = search.trim().toLocaleLowerCase();
     if (!query) return customers.data ?? [];
     return (customers.data ?? []).filter((customer) =>
-      [customer.customerName, customer.customerPhone ?? "", customer.customerAddress ?? ""]
+      [customer.customerName, customer.customerPhone ?? "", customer.customerEmail ?? "", customer.customerAddress ?? ""]
         .some((value) => value.toLocaleLowerCase().includes(query)),
     );
   }, [customers.data, search]);
@@ -66,7 +68,7 @@ export default function Customers() {
     <PageHeader
       eyebrow={isAr ? "البيع وخدمة العملاء" : "Sales & care"}
       title={isAr ? "الزبائن" : "Customers"}
-      description={isAr ? "قائمة الزبائن المستخرجة من الطلبات المسجلة في المتجر." : "Customers summarized from orders recorded by the store."}
+      description={isAr ? "حسابات الزبائن وبيانات مشترياتهم المسجلة في المتجر." : "Customer accounts and their recorded purchase history."}
     />
     <Panel>
       <div className="mb-5 flex flex-wrap items-center justify-between gap-4">
@@ -80,7 +82,7 @@ export default function Customers() {
       </div>
       {customers.isLoading && <LoadingState label={isAr ? "جارٍ تحميل الزبائن…" : "Loading customers…"} />}
       {customers.isError && <ErrorState error={customers.error} onRetry={() => customers.refetch()} />}
-      {!customers.isLoading && !customers.isError && filtered.length === 0 && <EmptyState icon={<Users className="h-5 w-5" />} title={search ? (isAr ? "لا توجد نتائج" : "No matches") : (isAr ? "لا يوجد زبائن بعد" : "No customers yet")} detail={search ? (isAr ? "جرّب اسمًا أو رقم هاتف مختلفًا." : "Try another name or phone number.") : (isAr ? "سيظهر الزبائن هنا بعد تسجيل طلباتهم." : "Customers will appear here after their orders are recorded.")} />}
+       {!customers.isLoading && !customers.isError && filtered.length === 0 && <EmptyState icon={<Users className="h-5 w-5" />} title={search ? (isAr ? "لا توجد نتائج" : "No matches") : (isAr ? "لا يوجد زبائن بعد" : "No customers yet")} detail={search ? (isAr ? "جرّب اسمًا أو رقم هاتف أو بريدًا مختلفًا." : "Try another name, phone, or email.") : (isAr ? "سيظهر الزبائن هنا عند إنشاء حساب أو تسجيل طلب." : "Customers appear here after creating an account or placing an order.")} />}
       {filtered.length > 0 && <div className="overflow-x-auto">
         <table className="w-full min-w-[900px] text-sm">
           <thead className="border-b border-border text-xs text-muted-foreground">
@@ -102,7 +104,7 @@ export default function Customers() {
               <td className="max-w-xs px-3 py-4 text-muted-foreground">{address || "—"}</td>
               <td className="px-3 py-4 text-end">{customer.orderCount}</td>
               <td className="px-3 py-4 text-end font-mono-ui">{money(customer.totalSpentMinor, language)}</td>
-              <td className="px-3 py-4 text-end text-xs text-muted-foreground">{dateLabel(customer.lastOrderAt, language)}</td>
+              <td className="px-3 py-4 text-end text-xs text-muted-foreground">{customer.lastOrderAt ? dateLabel(customer.lastOrderAt, language) : "—"}</td>
               <td className="px-3 py-4 text-end"><button type="button" onClick={() => setSelectedCustomer(customer)} className="border border-primary px-3 py-2 text-xs font-semibold text-primary hover:bg-primary hover:text-primary-foreground">{isAr ? "عرض" : "View"}</button></td>
             </tr>;
           })}</tbody>

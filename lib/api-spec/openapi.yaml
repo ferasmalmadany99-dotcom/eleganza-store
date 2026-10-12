@@ -309,7 +309,6 @@ paths:
       operationId: createStorefrontOrder
       tags: [storefront]
       summary: Create a customer storefront order
-      security: []
       requestBody:
         required: true
         content:
@@ -323,6 +322,26 @@ paths:
               schema: { $ref: "#/components/schemas/Order" }
         "409":
           description: One or more products are no longer available
+  /storefront/customers/profile:
+    post:
+      operationId: createStorefrontCustomerProfile
+      tags: [storefront]
+      summary: Create or update the signed-in customer's profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CustomerProfileInput" }
+      responses:
+        "201":
+          description: Customer profile saved
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CustomerProfileResult" }
+        "401":
+          description: A signed-in account is required
+        "403":
+          description: Email verification is required
           content:
             application/json:
               schema:
@@ -609,6 +628,18 @@ components:
             properties:
               productId: { type: integer, minimum: 1 }
               quantity: { type: integer, minimum: 1, maximum: 99 }
+    CustomerProfileInput:
+      type: object
+      required: [customerName, customerPhone]
+      properties:
+        customerName: { type: string, minLength: 2, maxLength: 120, pattern: ".*\\S.*" }
+        customerPhone: { type: string, minLength: 5, maxLength: 40, pattern: ".*\\S.*" }
+    CustomerProfileResult:
+      type: object
+      required: [id, customerName]
+      properties:
+        id: { type: integer }
+        customerName: { type: string }
     ProductAudience:
       type: string
       enum: [men, women]
@@ -868,15 +899,17 @@ components:
         items: { type: array, items: { $ref: "#/components/schemas/OrderItem" } }
     Customer:
       type: object
-      required: [id, customerName, orderCount, totalSpentMinor, lastOrderAt]
+      required: [id, customerName, orderCount, totalSpentMinor, lastOrderAt, customerEmail, accountCreatedAt]
       properties:
         id: { type: string }
         customerName: { type: string }
         customerPhone: { type: ["string", "null"] }
         customerAddress: { type: ["string", "null"] }
+        customerEmail: { type: ["string", "null"] }
+        accountCreatedAt: { type: ["string", "null"], format: date-time }
         orderCount: { type: integer }
         totalSpentMinor: { type: integer }
-        lastOrderAt: { type: string, format: date-time }
+        lastOrderAt: { type: ["string", "null"], format: date-time }
     Expense:
       type: object
       required: [id, description, category, amountMinor, expenseDate, createdAt, updatedAt]

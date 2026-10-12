@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export type CreateStorefrontOrder409 = {
-  error: string;
-};
+export interface CustomerProfileResult {
+  id: number;
+  customerName: string;
+}

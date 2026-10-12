@@ -162,6 +162,26 @@ export interface StorefrontOrderInput {
   items: StorefrontOrderInputItemsItem[];
 }
 
+export interface CustomerProfileInput {
+  /**
+     * @minLength 2
+     * @maxLength 120
+     * @pattern .*\S.*
+     */
+  customerName: string;
+  /**
+     * @minLength 5
+     * @maxLength 40
+     * @pattern .*\S.*
+     */
+  customerPhone: string;
+}
+
+export interface CustomerProfileResult {
+  id: number;
+  customerName: string;
+}
+
 export type ProductAudience = typeof ProductAudience[keyof typeof ProductAudience];
 
 
@@ -487,9 +507,14 @@ export interface Customer {
   customerPhone?: string | null;
   /** @nullable */
   customerAddress?: string | null;
+  /** @nullable */
+  customerEmail: string | null;
+  /** @nullable */
+  accountCreatedAt: string | null;
   orderCount: number;
   totalSpentMinor: number;
-  lastOrderAt: string;
+  /** @nullable */
+  lastOrderAt: string | null;
 }
 
 export interface Expense {
@@ -605,7 +630,7 @@ limit?: LimitParameter;
 offset?: OffsetParameter;
 };
 
-export type CreateStorefrontOrder409 = {
+export type CreateStorefrontCustomerProfile403 = {
   error: string;
 };
 

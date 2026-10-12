@@ -483,9 +483,11 @@ export const ListCustomersResponseItem = zod.object({
   "customerName": zod.string(),
   "customerPhone": zod.string().nullish(),
   "customerAddress": zod.string().nullish(),
+  "customerEmail": zod.string().nullable(),
+  "accountCreatedAt": zod.coerce.date().nullable(),
   "orderCount": zod.number().int(),
   "totalSpentMinor": zod.number().int(),
-  "lastOrderAt": zod.coerce.date()
+  "lastOrderAt": zod.coerce.date().nullable()
 })
 export const ListCustomersResponse = zod.array(ListCustomersResponseItem)
 
@@ -703,6 +705,32 @@ export const CreateStorefrontOrderResponse = zod.object({
   "unitPriceMinor": zod.number().int(),
   "unitCostMinor": zod.number().int()
 }))
+})
+
+
+/**
+ * @summary Create or update the signed-in customer's profile
+ */
+export const createStorefrontCustomerProfileBodyCustomerNameMin = 2;
+export const createStorefrontCustomerProfileBodyCustomerNameMax = 120;
+
+
+export const createStorefrontCustomerProfileBodyCustomerNameRegExp = new RegExp('.*\\S.*');
+export const createStorefrontCustomerProfileBodyCustomerPhoneMin = 5;
+export const createStorefrontCustomerProfileBodyCustomerPhoneMax = 40;
+
+
+export const createStorefrontCustomerProfileBodyCustomerPhoneRegExp = new RegExp('.*\\S.*');
+
+
+export const CreateStorefrontCustomerProfileBody = zod.object({
+  "customerName": zod.string().min(createStorefrontCustomerProfileBodyCustomerNameMin).max(createStorefrontCustomerProfileBodyCustomerNameMax).regex(createStorefrontCustomerProfileBodyCustomerNameRegExp),
+  "customerPhone": zod.string().min(createStorefrontCustomerProfileBodyCustomerPhoneMin).max(createStorefrontCustomerProfileBodyCustomerPhoneMax).regex(createStorefrontCustomerProfileBodyCustomerPhoneRegExp)
+})
+
+export const CreateStorefrontCustomerProfileResponse = zod.object({
+  "id": zod.number().int(),
+  "customerName": zod.string()
 })
 
 

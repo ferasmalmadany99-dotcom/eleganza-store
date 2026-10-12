@@ -1,5 +1,6 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ClerkProvider, SignIn, SignUp, Show, useClerk, useUser } from '@clerk/react';
+import { useSignUp } from '@clerk/react/legacy';
 import { publishableKeyFromHost } from '@clerk/react/internal';
 import { shadcn } from '@clerk/themes';
 import { Switch, Route, useLocation, Router as WouterRouter, Redirect } from 'wouter';
@@ -115,9 +116,81 @@ function CustomerSignInPage() {
 
 function CustomerSignUpPage() {
   const isAr = window.localStorage.getItem("eleganza-language") === "ar";
+  const { isLoaded, signUp, setActive } = useSignUp();
+  const [, setLocation] = useLocation();
+  const [step, setStep] = useState<"details" | "verify">("details");
+  const [fullName, setFullName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [code, setCode] = useState("");
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+  const saveCustomerProfile = async (sessionId: string | null) => {
+    if (!isLoaded || !setActive || !sessionId) {
+      throw new Error(isAr ? "لم يكتمل إنشاء جلسة الحساب." : "The customer session could not be started.");
+    }
+    await setActive({ session: sessionId });
+    const response = await fetch("/api/storefront/customers/profile", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ customerName: fullName.trim(), customerPhone: phone.trim() }),
+    });
+    if (!response.ok) throw new Error(isAr ? "تم إنشاء الحساب لكن تعذر حفظ بيانات الزبون. سجّل الدخول وحاول مرة أخرى." : "Account created, but the customer profile could not be saved. Sign in and try again.");
+    setLocation("/");
+  };
+  const submitDetails = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!isLoaded || !signUp) return;
+    setBusy(true);
+    setError("");
+    try {
+      const parts = fullName.trim().split(/\s+/);
+      await signUp.create({ emailAddress: email.trim(), password, firstName: parts[0], lastName: parts.slice(1).join(" ") });
+      await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
+      setStep("verify");
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : (isAr ? "تعذر إنشاء الحساب." : "Could not create the account."));
+    } finally {
+      setBusy(false);
+    }
+  };
+  const submitCode = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!isLoaded || !signUp) return;
+    setBusy(true);
+    setError("");
+    try {
+      const result = await signUp.attemptEmailAddressVerification({ code: code.trim() });
+      if (result.status !== "complete" || !result.createdSessionId) throw new Error(isAr ? "رمز التحقق غير صحيح أو لم يكتمل." : "The verification code is invalid or incomplete.");
+      await saveCustomerProfile(result.createdSessionId);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : (isAr ? "تعذر التحقق من البريد." : "Email verification failed."));
+    } finally {
+      setBusy(false);
+    }
+  };
   return (
     <div dir={isAr ? "rtl" : "ltr"} className="flex min-h-[100dvh] items-center justify-center bg-background px-4">
-      <SignUp routing="path" path={`${basePath}/customer-sign-up`} signInUrl={`${basePath}/customer-sign-in`} forceRedirectUrl={`${basePath}/`} />
+      <section className="w-full max-w-md border border-border bg-card p-7 shadow-xl sm:p-9">
+        <p className="font-mono-ui text-xs uppercase tracking-[.2em] text-primary">Eleganza</p>
+        <h1 className="mt-3 font-display text-3xl">{step === "verify" ? (isAr ? "تحقق من بريدك الإلكتروني" : "Verify your email") : (isAr ? "إنشاء حساب زبون" : "Create customer account")}</h1>
+        <p className="mt-2 text-sm text-muted-foreground">{step === "verify" ? (isAr ? `أدخل رمز التأكيد المرسل إلى ${email}` : `Enter the verification code sent to ${email}`) : (isAr ? "أدخل بياناتك لإنشاء حساب للمتجر." : "Enter your details to create a store account.")}</p>
+        {step === "details" ? <form className="mt-6 grid gap-4" onSubmit={submitDetails}>
+          <input className="h-11 border border-border bg-background px-3 text-sm" required minLength={2} maxLength={120} autoComplete="name" placeholder={isAr ? "الاسم الكامل" : "Full name"} value={fullName} onChange={(event) => setFullName(event.target.value)} />
+          <input className="h-11 border border-border bg-background px-3 text-sm" required minLength={5} maxLength={40} type="tel" autoComplete="tel" placeholder={isAr ? "رقم الهاتف" : "Phone number"} value={phone} onChange={(event) => setPhone(event.target.value)} />
+          <input className="h-11 border border-border bg-background px-3 text-sm" required type="email" autoComplete="email" placeholder={isAr ? "البريد الإلكتروني" : "Email"} value={email} onChange={(event) => setEmail(event.target.value)} />
+          <input className="h-11 border border-border bg-background px-3 text-sm" required minLength={8} type="password" autoComplete="new-password" placeholder={isAr ? "كلمة المرور" : "Password"} value={password} onChange={(event) => setPassword(event.target.value)} />
+          <button disabled={!isLoaded || busy} className="h-11 bg-primary text-sm font-semibold text-primary-foreground disabled:opacity-60">{busy ? (isAr ? "جارٍ الإنشاء…" : "Creating…") : (isAr ? "إنشاء الحساب وإرسال الرمز" : "Create account and send code")}</button>
+        </form> : <form className="mt-6 grid gap-4" onSubmit={submitCode}>
+          <input className="h-11 border border-border bg-background px-3 text-center text-lg tracking-[.3em]" required inputMode="numeric" autoComplete="one-time-code" placeholder={isAr ? "رمز التأكيد" : "Verification code"} value={code} onChange={(event) => setCode(event.target.value)} />
+          <button disabled={busy} className="h-11 bg-primary text-sm font-semibold text-primary-foreground disabled:opacity-60">{busy ? (isAr ? "جارٍ التحقق…" : "Verifying…") : (isAr ? "تأكيد وإنشاء الحساب" : "Verify and create account")}</button>
+        </form>}
+        {error && <p role="alert" className="mt-4 text-sm text-destructive">{error}</p>}
+        <p className="mt-6 text-center text-sm text-muted-foreground">{isAr ? "لديك حساب؟" : "Already registered?"} <a className="font-semibold text-primary underline" href={`${basePath}/customer-sign-in`}>{isAr ? "تسجيل الدخول" : "Sign in"}</a></p>
+        <a className="mt-4 block text-center text-sm text-muted-foreground underline" href={`${basePath}/`}>{isAr ? "العودة إلى المتجر" : "Back to store"}</a>
+      </section>
     </div>
   );
 }

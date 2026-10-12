@@ -13,7 +13,12 @@ export interface Customer {
   customerPhone?: string | null;
   /** @nullable */
   customerAddress?: string | null;
+  /** @nullable */
+  customerEmail: string | null;
+  /** @nullable */
+  accountCreatedAt: Date | null;
   orderCount: number;
   totalSpentMinor: number;
-  lastOrderAt: Date;
+  /** @nullable */
+  lastOrderAt: Date | null;
 }

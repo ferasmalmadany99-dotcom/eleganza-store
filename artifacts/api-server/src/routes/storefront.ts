@@ -1,11 +1,48 @@
 import { Router, type IRouter } from "express";
 import { desc, eq } from "drizzle-orm";
-import { db, orderItemsTable, ordersTable, productsTable } from "@workspace/db";
+import { clerkClient, getAuth } from "@clerk/express";
+import { db, orderItemsTable, ordersTable, productsTable, staffTable, storeCustomersTable } from "@workspace/db";
 import { CreateStorefrontOrderBody, CreateStorefrontOrderResponse } from "@workspace/api-zod";
 import { writeAudit } from "../lib/audit";
 import { draftOrderNumber, salesInvoiceNumber } from "../lib/invoice";
 
 const router: IRouter = Router();
+
+router.post("/customers/profile", async (req, res): Promise<void> => {
+  const userId = getAuth(req)?.userId;
+  if (!userId) {
+    res.status(401).json({ error: "Sign in to create a customer profile" });
+    return;
+  }
+  const customerName = typeof req.body?.customerName === "string" ? req.body.customerName.trim() : "";
+  const customerPhone = typeof req.body?.customerPhone === "string" ? req.body.customerPhone.trim() : "";
+  if (customerName.length < 2 || customerName.length > 120 || customerPhone.length < 5 || customerPhone.length > 40) {
+    res.status(400).json({ error: "A valid name and phone number are required" });
+    return;
+  }
+  const user = await clerkClient.users.getUser(userId);
+  const emailAddress = user.emailAddresses.find((address) => address.id === user.primaryEmailAddressId);
+  const email = emailAddress?.emailAddress;
+  if (!email || emailAddress?.verification?.status !== "verified") {
+    res.status(403).json({ error: "A verified email address is required" });
+    return;
+  }
+  const [staffAccount] = await db.select({ id: staffTable.id }).from(staffTable).where(eq(staffTable.clerkUserId, userId)).limit(1);
+  if (staffAccount) {
+    res.status(409).json({ error: "Staff accounts cannot be registered as customer accounts" });
+    return;
+  }
+  const [customer] = await db.insert(storeCustomersTable).values({
+    clerkUserId: userId,
+    customerName,
+    customerPhone,
+    customerEmail: email,
+  }).onConflictDoUpdate({
+    target: storeCustomersTable.clerkUserId,
+    set: { customerName, customerPhone, customerEmail: email, updatedAt: new Date() },
+  }).returning();
+  res.status(201).json({ id: customer.id, customerName: customer.customerName });
+});
 
 router.get("/products", async (_req, res): Promise<void> => {
   const products = await db.select({
@@ -27,6 +64,19 @@ router.get("/products", async (_req, res): Promise<void> => {
 });
 
 router.post("/orders", async (req, res): Promise<void> => {
+  const userId = getAuth(req)?.userId;
+  if (!userId) {
+    res.status(401).json({ error: "Sign in or create a customer account before placing an order" });
+    return;
+  }
+  const [customerAccount] = await db.select({ id: storeCustomersTable.id })
+    .from(storeCustomersTable)
+    .where(eq(storeCustomersTable.clerkUserId, userId))
+    .limit(1);
+  if (!customerAccount) {
+    res.status(403).json({ error: "A registered customer account is required to place an order" });
+    return;
+  }
   const parsed = CreateStorefrontOrderBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.message });

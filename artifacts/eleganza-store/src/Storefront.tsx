@@ -1471,6 +1471,7 @@ function Storefront() {
   const { isLoaded: clerkLoaded, isSignedIn } = useUser();
   const [, setLocation] = useLocation();
   const [customerAuthOpen, setCustomerAuthOpen] = useState(false);
+  const [entryChoiceOpen, setEntryChoiceOpen] = useState(false);
   const pendingActionHandled = useRef(false);
   const [language, setLanguage] = useState<Language>(() => {
     const requestedLanguage = new URLSearchParams(window.location.search).get('lang');
@@ -1509,6 +1510,15 @@ function Storefront() {
     document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr';
     window.localStorage.setItem('eleganza-language', language);
   }, [language]);
+
+  useEffect(() => {
+    if (!clerkLoaded) return;
+    if (isSignedIn) {
+      setEntryChoiceOpen(false);
+      return;
+    }
+    if (!window.sessionStorage.getItem('eleganza-entry-choice')) setEntryChoiceOpen(true);
+  }, [clerkLoaded, isSignedIn]);
 
   useEffect(() => {
     window.localStorage.setItem('eleganza-favorites', JSON.stringify(favorites));
@@ -1731,6 +1741,7 @@ function Storefront() {
         </div>
       </footer>
 
+       {entryChoiceOpen && <div className="fixed inset-0 z-[79] flex items-center justify-center bg-[#1f1915]/60 p-4"><section className="w-full max-w-md border border-[#312b25]/15 bg-[#f8f0e6] p-7 text-[#312b25] shadow-2xl sm:p-9" dir={language === 'ar' ? 'rtl' : 'ltr'} role="dialog" aria-modal="true" aria-labelledby="store-entry-title"><p className="font-mono-ui text-[9px] uppercase tracking-[.18em] text-[#9f523d]">Eleganza</p><h2 id="store-entry-title" className="mt-3 font-display text-3xl">{language === 'ar' ? 'أهلًا بك في المتجر' : 'Welcome to Eleganza'}</h2><p className="mt-3 text-sm leading-6 text-[#77695e]">{language === 'ar' ? 'يمكنك التصفح كزائر، أو فتح حساب لإضافة المنتجات ومتابعة مشترياتك.' : 'Browse as a guest, or create an account to add products and track your purchases.'}</p><div className="mt-7 grid gap-3"><button type="button" onClick={() => { window.sessionStorage.setItem('eleganza-entry-choice', 'account'); setEntryChoiceOpen(false); setLocation('/customer-sign-up'); }} className="bg-[#9f523d] px-5 py-4 font-mono-ui text-[10px] uppercase tracking-[.16em] text-[#fff5e8] hover:bg-[#7f3f31]">{language === 'ar' ? 'فتح حساب' : 'Create an account'}</button><button type="button" onClick={() => { window.sessionStorage.setItem('eleganza-entry-choice', 'guest'); setEntryChoiceOpen(false); }} className="border border-[#312b25]/20 px-5 py-4 font-mono-ui text-[10px] uppercase tracking-[.16em] hover:border-[#9f523d]">{language === 'ar' ? 'استمرار كزائر' : 'Continue as a guest'}</button></div></section></div>}
        {customerAuthOpen && <div className="fixed inset-0 z-[80] flex items-center justify-center bg-[#1f1915]/60 p-4" onClick={() => { window.sessionStorage.removeItem(pendingCustomerActionKey); setCustomerAuthOpen(false); }} role="presentation"><section className="w-full max-w-md border border-[#312b25]/15 bg-[#f8f0e6] p-7 text-[#312b25] shadow-2xl sm:p-9" dir={language === 'ar' ? 'rtl' : 'ltr'} role="dialog" aria-modal="true" aria-labelledby="customer-account-title" onClick={(event) => event.stopPropagation()}><div className="flex items-start justify-between gap-4"><div><p className="font-mono-ui text-[9px] uppercase tracking-[.18em] text-[#9f523d]">Eleganza</p><h2 id="customer-account-title" className="mt-3 font-display text-3xl">{language === 'ar' ? 'أنشئ حسابًا للمتابعة' : 'Create an account to continue'}</h2></div><button type="button" onClick={() => { window.sessionStorage.removeItem(pendingCustomerActionKey); setCustomerAuthOpen(false); }} aria-label={c.close} className="grid h-9 w-9 shrink-0 place-items-center border border-[#312b25]/15 hover:bg-[#efe2d3]"><X size={17} /></button></div><p className="mt-4 text-sm leading-6 text-[#77695e]">{language === 'ar' ? 'يمكنك تصفح المتجر كزائر. أنشئ حسابًا أو سجّل الدخول لإضافة المنتجات إلى السلة أو المفضلة.' : 'Browse freely as a guest. Create an account or sign in to add products to your bag or favorites.'}</p><div className="mt-7 grid gap-3"><button type="button" onClick={() => { setCustomerAuthOpen(false); setLocation('/customer-sign-up'); }} className="bg-[#9f523d] px-5 py-4 font-mono-ui text-[10px] uppercase tracking-[.16em] text-[#fff5e8] hover:bg-[#7f3f31]">{language === 'ar' ? 'إنشاء حساب' : 'Create account'}</button><button type="button" onClick={() => { setCustomerAuthOpen(false); setLocation('/customer-sign-in'); }} className="border border-[#312b25]/20 px-5 py-4 font-mono-ui text-[10px] uppercase tracking-[.16em] hover:border-[#9f523d]">{language === 'ar' ? 'لدي حساب — تسجيل الدخول' : 'I have an account — Sign in'}</button><button type="button" onClick={() => { window.sessionStorage.removeItem(pendingCustomerActionKey); setCustomerAuthOpen(false); }} className="py-2 text-sm text-[#77695e] hover:text-[#312b25]">{language === 'ar' ? 'متابعة التصفح كزائر' : 'Continue browsing as a guest'}</button></div></section></div>}
        {notice && <div className="fixed bottom-6 left-1/2 z-[60] flex w-[calc(100%-2rem)] max-w-md -translate-x-1/2 items-center justify-center gap-3 bg-[#312b25] px-6 py-4 text-center text-sm font-medium leading-6 text-[#fff8ed] shadow-2xl sm:w-auto sm:min-w-[360px] sm:text-base" role="status" aria-live="polite" data-testid="status-notice"><Sparkles size={18} className="shrink-0 text-[#d18c6d]" />{notice}</div>}
        {bagOpen && <BagDrawer items={bag.map(withCurrentCartStock)} language={language} c={c} onClose={() => setBagOpen(false)} onUpdate={updateQuantity} onRemove={(id) => setBag((current) => current.filter((item) => item.id !== id))} onCheckout={openCheckout} />}

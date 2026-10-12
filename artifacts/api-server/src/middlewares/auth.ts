@@ -1,7 +1,7 @@
 import { clerkClient, getAuth } from "@clerk/express";
 import type { NextFunction, Request, Response } from "express";
 import { eq } from "drizzle-orm";
-import { db, staffTable } from "@workspace/db";
+import { db, staffTable, storeCustomersTable } from "@workspace/db";
 import type { StaffRole } from "@workspace/api-zod";
 
 const staffRoles: StaffRole[] = ["owner", "manager", "inventory", "sales", "viewer"];
@@ -85,6 +85,14 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
   }
   req.userId = userId;
   try {
+    const [customerAccount] = await db.select({ id: storeCustomersTable.id })
+      .from(storeCustomersTable)
+      .where(eq(storeCustomersTable.clerkUserId, userId))
+      .limit(1);
+    if (customerAccount) {
+      res.status(403).json({ error: "Customer accounts cannot access staff operations" });
+      return;
+    }
     req.staff = await ensureStaffProfile(userId, req);
     if (!req.staff) {
       res.status(503).json({ error: "Staff profile could not be provisioned" });
