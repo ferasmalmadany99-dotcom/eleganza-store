@@ -37,3 +37,8 @@ externalPort = 3001
 [[ports]]
 localPort = 25719
 externalPort = 3000
+
+[userenv]
+
+[userenv.shared]
+NIXPKGS_ACCEPT_ANDROID_SDK_LICENSE = "1"
