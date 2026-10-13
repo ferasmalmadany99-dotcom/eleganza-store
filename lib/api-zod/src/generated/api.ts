@@ -709,6 +709,25 @@ export const CreateStorefrontOrderResponse = zod.object({
 
 
 /**
+ * @summary List active products for the public storefront
+ */
+export const ListStorefrontProductsResponseItem = zod.object({
+  "id": zod.number().int(),
+  "sku": zod.string(),
+  "nameEn": zod.string(),
+  "nameAr": zod.string(),
+  "category": zod.string(),
+  "descriptionEn": zod.string().nullable(),
+  "descriptionAr": zod.string().nullable(),
+  "imageUrls": zod.array(zod.string()),
+  "audience": zod.enum(['men', 'women']),
+  "salePriceMinor": zod.number().int(),
+  "quantityOnHand": zod.number().int()
+})
+export const ListStorefrontProductsResponse = zod.array(ListStorefrontProductsResponseItem)
+
+
+/**
  * @summary Create or update the signed-in customer's profile
  */
 export const createStorefrontCustomerProfileBodyCustomerNameMin = 2;

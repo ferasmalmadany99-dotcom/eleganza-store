@@ -61,6 +61,7 @@ export * from './staffUpdate';
 export * from './storefrontOrderInput';
 export * from './storefrontOrderInputItemsItem';
 export * from './storefrontOrderInputPaymentMethod';
+export * from './storefrontProduct';
 export * from './syncResult';
 export * from './systemResetInput';
 export * from './systemResetInputConfirmation';

@@ -55,6 +55,7 @@ import type {
   StaffInviteResponse,
   StaffUpdate,
   StorefrontOrderInput,
+  StorefrontProduct,
   SyncResult,
   SystemResetInput,
   SystemResetResult
@@ -1653,6 +1654,83 @@ export const useCreateStorefrontOrder = <TError = ErrorType<void>,
       > => {
       return useMutation(getCreateStorefrontOrderMutationOptions(options));
     }
+
+export const getListStorefrontProductsUrl = () => {
+
+
+
+
+  return `/api/storefront/products`
+}
+
+/**
+ * @summary List active products for the public storefront
+ */
+export const listStorefrontProducts = async ( options?: Parameters<typeof customFetch>[1]): Promise<StorefrontProduct[]> => {
+
+  return customFetch<StorefrontProduct[]>(getListStorefrontProductsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListStorefrontProductsQueryKey = () => {
+    return [
+    `/api/storefront/products`
+    ] as const;
+    }
+
+
+export const getListStorefrontProductsQueryOptions = <TData = Awaited<ReturnType<typeof listStorefrontProducts>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listStorefrontProducts>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListStorefrontProductsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listStorefrontProducts>>> = ({ signal }) => listStorefrontProducts({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listStorefrontProducts>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListStorefrontProductsQueryResult = NonNullable<Awaited<ReturnType<typeof listStorefrontProducts>>>
+export type ListStorefrontProductsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List active products for the public storefront
+ */
+
+export function useListStorefrontProducts<TData = Awaited<ReturnType<typeof listStorefrontProducts>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listStorefrontProducts>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListStorefrontProductsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 
 export const getCreateStorefrontCustomerProfileUrl = () => {
 
