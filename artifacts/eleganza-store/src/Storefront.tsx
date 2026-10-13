@@ -401,6 +401,7 @@ const copy = {
     deliveryEstimate: 'Estimated dispatch: within 2–3 days',
     closeCheckout: 'Close checkout',
     checkoutError: 'We could not place the order. Please check your details and try again.',
+    checkoutAccountError: 'Your account needs a verified customer email. Sign in with a verified customer account and try again.',
     unavailableForCheckout: 'Some products are no longer available. Please review your bag.',
     included: 'Included',
     format: 'Format',
@@ -528,6 +529,7 @@ const copy = {
     deliveryEstimate: 'التجهيز المتوقع: خلال 2–3 أيام',
     closeCheckout: 'إغلاق الدفع',
     checkoutError: 'تعذر إنشاء الطلب. تحقق من البيانات وحاول مرة أخرى.',
+    checkoutAccountError: 'تعذر اعتماد حسابك. سجّل الدخول بحساب زبون تم التحقق من بريده الإلكتروني ثم حاول مرة أخرى.',
     unavailableForCheckout: 'بعض المنتجات لم تعد متوفرة. راجع السلة وحاول مرة أخرى.',
     included: 'مشمول',
     format: 'النوع',
@@ -1145,6 +1147,10 @@ function CheckoutPanel({
   onSubmitted: (orderNumber: string) => void;
 }) {
   const createOrder = useCreateStorefrontOrder();
+  const orderError = createOrder.error as { status?: number } | null;
+  const checkoutErrorMessage = orderError?.status === 401 || orderError?.status === 403
+    ? c.checkoutAccountError
+    : c.checkoutError;
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [form, setForm] = useState({
     customerName: '',
@@ -1305,7 +1311,7 @@ function CheckoutPanel({
                 <p className="font-mono-ui text-[10px] uppercase tracking-[.18em] text-[#9f523d]">{c.payment}</p>
                 <div className="mt-3 flex items-start gap-4 border border-[#9f523d] bg-[#efe0d0] p-4"><span className="mt-1 grid h-4 w-4 place-items-center rounded-full border border-[#9f523d] bg-[#9f523d]"><span className="h-1.5 w-1.5 rounded-full bg-[#fff5e8]" /></span><div><p className="text-sm font-medium">{c.cashOnDelivery}</p><p className="mt-1 text-xs leading-5 text-[#75685d]">{c.cashOnDeliveryDetail}</p></div></div>
               </div>
-              {createOrder.isError && <p className="mt-5 border border-[#a64e3a]/30 bg-[#f2dfd7] px-4 py-3 text-sm leading-6 text-[#8b4037]" role="alert">{c.checkoutError}</p>}
+              {createOrder.isError && <p className="mt-5 border border-[#a64e3a]/30 bg-[#f2dfd7] px-4 py-3 text-sm leading-6 text-[#8b4037]" role="alert">{checkoutErrorMessage}</p>}
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <button type="button" onClick={() => setStep(1)} className="flex items-center justify-center gap-2 border border-[#312b25]/20 px-6 py-4 font-mono-ui text-[10px] uppercase tracking-[.18em] hover:border-[#9f523d]" data-testid="button-checkout-back"><ArrowLeft size={15} />{c.back}</button>
                 <button type="button" onClick={placeOrder} disabled={createOrder.isPending} className="flex flex-1 items-center justify-center gap-3 bg-[#9f523d] px-6 py-4 font-mono-ui text-[10px] uppercase tracking-[.18em] text-[#fff5e8] transition-colors hover:bg-[#7f3f31] disabled:cursor-wait disabled:opacity-60" data-testid="button-place-order">{createOrder.isPending ? <><LoaderCircle size={15} className="animate-spin" />{c.placingOrder}</> : <>{c.placeOrder}<Check size={15} /></>}</button>

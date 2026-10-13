@@ -69,14 +69,6 @@ router.post("/orders", async (req, res): Promise<void> => {
     res.status(401).json({ error: "Sign in or create a customer account before placing an order" });
     return;
   }
-  const [customerAccount] = await db.select({ id: storeCustomersTable.id })
-    .from(storeCustomersTable)
-    .where(eq(storeCustomersTable.clerkUserId, userId))
-    .limit(1);
-  if (!customerAccount) {
-    res.status(403).json({ error: "A registered customer account is required to place an order" });
-    return;
-  }
   const parsed = CreateStorefrontOrderBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.message });
@@ -98,6 +90,43 @@ router.post("/orders", async (req, res): Promise<void> => {
   } catch {
     res.status(400).json({ error: "A valid Google Maps location link is required" });
     return;
+  }
+
+  // Older signed-in customer accounts may not yet have a row in the customer directory.
+  // Backfill only from a verified Clerk email and never convert staff accounts.
+  const [customerAccount] = await db.select({ id: storeCustomersTable.id })
+    .from(storeCustomersTable)
+    .where(eq(storeCustomersTable.clerkUserId, userId))
+    .limit(1);
+  if (!customerAccount) {
+    const [staffAccount] = await db.select({ id: staffTable.id })
+      .from(staffTable)
+      .where(eq(staffTable.clerkUserId, userId))
+      .limit(1);
+    if (staffAccount) {
+      res.status(403).json({ error: "Staff accounts cannot place storefront orders" });
+      return;
+    }
+    const user = await clerkClient.users.getUser(userId);
+    const emailAddress = user.emailAddresses.find((address) => address.id === user.primaryEmailAddressId);
+    if (!emailAddress?.emailAddress || emailAddress.verification?.status !== "verified") {
+      res.status(403).json({ error: "A verified customer email is required to place an order" });
+      return;
+    }
+    await db.insert(storeCustomersTable).values({
+      clerkUserId: userId,
+      customerName: parsed.data.customerName.trim(),
+      customerPhone: parsed.data.customerPhone.trim(),
+      customerEmail: emailAddress.emailAddress,
+    }).onConflictDoUpdate({
+      target: storeCustomersTable.clerkUserId,
+      set: {
+        customerName: parsed.data.customerName.trim(),
+        customerPhone: parsed.data.customerPhone.trim(),
+        customerEmail: emailAddress.emailAddress,
+        updatedAt: new Date(),
+      },
+    });
   }
 
   const requestedItems = new Map<number, number>();
