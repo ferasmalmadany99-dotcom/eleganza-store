@@ -28,3 +28,17 @@ mtime_ms = 1789437439531
 storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:3821a01d-12d0-419b-8cdf-56b57c32cd74/28618b6a-e819-4fe8-871f-e8c2b6d7ffbf/e674a18e-89b4-4ae6-8b2d-5de3bbef5351"
 storage_version_token = "1789437443198534"
 content_type = "application/octet-stream"
+
+[[outputs]]
+id = "_QBLEBWlJod8EPQTUYeRx"
+uri = "file://generated-artifacts/Eleganza-1.0.0-debug.zip"
+type = "unspecified"
+title = "Eleganza Android APK"
+description = "ملف ZIP يحتوي على APK للتثبيت اليدوي على هاتف Android."
+logical_id = "3dfd28a1-2090-41c1-ac7c-fc7c80094722"
+content_hash = "sha256:884a1e1b1b78ef1af74bc5d580d46a7fe0d8bcf27c9029fe4099bcc2862fb2c8"
+size = 57411773
+mtime_ms = 1791931683014
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:3821a01d-12d0-419b-8cdf-56b57c32cd74/3dfd28a1-2090-41c1-ac7c-fc7c80094722/54519a09-e9fa-4168-a0a4-e3a7d49f6979"
+storage_version_token = "1791931697632666"
+content_type = "application/octet-stream"
