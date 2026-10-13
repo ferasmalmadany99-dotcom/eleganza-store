@@ -241,6 +241,9 @@ importers:
       '@clerk/expo':
         specifier: ^4.10.1
         version: 4.10.1(@types/react@19.2.18)(expo-auth-session@57.0.15(expo@57.0.28)(react-native@0.86.3(@babel/core@7.29.7)(@types/react@19.2.18)(react@19.2.3))(react@19.2.3))(expo-constants@57.0.21)(expo-crypto@57.0.4(expo@57.0.28))(expo-secure-store@57.0.4(expo@57.0.28))(expo-web-browser@57.0.3(expo@57.0.28)(react-native@0.86.3(@babel/core@7.29.7)(@types/react@19.2.18)(react@19.2.3)))(expo@57.0.28)(react-dom@19.2.3(react@19.2.3))(react-native@0.86.3(@babel/core@7.29.7)(@types/react@19.2.18)(react@19.2.3))(react@19.2.3)(typescript@6.0.3)(use-sync-external-store@1.7.0(react@19.2.3))(zod@3.25.76)
+      expo:
+        specifier: ~57.0.28
+        version: 57.0.28(@babel/core@7.29.7)(@expo/metro-runtime@57.0.16)(expo-router@57.0.26)(react-dom@19.2.3(react@19.2.3))(react-native-web@0.21.4(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react-native-worklets@0.10.1(@babel/core@7.29.7)(react-native@0.86.3(@babel/core@7.29.7)(@types/react@19.2.18)(react@19.2.3))(react@19.2.3))(react-native@0.86.3(@babel/core@7.29.7)(@types/react@19.2.18)(react@19.2.3))(react@19.2.3)(typescript@6.0.3)
       expo-auth-session:
         specifier: 57.0.15
         version: 57.0.15(expo@57.0.28)(react-native@0.86.3(@babel/core@7.29.7)(@types/react@19.2.18)(react@19.2.3))(react@19.2.3)
@@ -250,6 +253,12 @@ importers:
       expo-secure-store:
         specifier: 57.0.4
         version: 57.0.4(expo@57.0.28)
+      react:
+        specifier: 19.2.3
+        version: 19.2.3
+      react-native:
+        specifier: 0.86.3
+        version: 0.86.3(@babel/core@7.29.7)(@types/react@19.2.18)(react@19.2.3)
     devDependencies:
       '@babel/core':
         specifier: ^7.25.2
@@ -287,9 +296,6 @@ importers:
       create-launch:
         specifier: 0.4.1
         version: 0.4.1
-      expo:
-        specifier: ~57.0.28
-        version: 57.0.28(@babel/core@7.29.7)(@expo/metro-runtime@57.0.16)(expo-router@57.0.26)(react-dom@19.2.3(react@19.2.3))(react-native-web@0.21.4(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react-native-worklets@0.10.1(@babel/core@7.29.7)(react-native@0.86.3(@babel/core@7.29.7)(@types/react@19.2.18)(react@19.2.3))(react@19.2.3))(react-native@0.86.3(@babel/core@7.29.7)(@types/react@19.2.18)(react@19.2.3))(react@19.2.3)(typescript@6.0.3)
       expo-blur:
         specifier: ~57.0.2
         version: 57.0.3(expo@57.0.28)(react-native@0.86.3(@babel/core@7.29.7)(@types/react@19.2.18)(react@19.2.3))(react@19.2.3)
@@ -338,15 +344,9 @@ importers:
       expo-web-browser:
         specifier: ~57.0.1
         version: 57.0.3(expo@57.0.28)(react-native@0.86.3(@babel/core@7.29.7)(@types/react@19.2.18)(react@19.2.3))
-      react:
-        specifier: 19.2.3
-        version: 19.2.3
       react-dom:
         specifier: 19.2.3
         version: 19.2.3(react@19.2.3)
-      react-native:
-        specifier: 0.86.3
-        version: 0.86.3(@babel/core@7.29.7)(@types/react@19.2.18)(react@19.2.3)
       react-native-gesture-handler:
         specifier: ~2.32.0
         version: 2.32.0(react-native@0.86.3(@babel/core@7.29.7)(@types/react@19.2.18)(react@19.2.3))(react@19.2.3)

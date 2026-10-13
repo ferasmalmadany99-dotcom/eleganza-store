@@ -13,7 +13,7 @@ import {
 } from '@expo-google-fonts/inter';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { ClerkProvider, ClerkLoaded, useAuth } from '@clerk/expo';
+import { ClerkProvider, useAuth } from '@clerk/expo';
 import { tokenCache } from '@clerk/expo/token-cache';
 import { setAuthTokenGetter, setBaseUrl } from '@workspace/api-client-react';
 import { StoreProvider } from '@/context/StoreContext';
@@ -33,7 +33,7 @@ function AuthenticatedApp() {
     setAuthTokenGetter(() => getToken());
     return () => setAuthTokenGetter(null);
   }, [getToken]);
-  return <ClerkLoaded><StoreProvider><RootLayoutNav /></StoreProvider></ClerkLoaded>;
+  return <StoreProvider><RootLayoutNav /></StoreProvider>;
 }
 
 function RootLayoutNav() {

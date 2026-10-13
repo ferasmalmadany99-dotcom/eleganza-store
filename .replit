@@ -1,4 +1,4 @@
-modules = ["nodejs-24", "python-base-3.13", "postgresql-16"]
+modules = ["nodejs-24", "python-base-3.13", "postgresql-16", "java-graalvm22.3"]
 
 [deployment]
 router = "application"
@@ -41,4 +41,3 @@ externalPort = 3000
 [userenv]
 
 [userenv.shared]
-NIXPKGS_ACCEPT_ANDROID_SDK_LICENSE = "1"
