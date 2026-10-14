@@ -126,3 +126,17 @@ mtime_ms = 1791981134222
 storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:3821a01d-12d0-419b-8cdf-56b57c32cd74/a4c73311-4466-42a7-a37c-6cad5640cf13/00a8766b-ff24-4f93-a5a2-24bf952b23fd"
 storage_version_token = "1791981870896953"
 content_type = "application/octet-stream"
+
+[[outputs]]
+id = "lCHYcwJFk1dP-8sGWPlWK"
+uri = "file://generated-artifacts/Eleganza-1.0.5-release.zip"
+type = "unspecified"
+title = "Eleganza 1.0.5 بدون رمز دخول"
+description = "ملف ZIP يحتوي APK Android يفتح التطبيق مباشرة دون طلب رمز مشترك."
+logical_id = "d6cfdf18-5c75-47ec-b402-3737fd01878f"
+content_hash = "sha256:e100c12926f45406e34f27197398c7533ae068e7bb20bba4706cccac31f6772f"
+size = 46211695
+mtime_ms = 1791982963973
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:3821a01d-12d0-419b-8cdf-56b57c32cd74/d6cfdf18-5c75-47ec-b402-3737fd01878f/52adcfb2-6677-4d94-b384-03d3524b0d5b"
+storage_version_token = "1791983131365785"
+content_type = "application/octet-stream"
