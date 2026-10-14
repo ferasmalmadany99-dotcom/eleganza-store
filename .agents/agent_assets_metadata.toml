@@ -84,3 +84,31 @@ mtime_ms = 1791970226826
 storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:3821a01d-12d0-419b-8cdf-56b57c32cd74/bc714650-68b1-45ff-a869-022d61e59dd1/c04d59bb-1012-47ab-898d-c50046f441ae"
 storage_version_token = "1791970330395550"
 content_type = "application/octet-stream"
+
+[[outputs]]
+id = "PEMyuFP0jVA79amsG6wWo"
+uri = "file://generated-artifacts/Eleganza-1.0.2-verified.zip"
+type = "unspecified"
+title = "Eleganza Android 1.0.2 — ZIP"
+description = "نسخة Android الجديدة بعد إصلاح تحميل وعرض المنتجات. ملف ZIP جاهز للإرسال إلى الهاتف."
+logical_id = "dd0ccedd-df99-41d4-a956-de4a6170a6a0"
+content_hash = "sha256:2f3435f4a000ab7bd3feb07247e5b47ee2fb9e593b65c6d217ced1a9f70ceada"
+size = 47737263
+mtime_ms = 1791973410813
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:3821a01d-12d0-419b-8cdf-56b57c32cd74/dd0ccedd-df99-41d4-a956-de4a6170a6a0/6ebf6160-2c1c-4eea-a452-26681bcd8f5b"
+storage_version_token = "1791973474126198"
+content_type = "application/octet-stream"
+
+[[outputs]]
+id = "bf_LUNm2ZdyBUfMgxB1hg"
+uri = "file://generated-artifacts/Eleganza-1.0.2-release.apk"
+type = "unspecified"
+title = "Eleganza Android 1.0.2 — APK"
+description = "ملف تثبيت Android المباشر، إصدار 1.0.2."
+logical_id = "56aeb06f-d138-4bb0-b08b-6d3a334a3bcc"
+content_hash = "sha256:f94381c4423237977b9be5fa1e4da5a14682f54ac24610c13580d9f950a19e81"
+size = 77256509
+mtime_ms = 1791973408677
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:3821a01d-12d0-419b-8cdf-56b57c32cd74/56aeb06f-d138-4bb0-b08b-6d3a334a3bcc/97f93952-0296-4a65-866d-7c3e26f71e12"
+storage_version_token = "1791973475775913"
+content_type = "application/octet-stream"
