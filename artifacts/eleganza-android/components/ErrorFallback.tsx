@@ -23,6 +23,11 @@ export function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
   const insets = useSafeAreaInsets();
 
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const stackLines = error.stack?.split('\n').slice(1, 5).join('\n');
+  const releaseErrorDetails = [
+    `${error.name || 'Error'}: ${error.message || String(error)}`,
+    stackLines,
+  ].filter(Boolean).join('\n').slice(0, 900);
 
   const handleRestart = async () => {
     try {
@@ -69,12 +74,25 @@ export function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
 
       <View style={styles.content}>
         <Text style={[styles.title, { color: colors.foreground }]}>
-          Something went wrong
+          حدث خطأ في التطبيق
         </Text>
 
         <Text style={[styles.message, { color: colors.mutedForeground }]}>
-          Please reload the app to continue.
+          أرسل صورة لتفاصيل الخطأ أدناه حتى نتمكن من تحديد السبب.
         </Text>
+
+        {!__DEV__ ? (
+          <Text
+            style={[
+              styles.releaseError,
+              { color: colors.foreground, backgroundColor: colors.card },
+            ]}
+            selectable
+            numberOfLines={7}
+          >
+            {releaseErrorDetails}
+          </Text>
+        ) : null}
 
         <Pressable
           onPress={handleRestart}
@@ -90,7 +108,7 @@ export function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
           <Text
             style={[styles.buttonText, { color: colors.primaryForeground }]}
           >
-            Try Again
+            إعادة المحاولة
           </Text>
         </Pressable>
       </View>
@@ -193,6 +211,17 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: 'center',
     lineHeight: 24,
+  },
+  releaseError: {
+    width: '100%',
+    maxWidth: 600,
+    maxHeight: 180,
+    padding: 12,
+    borderRadius: 8,
+    fontSize: 11,
+    lineHeight: 16,
+    textAlign: 'left',
+    fontFamily: 'monospace',
   },
   topButton: {
     position: 'absolute',
