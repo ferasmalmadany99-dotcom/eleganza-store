@@ -89,14 +89,14 @@ content_type = "application/octet-stream"
 id = "PEMyuFP0jVA79amsG6wWo"
 uri = "file://generated-artifacts/Eleganza-1.0.2-verified.zip"
 type = "unspecified"
-title = "Eleganza Android 1.0.2 — ZIP"
-description = "نسخة Android الجديدة بعد إصلاح تحميل وعرض المنتجات. ملف ZIP جاهز للإرسال إلى الهاتف."
+title = "تنزيل Eleganza Android 1.0.2 المضغوط"
+description = "ملف ZIP الموثّق الذي يحتوي APK الجديد لتثبيته على هاتف Android."
 logical_id = "dd0ccedd-df99-41d4-a956-de4a6170a6a0"
 content_hash = "sha256:2f3435f4a000ab7bd3feb07247e5b47ee2fb9e593b65c6d217ced1a9f70ceada"
 size = 47737263
 mtime_ms = 1791973410813
-storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:3821a01d-12d0-419b-8cdf-56b57c32cd74/dd0ccedd-df99-41d4-a956-de4a6170a6a0/6ebf6160-2c1c-4eea-a452-26681bcd8f5b"
-storage_version_token = "1791973474126198"
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:3821a01d-12d0-419b-8cdf-56b57c32cd74/dd0ccedd-df99-41d4-a956-de4a6170a6a0/2df80692-78df-4b48-9e35-b3153367d824"
+storage_version_token = "1791976685693205"
 content_type = "application/octet-stream"
 
 [[outputs]]
