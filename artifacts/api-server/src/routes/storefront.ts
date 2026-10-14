@@ -8,8 +8,9 @@ import { writeAudit } from "../lib/audit";
 import { draftOrderNumber, salesInvoiceNumber } from "../lib/invoice";
 
 const router: IRouter = Router();
+export const storefrontAccessRouter: IRouter = Router();
 
-router.post("/access/verify", (req, res): void => {
+storefrontAccessRouter.post("/verify", (req, res): void => {
   const expectedCode = process.env.ELEGANZA_STORE_ACCESS_CODE;
   if (!expectedCode) {
     res.status(503).json({ error: "Store access is not configured" });
