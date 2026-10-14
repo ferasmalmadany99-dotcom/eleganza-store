@@ -186,6 +186,18 @@ export interface StorefrontProduct {
   quantityOnHand: number;
 }
 
+export interface StorefrontAccessCodeInput {
+  /**
+     * @minLength 1
+     * @maxLength 128
+     */
+  accessCode: string;
+}
+
+export interface StorefrontAccessVerification {
+  verified: boolean;
+}
+
 export interface CustomerProfileInput {
   /**
      * @minLength 2

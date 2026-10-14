@@ -336,6 +336,27 @@ paths:
               schema:
                 type: array
                 items: { $ref: "#/components/schemas/StorefrontProduct" }
+  /storefront/access/verify:
+    post:
+      operationId: verifyStorefrontAccess
+      tags: [storefront]
+      summary: Verify the shared access code for the Android app
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/StorefrontAccessCodeInput" }
+      responses:
+        "200":
+          description: Access code accepted
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/StorefrontAccessVerification" }
+        "401":
+          description: Access code is invalid
+        "503":
+          description: Access code is not configured
   /storefront/customers/profile:
     post:
       operationId: createStorefrontCustomerProfile
@@ -657,6 +678,16 @@ components:
         audience: { $ref: "#/components/schemas/ProductAudience" }
         salePriceMinor: { type: integer }
         quantityOnHand: { type: integer }
+    StorefrontAccessCodeInput:
+      type: object
+      required: [accessCode]
+      properties:
+        accessCode: { type: string, minLength: 1, maxLength: 128 }
+    StorefrontAccessVerification:
+      type: object
+      required: [verified]
+      properties:
+        verified: { type: boolean }
     CustomerProfileInput:
       type: object
       required: [customerName, customerPhone]

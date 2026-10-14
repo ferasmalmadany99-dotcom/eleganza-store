@@ -58,6 +58,8 @@ export * from './staffInviteResponseStatus';
 export * from './staffRole';
 export * from './staffStatus';
 export * from './staffUpdate';
+export * from './storefrontAccessCodeInput';
+export * from './storefrontAccessVerification';
 export * from './storefrontOrderInput';
 export * from './storefrontOrderInputItemsItem';
 export * from './storefrontOrderInputPaymentMethod';

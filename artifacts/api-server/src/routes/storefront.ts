@@ -1,5 +1,6 @@
 import { Router, type IRouter } from "express";
 import { desc, eq } from "drizzle-orm";
+import { timingSafeEqual } from "node:crypto";
 import { clerkClient, getAuth } from "@clerk/express";
 import { db, orderItemsTable, ordersTable, productsTable, staffTable, storeCustomersTable } from "@workspace/db";
 import { CreateStorefrontOrderBody, CreateStorefrontOrderResponse } from "@workspace/api-zod";
@@ -7,6 +8,23 @@ import { writeAudit } from "../lib/audit";
 import { draftOrderNumber, salesInvoiceNumber } from "../lib/invoice";
 
 const router: IRouter = Router();
+
+router.post("/access/verify", (req, res): void => {
+  const expectedCode = process.env.ELEGANZA_STORE_ACCESS_CODE;
+  if (!expectedCode) {
+    res.status(503).json({ error: "Store access is not configured" });
+    return;
+  }
+  const submittedCode = typeof req.body?.accessCode === "string" ? req.body.accessCode.trim() : "";
+  const expected = Buffer.from(expectedCode.trim(), "utf8");
+  const submitted = Buffer.from(submittedCode, "utf8");
+  const matches = expected.length > 0 && submitted.length === expected.length && timingSafeEqual(submitted, expected);
+  if (!matches) {
+    res.json({ verified: false });
+    return;
+  }
+  res.json({ verified: true });
+});
 
 router.post("/customers/profile", async (req, res): Promise<void> => {
   const userId = getAuth(req)?.userId;

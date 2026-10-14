@@ -728,6 +728,22 @@ export const ListStorefrontProductsResponse = zod.array(ListStorefrontProductsRe
 
 
 /**
+ * @summary Verify the shared access code for the Android app
+ */
+export const verifyStorefrontAccessBodyAccessCodeMax = 128;
+
+
+
+export const VerifyStorefrontAccessBody = zod.object({
+  "accessCode": zod.string().min(1).max(verifyStorefrontAccessBodyAccessCodeMax)
+})
+
+export const VerifyStorefrontAccessResponse = zod.object({
+  "verified": zod.boolean()
+})
+
+
+/**
  * @summary Create or update the signed-in customer's profile
  */
 export const createStorefrontCustomerProfileBodyCustomerNameMin = 2;
