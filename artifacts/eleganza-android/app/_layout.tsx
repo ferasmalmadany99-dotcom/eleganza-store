@@ -17,7 +17,6 @@ import { ClerkProvider, useAuth } from '@clerk/expo';
 import { tokenCache } from '@clerk/expo/token-cache';
 import { setAuthTokenGetter, setBaseUrl } from '@workspace/api-client-react';
 import { StoreProvider } from '@/context/StoreContext';
-import { StorefrontAccessGate } from '@/components/StorefrontAccessGate';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -34,7 +33,7 @@ function AuthenticatedApp() {
     setAuthTokenGetter(() => getToken());
     return () => setAuthTokenGetter(null);
   }, [getToken]);
-  return <StorefrontAccessGate><StoreProvider><RootLayoutNav /></StoreProvider></StorefrontAccessGate>;
+  return <StoreProvider><RootLayoutNav /></StoreProvider>;
 }
 
 function RootLayoutNav() {
