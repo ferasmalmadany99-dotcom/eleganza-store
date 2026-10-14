@@ -8,3 +8,15 @@ For Android release builds, default Gradle/CMake parallelism can exhaust the wor
 **Why:** the initial parallel release build was killed by the cgroup OOM killer despite Gradle reporting the daemon disappeared; the memory-limited retry completed.
 
 **How to apply:** on future `assembleRelease` builds in this workspace, limit Gradle and CMake parallelism before increasing heap size or restarting from a clean build.
+
+The workspace may not have a writable Android SDK available through the package installer. Nix-provided SDKs are read-only and can place the NDK at `ndk-bundle`, while Gradle expects a versioned `ndk/<version>` path and additional Build Tools packages. Avoid copying the full NDK into the workspace; that can exceed its per-user disk quota.
+
+**Why:** release builds need SDK paths and components Gradle can both discover and update, but the Nix SDK store is immutable and the complete NDK is too large for a workspace copy.
+
+**How to apply:** if Android SDK discovery or SDK component installation fails, use a writable SDK root with links to the Nix SDK components, provide the expected versioned NDK path, and install missing Build Tools into that writable root.
+
+For Android API 36 release builds, use OpenJDK 21 rather than the workspace's default GraalVM 19. The Android JDK image transform failed under JDK 19 and completed under JDK 21.
+
+**Why:** the Android Gradle plugin's `jlink` transform for API 36 was incompatible with the default GraalVM JDK in this environment.
+
+**How to apply:** set `JAVA_HOME` and put that JDK's `bin` directory first in `PATH` when building Android release variants.

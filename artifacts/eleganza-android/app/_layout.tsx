@@ -23,7 +23,10 @@ SplashScreen.preventAutoHideAsync();
 
 const queryClient = new QueryClient();
 const apiDomain = process.env.EXPO_PUBLIC_DOMAIN;
-if (apiDomain) setBaseUrl(`https://${apiDomain}`);
+const apiBaseUrl =
+  process.env.EXPO_PUBLIC_API_BASE_URL ??
+  (apiDomain ? `https://${apiDomain}` : undefined);
+if (apiBaseUrl) setBaseUrl(apiBaseUrl);
 const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY ?? '';
 if (!publishableKey) throw new Error('Missing EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY');
 
