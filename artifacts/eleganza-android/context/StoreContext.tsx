@@ -12,17 +12,52 @@ type StoreContextValue = {
 };
 const StoreContext = createContext<StoreContextValue | null>(null);
 
+function readStoredList<T>(value: string | null, validate: (item: unknown) => item is T): T[] {
+  if (!value) return [];
+  try {
+    const parsed: unknown = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed.filter(validate) : [];
+  } catch {
+    return [];
+  }
+}
+
+function isBagItem(value: unknown): value is BagItem {
+  if (!value || typeof value !== 'object') return false;
+  const item = value as Partial<BagItem>;
+  return !!item.product
+    && typeof item.product === 'object'
+    && Number.isSafeInteger(item.product.id)
+    && typeof item.quantity === 'number'
+    && Number.isFinite(item.quantity)
+    && Number.isInteger(item.quantity)
+    && item.quantity > 0;
+}
+
+function isFavoriteId(value: unknown): value is number {
+  return typeof value === 'number' && Number.isSafeInteger(value);
+}
+
 export function StoreProvider({ children }: React.PropsWithChildren) {
   const [bag, setBag] = useState<BagItem[]>([]);
   const [favorites, setFavorites] = useState<number[]>([]);
   useEffect(() => {
     AsyncStorage.multiGet(['eleganza-mobile-bag', 'eleganza-mobile-favorites']).then(([b, f]) => {
-      if (b[1]) setBag(JSON.parse(b[1]) as BagItem[]);
-      if (f[1]) setFavorites(JSON.parse(f[1]) as number[]);
-    }).catch(() => undefined);
+      setBag(readStoredList<BagItem>(b?.[1] ?? null, isBagItem));
+      setFavorites(readStoredList<number>(f?.[1] ?? null, isFavoriteId));
+    }).catch(() => {
+      setBag([]);
+      setFavorites([]);
+    });
   }, []);
-  useEffect(() => { void AsyncStorage.setItem('eleganza-mobile-bag', JSON.stringify(bag)); }, [bag]);
-  useEffect(() => { void AsyncStorage.setItem('eleganza-mobile-favorites', JSON.stringify(favorites)); }, [favorites]);
+  useEffect(() => {
+    void AsyncStorage.setItem('eleganza-mobile-bag', JSON.stringify(bag))
+      .catch((error) => console.warn('Unable to save the cart locally', error));
+  }, [bag]);
+  useEffect(() => {
+    void AsyncStorage.setItem('eleganza-mobile-favorites', JSON.stringify(favorites))
+      .catch((error) => console.warn('Unable to save favorites locally', error));
+  }, [favorites]);
   const value = useMemo<StoreContextValue>(() => ({
     bag, favorites,
     add: (product) => setBag((current) => {

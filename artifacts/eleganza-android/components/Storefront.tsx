@@ -75,10 +75,11 @@ function formatPrice(minorUnits: number): string {
 function ProductCard({ product, onAdd, onFavorite }: { product: StorefrontProduct; onAdd: () => void; onFavorite: () => void }) {
   const colors = useColors();
   const { favorites } = useStore();
+  const isFavorite = Array.isArray(favorites) && favorites.includes(product.id);
   const image = product.imageUrls?.[0];
   return <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
     {image ? <Image source={{ uri: image }} style={styles.image} resizeMode="cover" /> : <View style={[styles.image, styles.noImage, { backgroundColor: colors.secondary }]}><Text style={{ color: colors.mutedForeground }}>Eleganza</Text></View>}
-    <Pressable accessibilityLabel="حفظ في المفضلة" style={[styles.favorite, { backgroundColor: colors.background }]} onPress={() => onFavorite()}><Text style={{ color: favorites.includes(product.id) ? colors.primary : colors.foreground, fontSize: 20 }}>{favorites.includes(product.id) ? '♥' : '♡'}</Text></Pressable>
+    <Pressable accessibilityLabel="حفظ في المفضلة" style={[styles.favorite, { backgroundColor: colors.background }]} onPress={() => onFavorite()}><Text style={{ color: isFavorite ? colors.primary : colors.foreground, fontSize: 20 }}>{isFavorite ? '♥' : '♡'}</Text></Pressable>
     <Text numberOfLines={1} style={[styles.name, { color: colors.foreground }]}>{product.nameAr || product.nameEn}</Text>
     <Text style={[styles.price, { color: colors.primary }]}>{formatPrice(product.salePriceMinor)} د.ل</Text>
     <Pressable accessibilityLabel="أضف إلى السلة" onPress={() => onAdd()} style={[styles.addButton, { backgroundColor: colors.primary }]}><Text style={{ color: colors.primaryForeground }}>أضف للسلة</Text></Pressable>
