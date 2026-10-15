@@ -266,3 +266,17 @@ mtime_ms = 1792087215905
 storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:3821a01d-12d0-419b-8cdf-56b57c32cd74/1f553199-a279-49b1-890c-a38185a3d8c2/52b004bc-c32f-4054-8043-ddeb4eb67fbe"
 storage_version_token = "1792087227862650"
 content_type = "application/octet-stream"
+
+[[outputs]]
+id = "BOL5VBqa_y4NDBn3Yml-1"
+uri = "file://generated-artifacts/Eleganza-1.1.3-arm64.apk"
+type = "unspecified"
+title = "Eleganza Android 1.1.3 APK"
+description = "نسخة Android arm64 مصححة، الإصدار 1.1.3 (build 14). التوقيع مطابق للنسخة السابقة، وإعداد Clerk موجود داخل الحزمة. حدّث بها التطبيق الحالي دون حذفه."
+logical_id = "ce83ae5a-8899-4034-8b77-74312d17e1c6"
+content_hash = "sha256:633903e4d012ab97cf71e76d471eafb9a917f42cac81fc623a86b6cbea727bd4"
+size = 60896139
+mtime_ms = 1792093691873
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:3821a01d-12d0-419b-8cdf-56b57c32cd74/ce83ae5a-8899-4034-8b77-74312d17e1c6/5a4f629c-dc4a-4fa6-851c-0384fe995e1d"
+storage_version_token = "1792093727113844"
+content_type = "application/octet-stream"

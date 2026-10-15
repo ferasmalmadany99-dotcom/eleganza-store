@@ -15,11 +15,11 @@ The workspace may not have a writable Android SDK available through the package 
 
 **How to apply:** if Android SDK discovery or SDK component installation fails, use a writable SDK root with links to the Nix SDK components, provide the expected versioned NDK path, and install missing Build Tools into that writable root.
 
-Workspace restarts can terminate an active Gradle build and erase a writable SDK shim under `/tmp`.
+Workspace restarts can terminate an active Gradle build and erase a temporary SDK root under `/tmp`, causing `SDK location not found` even when the Nix SDK remains installed.
 
-**Why:** a release build was interrupted by workspace restarts while compiling native Android libraries, and the temporary SDK root had to be recreated.
+**Why:** the `/tmp/android-sdk` path disappeared after a workspace restart. Pointing `ANDROID_HOME` and `ANDROID_SDK_ROOT` directly at the existing Nix Android SDK restored the build; the NDK location warning was non-fatal.
 
-**How to apply:** after a restart, check the APK timestamp and SDK shim before assuming a build completed; recreate the lightweight symlink SDK root before retrying.
+**How to apply:** after a restart, verify the APK timestamp and locate the current Nix SDK root under `/nix/store/*-androidsdk/libexec/android-sdk`. Use it directly when the required platform, Build Tools, NDK, and CMake are present; create a writable shim only when Gradle must install missing components. Do not assume `/tmp/android-sdk` persists.
 
 For Android API 36 release builds, use OpenJDK 21 rather than the workspace's default GraalVM 19. The Android JDK image transform failed under JDK 19 and completed under JDK 21.
 

@@ -9,5 +9,5 @@
 - [أمان إعادة ضبط النظام](system-reset-safety.md) — إعادة الضبط للمالك فقط وباختيارات محددة، مع الحفاظ على حسابات الموظفين وسجل التدقيق.
 - [توافق Expo مع حظر الإصدارات الحديثة](expo-package-age-gate.md) — لا تعتبر معاينة الويب إثباتًا لتوافق وحدات Expo الأصلية مع Android.
 - [تنزيل تحديث Expo Go](expo-go-download.md) — نجاح /status وفحص الحزم لا يثبت أن الهاتف نزّل حزمة Android؛ اختبر ملف launchAsset نفسه.
-- [بناء APK بذاكرة محدودة](android-release-build.md) — خفّض توازي Gradle وCMake لتجنب نفاد الذاكرة أثناء بناء Android release.
+- [بناء APK بذاكرة محدودة](android-release-build.md) — خفّض توازي Gradle وCMake، واستخدم SDK المثبت بدل مسار `/tmp` العابر.
 - [تأخير إصدارات Expo الحديثة](expo-release-age-gate.md) — قد يمنع حدّ عمر الحزم تنزيل إصدار Expo موصى به فور نشره؛ لا تتجاوز سياسة الحماية لتحديث رقع صغيرة.
