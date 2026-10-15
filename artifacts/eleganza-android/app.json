@@ -12,7 +12,7 @@
     },
     "android": {
       "package": "com.eleganza.beauty",
-      "versionCode": 7
+      "versionCode": 8
     },
     "web": {
       "favicon": "./assets/images/icon.png"

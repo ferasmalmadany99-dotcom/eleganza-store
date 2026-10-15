@@ -154,3 +154,17 @@ mtime_ms = 1792009483495
 storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:3821a01d-12d0-419b-8cdf-56b57c32cd74/80717f08-814b-484d-b9ab-8046b87e913b/1688a638-f44e-4e4d-9bc8-0dd912f9745b"
 storage_version_token = "1792015488685170"
 content_type = "application/octet-stream"
+
+[[outputs]]
+id = "zIZzq6uQ28Vml_Kr8E8Ij"
+uri = "file://generated-artifacts/Eleganza-1.0.7-dev.zip"
+type = "unspecified"
+title = "Eleganza 1.0.7 — نسخة Android للتطوير"
+description = "APK مضغوط بحجم نحو 60 ميغابايت. هذه النسخة متصلة بخادم التطوير وتحتاج بقاء المشروع شغالًا."
+logical_id = "0384796d-594d-47d8-a606-5f109958c127"
+content_hash = "sha256:45ad55c852f211beb46c9b368ecd4722e0a5273bdc2845db1283c5d6676e3b90"
+size = 62722175
+mtime_ms = 1792024210390
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:3821a01d-12d0-419b-8cdf-56b57c32cd74/0384796d-594d-47d8-a606-5f109958c127/307466cd-a6de-4bf0-9648-878f640cef1c"
+storage_version_token = "1792024273927403"
+content_type = "application/octet-stream"

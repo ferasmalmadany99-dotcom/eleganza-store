@@ -20,3 +20,9 @@ For Android API 36 release builds, use OpenJDK 21 rather than the workspace's de
 **Why:** the Android Gradle plugin's `jlink` transform for API 36 was incompatible with the default GraalVM JDK in this environment.
 
 **How to apply:** set `JAVA_HOME` and put that JDK's `bin` directory first in `PATH` when building Android release variants.
+
+Gradle may mark the React Native release JS bundle as up to date even when only Expo public API host variables changed, leaving the APK with its previous API hostname.
+
+**Why:** those environment values are not reliably tracked as bundle task inputs.
+
+**How to apply:** force `:app:createBundleReleaseJsAndAssets` to rerun with the intended `EXPO_PUBLIC_DOMAIN` and `EXPO_PUBLIC_API_BASE_URL`, then inspect `assets/index.android.bundle` inside the APK for the expected host before distributing it.
