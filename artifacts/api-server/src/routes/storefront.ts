@@ -25,6 +25,7 @@ const productImageByName: Record<string, string> = {
 
 const categoryProductImage: Record<string, string> = {
   fragrance: "perfume-product-480.jpg",
+  perfume: "perfume-product-480.jpg",
   accessories: "jewelry-product-480.jpg",
   makeup: "makeup-product-480.jpg",
   skincare: "makeup-product-480.jpg",
@@ -102,7 +103,7 @@ router.post("/customers/profile", async (req, res): Promise<void> => {
   res.status(201).json({ id: customer.id, customerName: customer.customerName });
 });
 
-router.get("/products", async (_req, res): Promise<void> => {
+router.get("/products", async (req, res): Promise<void> => {
   const products = await db.select({
     id: productsTable.id,
     sku: productsTable.sku,
@@ -128,7 +129,10 @@ router.get("/products", async (_req, res): Promise<void> => {
       .replace(/\p{Diacritic}/gu, "")
       .trim()
       .toLowerCase();
-    const fallback = productImageByName[normalizedName] ?? categoryProductImage[product.category];
+    const normalizedCategory = typeof product.category === "string"
+      ? product.category.trim().toLowerCase()
+      : "";
+    const fallback = productImageByName[normalizedName] ?? categoryProductImage[normalizedCategory];
     return fallback ? { ...product, imageUrls: [`${baseUrl}${fallback}`] } : product;
   }));
 });
