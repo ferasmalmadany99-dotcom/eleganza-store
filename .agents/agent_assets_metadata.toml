@@ -196,3 +196,17 @@ mtime_ms = 1792061084382
 storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:3821a01d-12d0-419b-8cdf-56b57c32cd74/9842fbb2-afef-4597-8dd7-b5ef1cf718cf/6706681c-4551-4e32-be34-285fb73e42b4"
 storage_version_token = "1792061124811012"
 content_type = "application/octet-stream"
+
+[[outputs]]
+id = "dV9CbMCPbrwmWytD46EqK"
+uri = "file://generated-artifacts/Eleganza-1.1.0-dev.zip"
+type = "unspecified"
+title = "Eleganza 1.1.0 — التصميم التحريري الجديد"
+description = "تحديث APK للتطبيق الحالي: تصميم محدّث للمتجر والمنتجات والسلة والمفضلة والحساب. ZIP بحجم نحو 60 ميغابايت، ويمكن تثبيته فوق النسخة الحالية دون حذفها."
+logical_id = "3f4b0405-040a-48ee-befe-d567681665f9"
+content_hash = "sha256:5665305dd814e318246f37e3e1b2e1c0fc30e376cd484a537aa9619766c9d964"
+size = 62735795
+mtime_ms = 1792062757933
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:3821a01d-12d0-419b-8cdf-56b57c32cd74/3f4b0405-040a-48ee-befe-d567681665f9/01e61646-4cba-4025-9fe6-5ab2269eafd3"
+storage_version_token = "1792062777689602"
+content_type = "application/octet-stream"

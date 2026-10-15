@@ -3,6 +3,8 @@ import { ActivityIndicator, FlatList, Image, Modal, Pressable, ScrollView, Style
 import { useListStorefrontProducts, type StorefrontProduct } from '@workspace/api-client-react';
 import { useColors } from '@/hooks/useColors';
 import { useStore } from '@/context/StoreContext';
+import { Feather, Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export function ProductList({ onlyFavorites = false, onAdd, onFavorite, header }: { onlyFavorites?: boolean; onAdd: (product: StorefrontProduct) => void; onFavorite: (product: StorefrontProduct) => void; header?: React.ReactElement | null }) {
   const colors = useColors();
@@ -30,7 +32,7 @@ export function ProductList({ onlyFavorites = false, onAdd, onFavorite, header }
       columnWrapperStyle={styles.row}
       ListHeaderComponent={header ?? null}
       ListEmptyComponent={emptyState}
-      renderItem={({ item }) => <ProductCard product={item} onSelect={() => setSelectedProduct(item)} onAdd={() => onAdd(item)} onFavorite={() => onFavorite(item)} />}
+       renderItem={({ item, index }) => <ProductCard product={item} index={index} onSelect={() => setSelectedProduct(item)} onAdd={() => onAdd(item)} onFavorite={() => onFavorite(item)} />}
     />
     {selectedProduct ? <ProductDetails
       product={selectedProduct}
@@ -82,19 +84,29 @@ function formatPrice(minorUnits: number): string {
   return fallback.replace('.', '٫').replace(/[0-9]/g, (digit) => String.fromCharCode(0x0660 + Number(digit)));
 }
 
-function ProductCard({ product, onSelect, onAdd, onFavorite }: { product: StorefrontProduct; onSelect: () => void; onAdd: () => void; onFavorite: () => void }) {
+function ProductCard({ product, index, onSelect, onAdd, onFavorite }: { product: StorefrontProduct; index: number; onSelect: () => void; onAdd: () => void; onFavorite: () => void }) {
   const colors = useColors();
   const { favorites } = useStore();
   const isFavorite = Array.isArray(favorites) && favorites.includes(product.id);
   const image = product.imageUrls?.[0];
   return <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
-    <Pressable accessibilityRole="button" accessibilityLabel={`تفاصيل ${product.nameAr || product.nameEn}`} onPress={onSelect}>
-      {image ? <Image source={{ uri: image }} style={styles.image} resizeMode="cover" /> : <View style={[styles.image, styles.noImage, { backgroundColor: colors.secondary }]}><Text style={{ color: colors.mutedForeground }}>Eleganza</Text></View>}
-      <Text numberOfLines={1} style={[styles.name, { color: colors.foreground }]}>{product.nameAr || product.nameEn}</Text>
-      <Text style={[styles.price, { color: colors.primary }]}>{formatPrice(product.salePriceMinor)} د.ل</Text>
+    <Pressable accessibilityRole="button" accessibilityLabel={`تفاصيل ${product.nameAr || product.nameEn}`} onPress={onSelect} android_ripple={{ color: colors.muted }}>
+      <View style={styles.imageWrap}>
+        {image ? <Image source={{ uri: image }} style={styles.image} resizeMode="cover" /> : <View style={[styles.image, styles.noImage, { backgroundColor: colors.secondary }]}><Text style={{ color: colors.mutedForeground }}>Eleganza</Text></View>}
+        <Text style={[styles.imageNumber, { color: colors.foreground, backgroundColor: colors.background + 'E8' }]}>{String(index + 1).padStart(2, '0')}</Text>
+      </View>
+      <View style={styles.cardCopy}>
+        <Text numberOfLines={1} style={[styles.name, { color: colors.foreground }]}>{product.nameAr || product.nameEn}</Text>
+        <Text style={[styles.price, { color: colors.primary }]}>{formatPrice(product.salePriceMinor)} د.ل</Text>
+      </View>
     </Pressable>
-    <Pressable accessibilityLabel="حفظ في المفضلة" style={[styles.favorite, { backgroundColor: colors.background }]} onPress={() => onFavorite()}><Text style={{ color: isFavorite ? colors.primary : colors.foreground, fontSize: 20 }}>{isFavorite ? '♥' : '♡'}</Text></Pressable>
-    <Pressable accessibilityLabel="أضف إلى السلة" onPress={() => onAdd()} style={[styles.addButton, { backgroundColor: colors.primary }]}><Text style={{ color: colors.primaryForeground }}>أضف للسلة</Text></Pressable>
+    <Pressable accessibilityRole="button" accessibilityState={{ selected: isFavorite }} accessibilityLabel={isFavorite ? 'إزالة من المفضلة' : 'حفظ في المفضلة'} hitSlop={6} style={[styles.favorite, { backgroundColor: colors.background }]} onPress={onFavorite}>
+      <Ionicons name={isFavorite ? 'heart' : 'heart-outline'} size={19} color={isFavorite ? colors.primary : colors.foreground} />
+    </Pressable>
+    <Pressable accessibilityRole="button" accessibilityLabel="أضف إلى السلة" onPress={onAdd} style={[styles.addButton, { backgroundColor: colors.primary }]}>
+      <Feather name="plus" size={16} color={colors.primaryForeground} />
+      <Text style={[styles.addText, { color: colors.primaryForeground }]}>أضف للسلة</Text>
+    </Pressable>
   </View>;
 }
 
@@ -106,6 +118,7 @@ function ProductDetails({ product, favorite, onClose, onAdd, onFavorite }: {
   onFavorite: () => void;
 }) {
   const colors = useColors();
+  const insets = useSafeAreaInsets();
   const category = categoryName(product.category);
   const detailCopy = productDetailsBySku[product.sku];
   const description = product.descriptionAr?.trim()
@@ -117,9 +130,12 @@ function ProductDetails({ product, favorite, onClose, onAdd, onFavorite }: {
   return <Modal visible transparent animationType="slide" statusBarTranslucent onRequestClose={onClose}>
     <View style={styles.modalBackdrop}>
       <Pressable accessibilityLabel="إغلاق تفاصيل المنتج" style={StyleSheet.absoluteFill} onPress={onClose} />
-      <View style={[styles.detailSheet, { backgroundColor: colors.background }]}>
-        <View style={styles.detailHeader}>
-          <Text style={[styles.detailHeaderTitle, { color: colors.foreground }]}>تفاصيل المنتج</Text>
+      <View style={[styles.detailSheet, { backgroundColor: colors.background, paddingBottom: Math.max(insets.bottom, 12) }]}>
+        <View style={[styles.detailHeader, { borderBottomColor: colors.border }]}>
+          <View style={styles.detailHeadCopy}>
+            <Text style={[styles.detailOverline, { color: colors.accent }]}>ELEGANZA / PRODUCT</Text>
+            <Text style={[styles.detailHeaderTitle, { color: colors.foreground }]}>تفاصيل المنتج</Text>
+          </View>
           <Pressable accessibilityRole="button" accessibilityLabel="إغلاق" onPress={onClose} style={[styles.closeButton, { backgroundColor: colors.secondary }]}>
             <Text style={[styles.closeText, { color: colors.foreground }]}>×</Text>
           </Pressable>
@@ -142,10 +158,11 @@ function ProductDetails({ product, favorite, onClose, onAdd, onFavorite }: {
           </View>
           <View style={styles.detailActions}>
             <Pressable accessibilityRole="button" onPress={onAdd} style={[styles.detailAddButton, { backgroundColor: colors.primary }]}>
+              <Feather name="plus" size={17} color={colors.primaryForeground} />
               <Text style={[styles.detailAddText, { color: colors.primaryForeground }]}>أضف للسلة</Text>
             </Pressable>
-            <Pressable accessibilityRole="button" accessibilityLabel="حفظ في المفضلة" onPress={onFavorite} style={[styles.detailFavoriteButton, { borderColor: colors.border }]}>
-              <Text style={{ color: favorite ? colors.primary : colors.foreground, fontSize: 24 }}>{favorite ? '♥' : '♡'}</Text>
+            <Pressable accessibilityRole="button" accessibilityState={{ selected: favorite }} accessibilityLabel={favorite ? 'إزالة من المفضلة' : 'حفظ في المفضلة'} onPress={onFavorite} style={[styles.detailFavoriteButton, { borderColor: colors.border }]}>
+              <Ionicons name={favorite ? 'heart' : 'heart-outline'} size={22} color={favorite ? colors.primary : colors.foreground} />
             </Pressable>
           </View>
         </ScrollView>
@@ -189,29 +206,35 @@ const productDetailsBySku: Record<string, { material: string; color: string; not
 
 const styles = StyleSheet.create({
   center: { flex: 1, minHeight: 240, alignItems: 'center', justifyContent: 'center', gap: 12 },
-  grid: { paddingHorizontal: 16, paddingBottom: 110, paddingTop: 12 }, row: { gap: 12 },
-  card: { flex: 1, marginBottom: 14, borderWidth: 1, overflow: 'hidden', paddingBottom: 12 },
-  image: { width: '100%', height: 172 }, noImage: { alignItems: 'center', justifyContent: 'center' },
-  favorite: { position: 'absolute', top: 9, right: 9, width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
-  name: { fontFamily: 'serif', fontSize: 18, textAlign: 'right', marginHorizontal: 10, marginTop: 10 },
-  price: { fontSize: 14, textAlign: 'right', marginHorizontal: 10, marginTop: 4 },
-  addButton: { minHeight: 40, marginHorizontal: 10, marginTop: 10, alignItems: 'center', justifyContent: 'center' },
+  grid: { paddingHorizontal: 14, paddingBottom: 112, paddingTop: 12 }, row: { gap: 11 },
+  card: { flex: 1, marginBottom: 14, borderWidth: StyleSheet.hairlineWidth, overflow: 'hidden', paddingBottom: 11 },
+  imageWrap: { position: 'relative' },
+  image: { width: '100%', height: 174 }, noImage: { alignItems: 'center', justifyContent: 'center' },
+  imageNumber: { position: 'absolute', left: 9, bottom: 9, fontSize: 10, letterSpacing: 1, paddingHorizontal: 7, paddingVertical: 4 },
+  cardCopy: { alignItems: 'flex-end', minHeight: 61, paddingTop: 10, paddingHorizontal: 10 },
+  favorite: { position: 'absolute', top: 9, right: 9, width: 40, height: 40, alignItems: 'center', justifyContent: 'center', borderRadius: 20 },
+  name: { fontFamily: 'serif', fontSize: 17, lineHeight: 23, textAlign: 'right', width: '100%' },
+  price: { fontSize: 13, textAlign: 'right', marginTop: 3, width: '100%' },
+  addButton: { minHeight: 42, marginHorizontal: 9, marginTop: 8, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 7 },
+  addText: { fontSize: 13, writingDirection: 'rtl' },
   modalBackdrop: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(28, 22, 18, 0.56)' },
-  detailSheet: { maxHeight: '92%', borderTopLeftRadius: 20, borderTopRightRadius: 20, overflow: 'hidden' },
-  detailHeader: { minHeight: 58, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 18, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: '#d9cbbb' },
-  detailHeaderTitle: { fontSize: 18, fontFamily: 'serif' },
-  closeButton: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center', borderRadius: 18 },
+  detailSheet: { maxHeight: '94%', borderTopLeftRadius: 20, borderTopRightRadius: 20, overflow: 'hidden' },
+  detailHeader: { minHeight: 68, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 18, borderBottomWidth: StyleSheet.hairlineWidth },
+  detailHeadCopy: { alignItems: 'flex-end', gap: 2 },
+  detailOverline: { fontSize: 9, letterSpacing: 1.2 },
+  detailHeaderTitle: { fontSize: 19, fontFamily: 'serif', writingDirection: 'rtl' },
+  closeButton: { width: 42, height: 42, alignItems: 'center', justifyContent: 'center', borderRadius: 21 },
   closeText: { fontSize: 26, lineHeight: 30 },
   detailContent: { paddingBottom: 28 },
   detailImage: { width: '100%', height: 280 },
   detailCategory: { marginTop: 20, marginHorizontal: 20, textAlign: 'right', fontSize: 13 },
-  detailName: { marginTop: 8, marginHorizontal: 20, textAlign: 'right', fontFamily: 'serif', fontSize: 30 },
+  detailName: { marginTop: 8, marginHorizontal: 20, textAlign: 'right', fontFamily: 'serif', fontSize: 30, lineHeight: 40, writingDirection: 'rtl' },
   detailPrice: { marginTop: 8, marginHorizontal: 20, textAlign: 'right', fontSize: 17 },
   detailDescription: { marginTop: 20, marginHorizontal: 20, textAlign: 'right', writingDirection: 'rtl', fontSize: 16, lineHeight: 27 },
   detailFacts: { marginHorizontal: 20, marginTop: 22, paddingVertical: 12, borderTopWidth: StyleSheet.hairlineWidth, borderBottomWidth: StyleSheet.hairlineWidth },
   factRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 16, paddingVertical: 8 },
   detailActions: { flexDirection: 'row', gap: 10, marginHorizontal: 20, marginTop: 20 },
-  detailAddButton: { flex: 1, minHeight: 50, alignItems: 'center', justifyContent: 'center' },
+  detailAddButton: { flex: 1, minHeight: 52, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 8 },
   detailAddText: { fontSize: 16, fontFamily: 'serif' },
   detailFavoriteButton: { width: 52, minHeight: 50, alignItems: 'center', justifyContent: 'center', borderWidth: StyleSheet.hairlineWidth },
 });

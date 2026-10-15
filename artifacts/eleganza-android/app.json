@@ -2,7 +2,7 @@
   "expo": {
     "name": "Eleganza",
     "slug": "eleganza-android",
-    "version": "1.0.9",
+    "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "eleganza-android",
@@ -12,7 +12,7 @@
     },
     "android": {
       "package": "com.eleganza.beauty",
-      "versionCode": 10
+      "versionCode": 11
     },
     "web": {
       "favicon": "./assets/images/icon.png"
@@ -26,7 +26,7 @@
           "image": "./assets/images/icon.png",
           "imageWidth": 180,
           "resizeMode": "contain",
-          "backgroundColor": "#f8f3eb"
+          "backgroundColor": "#f7f4ed"
         }
       ],
       "expo-secure-store"

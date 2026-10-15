@@ -50,12 +50,17 @@ function ClassicTabLayout() {
         headerShown: false,
         tabBarStyle: {
           position: 'absolute',
-          backgroundColor: isIOS ? 'transparent' : colors.background,
-          borderTopWidth: isWeb ? 1 : 0,
+          backgroundColor: isIOS ? 'transparent' : colors.card,
+          borderTopWidth: 1,
           borderTopColor: colors.border,
-          elevation: 0,
-          ...(isWeb ? { height: 84 } : {}),
+          elevation: isIOS ? 0 : 8,
+          height: isWeb ? 80 : 78,
+          paddingTop: 6,
+          paddingBottom: 8,
         },
+        tabBarItemStyle: { minHeight: 56, paddingVertical: 2 },
+        tabBarLabelStyle: { fontSize: 11, fontWeight: '600', marginTop: 2 },
+        tabBarHideOnKeyboard: true,
         tabBarBackground: () =>
           isIOS ? (
             <BlurView
