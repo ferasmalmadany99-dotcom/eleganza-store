@@ -28,6 +28,7 @@ export default function AccountScreen() {
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
   const [saving, setSaving] = useState(false);
+  const [expandedOrders, setExpandedOrders] = useState<Set<number>>(() => new Set());
   const profile = account.data?.profile;
   const displayName = profile?.customerName || user?.fullName || user?.username || 'زبون Eleganza';
 
@@ -129,26 +130,50 @@ export default function AccountScreen() {
           </Text>
         </View>
       ) : null}
-      {account.data?.orders.map((order) => (
-        <View key={order.id} style={[styles.orderCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
-          <View style={styles.orderHeader}>
-            <Text style={[styles.orderTotal, { color: colors.primary }]}>{formatPrice(order.totalMinor)} د.ل</Text>
-            <View style={styles.orderHeadingCopy}>
-              <Text style={[styles.orderNumber, { color: colors.foreground }]}>{order.orderNumber}</Text>
-              <Text style={[styles.muted, { color: colors.mutedForeground }]}>{new Date(order.createdAt).toLocaleDateString('ar-LY')}</Text>
-            </View>
-          </View>
-          <Text style={[styles.orderStatus, { color: colors.accent }]}>{orderStatus[order.status] || order.status}</Text>
-          <View style={[styles.orderItems, { borderTopColor: colors.border }]}>
-            {order.items.map((item, index) => (
-              <View key={`${order.id}-${index}`} style={styles.orderItem}>
-                <Text style={[styles.orderItemValue, { color: colors.foreground }]}>{item.quantity} × {item.productName}</Text>
-                <Text style={[styles.muted, { color: colors.mutedForeground }]}>{formatPrice(item.unitPriceMinor)} د.ل</Text>
+      {account.data?.orders.map((order) => {
+        const expanded = expandedOrders.has(order.id);
+        return <View key={order.id} style={[styles.orderCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityState={{ expanded }}
+            accessibilityLabel={`طلب ${order.orderNumber}، ${orderStatus[order.status] || order.status}`}
+            onPress={() => setExpandedOrders((current) => {
+              const next = new Set(current);
+              if (next.has(order.id)) next.delete(order.id);
+              else next.add(order.id);
+              return next;
+            })}
+          >
+            <View style={styles.orderHeader}>
+              <Feather name={expanded ? 'chevron-up' : 'chevron-down'} size={18} color={colors.mutedForeground} />
+              <Text style={[styles.orderTotal, { color: colors.primary }]}>{formatPrice(order.totalMinor)} د.ل</Text>
+              <View style={styles.orderHeadingCopy}>
+                <Text style={[styles.orderNumber, { color: colors.foreground }]}>{order.orderNumber}</Text>
+                <Text style={[styles.muted, { color: colors.mutedForeground }]}>{new Date(order.createdAt).toLocaleDateString('ar-LY')}</Text>
               </View>
-            ))}
-          </View>
-        </View>
-      ))}
+            </View>
+            <Text style={[styles.orderStatus, { color: colors.accent }]}>{orderStatus[order.status] || order.status}</Text>
+          </Pressable>
+          {expanded ? <>
+            <View style={[styles.orderItems, { borderTopColor: colors.border }]}>
+              {order.items.map((item, index) => (
+                <View key={`${order.id}-${index}`} style={styles.orderItem}>
+                  <View style={styles.orderItemCopy}>
+                    <Text style={[styles.orderItemValue, { color: colors.foreground }]}>{item.quantity} × {item.productName}</Text>
+                    <Text style={[styles.muted, { color: colors.mutedForeground }]}>سعر القطعة: {formatPrice(item.unitPriceMinor)} د.ل</Text>
+                  </View>
+                  <Text style={[styles.orderLineTotal, { color: colors.foreground }]}>{formatPrice(item.quantity * item.unitPriceMinor)} د.ل</Text>
+                </View>
+              ))}
+            </View>
+            <View style={[styles.invoiceSummary, { borderTopColor: colors.border }]}>
+              <SummaryRow label="مجموع الأصناف" value={order.subtotalMinor} colors={colors} />
+              <SummaryRow label="التوصيل" value={order.shippingMinor} colors={colors} />
+              <SummaryRow label="الإجمالي" value={order.totalMinor} colors={colors} emphasized />
+            </View>
+          </> : null}
+        </View>;
+      })}
     </> : <View style={[styles.profileCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
       <View style={[styles.avatar, { backgroundColor: colors.secondary }]}>
         <Feather name="user" size={27} color={colors.accent} />
@@ -171,6 +196,13 @@ function InfoRow({ label, value, colors }: { label: string; value: string; color
   return <View style={styles.infoRow}>
     <Text style={[styles.infoValue, { color: colors.foreground }]}>{value}</Text>
     <Text style={[styles.infoLabel, { color: colors.mutedForeground }]}>{label}</Text>
+  </View>;
+}
+
+function SummaryRow({ label, value, colors, emphasized = false }: { label: string; value: number; colors: ReturnType<typeof useColors>; emphasized?: boolean }) {
+  return <View style={styles.summaryRow}>
+    <Text style={[styles.summaryValue, { color: emphasized ? colors.primary : colors.foreground, fontWeight: emphasized ? '700' : '400' }]}>{formatPrice(value)} د.ل</Text>
+    <Text style={[styles.muted, { color: colors.mutedForeground }]}>{label}</Text>
   </View>;
 }
 
@@ -212,7 +244,12 @@ const styles = StyleSheet.create({
   orderStatus: { textAlign: 'right', marginTop: 8, fontSize: 13, writingDirection: 'rtl' },
   orderItems: { borderTopWidth: StyleSheet.hairlineWidth, marginTop: 10, paddingTop: 6 },
   orderItem: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 10, paddingVertical: 5 },
+  orderItemCopy: { flex: 1, alignItems: 'flex-end', gap: 3 },
   orderItemValue: { flex: 1, fontSize: 13, textAlign: 'right', writingDirection: 'rtl' },
+  orderLineTotal: { fontSize: 13, fontWeight: '600' },
+  invoiceSummary: { borderTopWidth: StyleSheet.hairlineWidth, marginTop: 8, paddingTop: 8, gap: 8 },
+  summaryRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  summaryValue: { fontSize: 13 },
   signInLink: { minHeight: 46, justifyContent: 'center', alignItems: 'center' },
   footerMark: { marginTop: 28, fontSize: 9, letterSpacing: 1.2 },
 });

@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { router } from 'expo-router';
 import { useAuth, useUser } from '@clerk/expo';
 import * as Location from 'expo-location';
-import { useCreateStorefrontOrder } from '@workspace/api-client-react';
+import { createStorefrontCustomerProfile, getGetStorefrontCustomerAccountQueryKey, useCreateStorefrontOrder, useGetStorefrontCustomerAccount } from '@workspace/api-client-react';
 import { useStore } from '@/context/StoreContext';
 import { useColors } from '@/hooks/useColors';
 import { Feather } from '@expo/vector-icons';
@@ -13,9 +13,41 @@ export default function BagScreen() {
   const colors = useColors(); const { isSignedIn } = useAuth(); const { user } = useUser();
   const insets = useSafeAreaInsets();
   const { bag, add, remove } = useStore(); const order = useCreateStorefrontOrder();
-  const [name, setName] = useState(user?.fullName ?? ''); const [phone, setPhone] = useState(user?.primaryPhoneNumber?.phoneNumber ?? '');
+  const account = useGetStorefrontCustomerAccount({
+    query: { queryKey: getGetStorefrontCustomerAccountQueryKey(), enabled: Boolean(isSignedIn) },
+  });
+  const profilePrefilled = useRef(false);
+  const [name, setName] = useState(''); const [phone, setPhone] = useState('');
+  const [editingCustomerInfo, setEditingCustomerInfo] = useState(false);
+  const [savingCustomerInfo, setSavingCustomerInfo] = useState(false);
   const [address, setAddress] = useState(''); const [locationUrl, setLocationUrl] = useState(''); const [busy, setBusy] = useState(false);
   const total = bag.reduce((sum, item) => sum + item.product.salePriceMinor * item.quantity, 0) / 100;
+  useEffect(() => {
+    if (!account.data || profilePrefilled.current) return;
+    const savedName = account.data.profile.customerName || user?.fullName || '';
+    const savedPhone = account.data.profile.customerPhone || user?.primaryPhoneNumber?.phoneNumber || '';
+    setName(savedName);
+    setPhone(savedPhone);
+    setEditingCustomerInfo(!savedName || !savedPhone);
+    profilePrefilled.current = true;
+  }, [account.data, user?.fullName, user?.primaryPhoneNumber?.phoneNumber]);
+  const saveCustomerInfo = async () => {
+    if (name.trim().length < 2 || phone.trim().length < 5) {
+      Alert.alert('أكمل بيانات الحساب', 'أدخل الاسم الكامل ورقم الهاتف قبل الحفظ.');
+      return;
+    }
+    setSavingCustomerInfo(true);
+    try {
+      await createStorefrontCustomerProfile({ customerName: name.trim(), customerPhone: phone.trim() });
+      await account.refetch();
+      setEditingCustomerInfo(false);
+      Alert.alert('تم الحفظ', 'تم تحديث بياناتك وستظهر تلقائيًا عند إتمام الطلب.');
+    } catch (error) {
+      Alert.alert('تعذر حفظ البيانات', error instanceof Error ? error.message : 'تحقق من اتصال الإنترنت وحاول مرة أخرى.');
+    } finally {
+      setSavingCustomerInfo(false);
+    }
+  };
   const captureLocation = async () => {
     try {
       const permission = await Location.requestForegroundPermissionsAsync();
@@ -64,8 +96,26 @@ export default function BagScreen() {
       {!isSignedIn ? <Pressable accessibilityRole="button" onPress={() => router.push('/(auth)/sign-in')} style={[styles.button, { backgroundColor: colors.primary }]}><Text style={{ color: colors.primaryForeground }}>سجّل الدخول لمتابعة الطلب</Text></Pressable> :
       <View style={[styles.checkout, { backgroundColor: colors.card, borderColor: colors.border }]}>
         <Text style={[styles.checkoutTitle, { color: colors.foreground }]}>بيانات التوصيل</Text>
-        <TextInput value={name} onChangeText={setName} placeholder="الاسم الكامل" placeholderTextColor={colors.mutedForeground} style={[styles.input, { borderColor: colors.border, color: colors.foreground, backgroundColor: colors.background }]} />
-        <TextInput value={phone} onChangeText={setPhone} placeholder="رقم الهاتف" placeholderTextColor={colors.mutedForeground} keyboardType="phone-pad" style={[styles.input, { borderColor: colors.border, color: colors.foreground, backgroundColor: colors.background }]} />
+        <View style={[styles.customerInfo, { borderColor: colors.border }]}>
+          <View style={styles.customerInfoHeader}>
+            <Pressable accessibilityRole="button" onPress={() => setEditingCustomerInfo((value) => !value)} style={styles.editInfoButton}>
+              <Feather name={editingCustomerInfo ? 'x' : 'edit-2'} size={15} color={colors.primary} />
+              <Text style={{ color: colors.primary }}>{editingCustomerInfo ? 'إلغاء التعديل' : 'تعديل البيانات'}</Text>
+            </Pressable>
+            <Text style={[styles.customerInfoTitle, { color: colors.foreground }]}>بيانات الحساب</Text>
+          </View>
+          {editingCustomerInfo ? <>
+            <TextInput value={name} onChangeText={setName} placeholder="الاسم الكامل" placeholderTextColor={colors.mutedForeground} accessibilityLabel="الاسم الكامل" style={[styles.input, { borderColor: colors.border, color: colors.foreground, backgroundColor: colors.background }]} />
+            <TextInput value={phone} onChangeText={setPhone} placeholder="رقم الهاتف" placeholderTextColor={colors.mutedForeground} accessibilityLabel="رقم الهاتف" keyboardType="phone-pad" style={[styles.input, { borderColor: colors.border, color: colors.foreground, backgroundColor: colors.background }]} />
+            <Pressable accessibilityRole="button" disabled={savingCustomerInfo} onPress={() => void saveCustomerInfo()} style={[styles.saveInfoButton, { borderColor: colors.border, opacity: savingCustomerInfo ? 0.6 : 1 }]}>
+              {savingCustomerInfo ? <ActivityIndicator color={colors.primary} /> : <Text style={{ color: colors.primary }}>حفظ بيانات الحساب</Text>}
+            </Pressable>
+          </> : <>
+            <View style={styles.infoRow}><Text style={[styles.infoValue, { color: colors.foreground }]}>{name || 'غير مسجل'}</Text><Text style={[styles.infoLabel, { color: colors.mutedForeground }]}>الاسم</Text></View>
+            <View style={styles.infoRow}><Text style={[styles.infoValue, { color: colors.foreground }]}>{phone || 'غير مسجل'}</Text><Text style={[styles.infoLabel, { color: colors.mutedForeground }]}>الهاتف</Text></View>
+            {!!account.data?.profile.customerEmail && <View style={styles.infoRow}><Text style={[styles.infoValue, { color: colors.foreground }]}>{account.data.profile.customerEmail}</Text><Text style={[styles.infoLabel, { color: colors.mutedForeground }]}>البريد</Text></View>}
+          </>}
+        </View>
         <TextInput value={address} onChangeText={setAddress} placeholder="العنوان بالتفصيل" placeholderTextColor={colors.mutedForeground} style={[styles.input, { borderColor: colors.border, color: colors.foreground, backgroundColor: colors.background }]} />
         <TextInput value={locationUrl} onChangeText={setLocationUrl} placeholder="رابط موقع Google Maps" placeholderTextColor={colors.mutedForeground} autoCapitalize="none" style={[styles.input, { borderColor: colors.border, color: colors.foreground, backgroundColor: colors.background }]} />
         <Pressable accessibilityRole="button" onPress={captureLocation} style={[styles.locationButton, { borderColor: colors.border }]}>
@@ -99,6 +149,14 @@ const styles = StyleSheet.create({
   total: { textAlign: 'right', fontSize: 20, fontFamily: 'serif' },
   checkout: { borderWidth: StyleSheet.hairlineWidth, padding: 14, gap: 11, marginTop: 4 },
   checkoutTitle: { fontFamily: 'serif', fontSize: 21, textAlign: 'right', writingDirection: 'rtl', marginBottom: 1 },
+  customerInfo: { borderWidth: StyleSheet.hairlineWidth, padding: 11, gap: 9 },
+  customerInfoHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingBottom: 5 },
+  customerInfoTitle: { fontSize: 14, fontWeight: '600', writingDirection: 'rtl' },
+  editInfoButton: { minHeight: 36, flexDirection: 'row', alignItems: 'center', gap: 7 },
+  saveInfoButton: { minHeight: 44, borderWidth: StyleSheet.hairlineWidth, alignItems: 'center', justifyContent: 'center' },
+  infoRow: { minHeight: 28, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
+  infoValue: { flex: 1, fontSize: 13, textAlign: 'left' },
+  infoLabel: { fontSize: 12, writingDirection: 'rtl' },
   input: { borderWidth: StyleSheet.hairlineWidth, paddingHorizontal: 13, minHeight: 50, textAlign: 'right', writingDirection: 'rtl' },
   locationButton: { minHeight: 48, flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'center', gap: 9, borderWidth: StyleSheet.hairlineWidth },
   button: { minHeight: 52, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 14 },

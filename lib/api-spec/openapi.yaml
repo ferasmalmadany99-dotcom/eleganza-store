@@ -733,11 +733,13 @@ components:
         createdAt: { type: ["string", "null"], format: date-time }
     StorefrontCustomerOrder:
       type: object
-      required: [id, orderNumber, status, totalMinor, createdAt, items]
+      required: [id, orderNumber, status, subtotalMinor, shippingMinor, totalMinor, createdAt, items]
       properties:
         id: { type: integer }
         orderNumber: { type: string }
         status: { $ref: "#/components/schemas/OrderStatus" }
+        subtotalMinor: { type: integer }
+        shippingMinor: { type: integer }
         totalMinor: { type: integer }
         createdAt: { type: string, format: date-time }
         items:

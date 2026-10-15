@@ -169,6 +169,8 @@ router.get("/customers/me", async (req, res): Promise<void> => {
       id: order.id,
       orderNumber: order.orderNumber,
       status: order.status,
+      subtotalMinor: order.subtotalMinor,
+      shippingMinor: order.shippingMinor,
       totalMinor: order.totalMinor,
       createdAt: order.createdAt.toISOString(),
       items: (itemsByOrder.get(order.id) ?? []).map((item) => ({
