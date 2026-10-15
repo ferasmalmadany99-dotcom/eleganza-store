@@ -33,11 +33,11 @@ export default function HomeScreen() {
         </View>
         <Text style={[styles.edition, { color: colors.accent }]}>الجمال / 01</Text>
       </View>
-      <ImageBackground source={require('@/assets/images/beauty-hero.jpg')} style={styles.hero} imageStyle={styles.heroImage}>
-        <View style={[styles.heroIndex, { backgroundColor: colors.background + 'D9' }]}>
+      <ImageBackground source={require('@/assets/images/beauty-hero.jpg')} style={[styles.hero, { borderRadius: colors.radius }]} imageStyle={[styles.heroImage, { borderRadius: colors.radius }]}>
+        <View style={[styles.heroIndex, { backgroundColor: colors.background + 'D9', borderRadius: colors.radius }]}>
           <Text style={[styles.heroIndexText, { color: colors.foreground }]}>مختارات إليغانزا</Text>
         </View>
-        <View style={[styles.heroCaption, { backgroundColor: colors.foreground + 'E8' }]}>
+        <View style={[styles.heroCaption, { backgroundColor: colors.foreground + 'E8', borderBottomLeftRadius: colors.radius, borderBottomRightRadius: colors.radius }]}>
           <Text style={[styles.heroKicker, { color: colors.secondary }]}>مختارات هذا الموسم</Text>
           <Text style={[styles.heroTitle, { color: colors.background }]}>اختاري ما يشبهك</Text>
           <Text style={[styles.heroText, { color: colors.background }]}>عطور وجمال مختارة بعناية</Text>

@@ -73,30 +73,30 @@ export default function BagScreen() {
       <Text style={[styles.title, { color: colors.foreground }]}>حقيبة التسوق</Text>
       <Text style={[styles.subtitle, { color: colors.mutedForeground }]}>{bag.length ? 'مراجعة مختاراتك قبل إتمام الطلب' : 'قطعك المختارة تظهر هنا'}</Text>
     </View>
-    {!bag.length ? <View style={[styles.emptyState, { backgroundColor: colors.card, borderColor: colors.border }]}>
+    {!bag.length ? <View style={[styles.emptyState, { backgroundColor: colors.card, borderColor: colors.border, borderRadius: colors.radius }]}>
       <Feather name="shopping-bag" size={26} color={colors.accent} />
       <Text style={[styles.emptyTitle, { color: colors.foreground }]}>حقيبتك فارغة حاليًا</Text>
       <Text style={[styles.emptyCopy, { color: colors.mutedForeground }]}>ابدئي باكتشاف العطور والجمال المختار بعناية.</Text>
-    </View> : bag.map(({ product, quantity }) => <View key={product.id} style={[styles.item, { backgroundColor: colors.card, borderColor: colors.border }]}>
+    </View> : bag.map(({ product, quantity }) => <View key={product.id} style={[styles.item, { backgroundColor: colors.card, borderColor: colors.border, borderRadius: colors.radius }]}>
       {product.imageUrls?.[0] ? <Image source={{ uri: product.imageUrls[0] }} style={styles.itemImage} resizeMode="cover" /> : <View style={[styles.itemImage, styles.itemPlaceholder, { backgroundColor: colors.secondary }]}><Text style={{ color: colors.mutedForeground, fontFamily: 'serif' }}>E</Text></View>}
       <View style={styles.itemCopy}>
         <Text numberOfLines={2} style={[styles.product, { color: colors.foreground }]}>{product.nameAr || product.nameEn}</Text>
         <Text style={[styles.itemPrice, { color: colors.primary }]}>{(product.salePriceMinor * quantity / 100).toFixed(2)} د.ل</Text>
-        <View style={[styles.counter, { borderColor: colors.border }]}>
+        <View style={[styles.counter, { borderColor: colors.border, borderRadius: colors.radius }]}>
           <Pressable accessibilityRole="button" accessibilityLabel="تقليل الكمية" hitSlop={6} onPress={() => remove(product.id)} style={styles.counterButton}><Text style={{ color: colors.primary, fontSize: 20 }}>−</Text></Pressable>
           <Text style={[styles.counterValue, { color: colors.foreground }]}>{quantity}</Text>
           <Pressable accessibilityRole="button" accessibilityLabel="زيادة الكمية" hitSlop={6} onPress={() => add(product)} style={styles.counterButton}><Text style={{ color: colors.primary, fontSize: 20 }}>＋</Text></Pressable>
         </View>
       </View>
     </View>)}
-    {!!bag.length && <><View style={[styles.totalPanel, { backgroundColor: colors.card, borderColor: colors.border }]}>
+    {!!bag.length && <><View style={[styles.totalPanel, { backgroundColor: colors.card, borderColor: colors.border, borderRadius: colors.radius }]}>
       <Text style={[styles.totalLabel, { color: colors.mutedForeground }]}>الإجمالي</Text>
       <Text style={[styles.total, { color: colors.foreground }]}>{total.toFixed(2)} د.ل</Text>
     </View>
-      {!isSignedIn ? <Pressable accessibilityRole="button" onPress={() => router.push('/(auth)/sign-in')} style={[styles.button, { backgroundColor: colors.primary }]}><Text style={{ color: colors.primaryForeground }}>سجّل الدخول لمتابعة الطلب</Text></Pressable> :
-      <View style={[styles.checkout, { backgroundColor: colors.card, borderColor: colors.border }]}>
+      {!isSignedIn ? <Pressable accessibilityRole="button" onPress={() => router.push('/(auth)/sign-in')} style={[styles.button, { backgroundColor: colors.primary, borderRadius: colors.radius }]}><Text style={{ color: colors.primaryForeground }}>سجّل الدخول لمتابعة الطلب</Text></Pressable> :
+      <View style={[styles.checkout, { backgroundColor: colors.card, borderColor: colors.border, borderRadius: colors.radius }]}>
         <Text style={[styles.checkoutTitle, { color: colors.foreground }]}>بيانات التوصيل</Text>
-        <View style={[styles.customerInfo, { borderColor: colors.border }]}>
+        <View style={[styles.customerInfo, { borderColor: colors.border, borderRadius: colors.radius }]}>
           <View style={styles.customerInfoHeader}>
             <Pressable accessibilityRole="button" onPress={() => {
               if (editingCustomerInfo) {
@@ -111,9 +111,9 @@ export default function BagScreen() {
             <Text style={[styles.customerInfoTitle, { color: colors.foreground }]}>بيانات الحساب</Text>
           </View>
           {editingCustomerInfo ? <>
-            <TextInput value={name} onChangeText={setName} placeholder="الاسم الكامل" placeholderTextColor={colors.mutedForeground} accessibilityLabel="الاسم الكامل" style={[styles.input, { borderColor: colors.border, color: colors.foreground, backgroundColor: colors.background }]} />
-            <TextInput value={phone} onChangeText={setPhone} placeholder="رقم الهاتف" placeholderTextColor={colors.mutedForeground} accessibilityLabel="رقم الهاتف" keyboardType="phone-pad" style={[styles.input, { borderColor: colors.border, color: colors.foreground, backgroundColor: colors.background }]} />
-            <Pressable accessibilityRole="button" disabled={savingCustomerInfo} onPress={() => void saveCustomerInfo()} style={[styles.saveInfoButton, { borderColor: colors.border, opacity: savingCustomerInfo ? 0.6 : 1 }]}>
+            <TextInput value={name} onChangeText={setName} placeholder="الاسم الكامل" placeholderTextColor={colors.mutedForeground} accessibilityLabel="الاسم الكامل" style={[styles.input, { borderColor: colors.border, color: colors.foreground, backgroundColor: colors.background, borderRadius: colors.radius }]} />
+            <TextInput value={phone} onChangeText={setPhone} placeholder="رقم الهاتف" placeholderTextColor={colors.mutedForeground} accessibilityLabel="رقم الهاتف" keyboardType="phone-pad" style={[styles.input, { borderColor: colors.border, color: colors.foreground, backgroundColor: colors.background, borderRadius: colors.radius }]} />
+            <Pressable accessibilityRole="button" disabled={savingCustomerInfo} onPress={() => void saveCustomerInfo()} style={[styles.saveInfoButton, { borderColor: colors.border, borderRadius: colors.radius, opacity: savingCustomerInfo ? 0.6 : 1 }]}>
               {savingCustomerInfo ? <ActivityIndicator color={colors.primary} /> : <Text style={{ color: colors.primary }}>حفظ بيانات الحساب</Text>}
             </Pressable>
           </> : <>
@@ -122,12 +122,12 @@ export default function BagScreen() {
             {!!account.data?.profile.customerEmail && <View style={styles.infoRow}><Text style={[styles.infoValue, { color: colors.foreground }]}>{account.data.profile.customerEmail}</Text><Text style={[styles.infoLabel, { color: colors.mutedForeground }]}>البريد</Text></View>}
           </>}
         </View>
-        <TextInput value={address} onChangeText={setAddress} placeholder="العنوان بالتفصيل" placeholderTextColor={colors.mutedForeground} style={[styles.input, { borderColor: colors.border, color: colors.foreground, backgroundColor: colors.background }]} />
-        <TextInput value={locationUrl} onChangeText={setLocationUrl} placeholder="رابط موقع Google Maps" placeholderTextColor={colors.mutedForeground} autoCapitalize="none" style={[styles.input, { borderColor: colors.border, color: colors.foreground, backgroundColor: colors.background }]} />
-        <Pressable accessibilityRole="button" onPress={captureLocation} style={[styles.locationButton, { borderColor: colors.border }]}>
+        <TextInput value={address} onChangeText={setAddress} placeholder="العنوان بالتفصيل" placeholderTextColor={colors.mutedForeground} style={[styles.input, { borderColor: colors.border, color: colors.foreground, backgroundColor: colors.background, borderRadius: colors.radius }]} />
+        <TextInput value={locationUrl} onChangeText={setLocationUrl} placeholder="رابط موقع Google Maps" placeholderTextColor={colors.mutedForeground} autoCapitalize="none" style={[styles.input, { borderColor: colors.border, color: colors.foreground, backgroundColor: colors.background, borderRadius: colors.radius }]} />
+        <Pressable accessibilityRole="button" onPress={captureLocation} style={[styles.locationButton, { borderColor: colors.border, borderRadius: colors.radius }]}>
           <Feather name="map-pin" size={16} color={colors.accent} /><Text style={{ color: colors.foreground }}>استخدم موقعي الحالي</Text>
         </Pressable>
-        <Pressable accessibilityRole="button" disabled={busy} onPress={submit} style={[styles.button, { backgroundColor: colors.primary, opacity: busy ? 0.75 : 1 }]}>{busy ? <ActivityIndicator color={colors.primaryForeground} /> : <Text style={{ color: colors.primaryForeground }}>تأكيد الطلب — الدفع عند الاستلام</Text>}</Pressable>
+        <Pressable accessibilityRole="button" disabled={busy} onPress={submit} style={[styles.button, { backgroundColor: colors.primary, borderRadius: colors.radius, opacity: busy ? 0.75 : 1 }]}>{busy ? <ActivityIndicator color={colors.primaryForeground} /> : <Text style={{ color: colors.primaryForeground }}>تأكيد الطلب — الدفع عند الاستلام</Text>}</Pressable>
       </View>}
     </>}
   </ScrollView>;

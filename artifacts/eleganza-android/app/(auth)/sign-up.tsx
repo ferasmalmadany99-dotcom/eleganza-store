@@ -64,15 +64,15 @@ export default function SignUpScreen() {
     <Text style={[styles.brand, { color: colors.foreground }]}>Eleganza</Text>
     <Text style={[styles.title, { color: colors.foreground }]}>{step === 'verify' ? 'تأكيد البريد الإلكتروني' : 'إنشاء حساب زبون'}</Text>
     {step === 'details' ? <>
-      <TextInput value={name} onChangeText={setName} placeholder="الاسم الكامل" style={[styles.input, { borderColor: colors.border, color: colors.foreground, backgroundColor: colors.card }]} />
-      <TextInput value={phone} onChangeText={setPhone} placeholder="رقم الهاتف" keyboardType="phone-pad" style={[styles.input, { borderColor: colors.border, color: colors.foreground, backgroundColor: colors.card }]} />
-      <TextInput value={email} onChangeText={setEmail} placeholder="البريد الإلكتروني" keyboardType="email-address" autoCapitalize="none" style={[styles.input, { borderColor: colors.border, color: colors.foreground, backgroundColor: colors.card }]} />
-      <TextInput value={password} onChangeText={setPassword} placeholder="كلمة المرور" secureTextEntry style={[styles.input, { borderColor: colors.border, color: colors.foreground, backgroundColor: colors.card }]} />
-      <Pressable disabled={fetchStatus === 'fetching'} onPress={start} style={[styles.button, { backgroundColor: colors.primary }]}><Text style={{ color: colors.primaryForeground }}>متابعة وإرسال رمز التأكيد</Text></Pressable>
+      <TextInput value={name} onChangeText={setName} placeholder="الاسم الكامل" style={[styles.input, { borderColor: colors.border, color: colors.foreground, backgroundColor: colors.card, borderRadius: colors.radius }]} />
+      <TextInput value={phone} onChangeText={setPhone} placeholder="رقم الهاتف" keyboardType="phone-pad" style={[styles.input, { borderColor: colors.border, color: colors.foreground, backgroundColor: colors.card, borderRadius: colors.radius }]} />
+      <TextInput value={email} onChangeText={setEmail} placeholder="البريد الإلكتروني" keyboardType="email-address" autoCapitalize="none" style={[styles.input, { borderColor: colors.border, color: colors.foreground, backgroundColor: colors.card, borderRadius: colors.radius }]} />
+      <TextInput value={password} onChangeText={setPassword} placeholder="كلمة المرور" secureTextEntry style={[styles.input, { borderColor: colors.border, color: colors.foreground, backgroundColor: colors.card, borderRadius: colors.radius }]} />
+      <Pressable disabled={fetchStatus === 'fetching'} onPress={start} style={[styles.button, { backgroundColor: colors.primary, borderRadius: colors.radius }]}><Text style={{ color: colors.primaryForeground }}>متابعة وإرسال رمز التأكيد</Text></Pressable>
     </> : <>
       <Text style={{ color: colors.mutedForeground, textAlign: 'right' }}>أدخل الرمز الذي أرسلناه إلى {email}.</Text>
-      <TextInput value={code} onChangeText={setCode} placeholder="رمز التأكيد" keyboardType="number-pad" editable={!verifying} style={[styles.input, { borderColor: colors.border, color: colors.foreground, backgroundColor: colors.card }]} />
-      <Pressable disabled={verifying || !code.trim()} onPress={verify} style={[styles.button, { backgroundColor: colors.primary, opacity: verifying || !code.trim() ? 0.65 : 1 }]}><Text style={{ color: colors.primaryForeground }}>{verifying ? 'جارٍ تأكيد الرمز…' : 'تأكيد وإنشاء الحساب'}</Text></Pressable>
+      <TextInput value={code} onChangeText={setCode} placeholder="رمز التأكيد" keyboardType="number-pad" editable={!verifying} style={[styles.input, { borderColor: colors.border, color: colors.foreground, backgroundColor: colors.card, borderRadius: colors.radius }]} />
+      <Pressable disabled={verifying || !code.trim()} onPress={verify} style={[styles.button, { backgroundColor: colors.primary, borderRadius: colors.radius, opacity: verifying || !code.trim() ? 0.65 : 1 }]}><Text style={{ color: colors.primaryForeground }}>{verifying ? 'جارٍ تأكيد الرمز…' : 'تأكيد وإنشاء الحساب'}</Text></Pressable>
       <Pressable disabled={sending} onPress={() => void resendCode()}><Text style={{ color: colors.primary, textAlign: 'center' }}>{sending ? 'جارٍ إرسال الرمز…' : 'إرسال رمز جديد'}</Text></Pressable>
     </>}
     <Text nativeID="clerk-captcha" />

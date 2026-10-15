@@ -38,3 +38,9 @@ An arm64 release with the corrected Expo Router startup route and Clerk configur
 **Why:** a successful web preview or APK build alone does not prove the native app starts correctly on-device.
 
 **How to apply:** when changing Android startup or authentication setup, include an install-and-launch check on a real device before treating the release as fully verified.
+
+A cold Android release build can take many minutes initializing Gradle/Expo and compiling native C++ targets. NDK path warnings and cross-filesystem hard-link failures may fall back to slower copies without failing the build.
+
+**Why:** after a workspace reset, this release spent several minutes in Gradle setup, Metro bundling, and native compilation while the processes remained active and eventually advanced.
+
+**How to apply:** if Gradle, Metro, Ninja, or clang are still active and the log advances, allow the cold build to continue; restart only after a real error or a confirmed stalled process.

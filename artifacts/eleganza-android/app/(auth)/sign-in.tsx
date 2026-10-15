@@ -19,10 +19,10 @@ export default function SignInScreen() {
   };
   return <KeyboardAwareScrollViewCompat style={{ flex: 1, backgroundColor: colors.background }} contentContainerStyle={styles.page} bottomOffset={24} keyboardShouldPersistTaps="handled">
     <Text style={[styles.brand, { color: colors.foreground }]}>Eleganza</Text><Text style={[styles.title, { color: colors.foreground }]}>تسجيل الدخول</Text>
-    <TextInput value={emailAddress} onChangeText={setEmailAddress} placeholder="البريد الإلكتروني" keyboardType="email-address" autoCapitalize="none" style={[styles.input, { borderColor: colors.border, color: colors.foreground, backgroundColor: colors.card }]} />
-    <TextInput value={password} onChangeText={setPassword} placeholder="كلمة المرور" secureTextEntry style={[styles.input, { borderColor: colors.border, color: colors.foreground, backgroundColor: colors.card }]} />
+    <TextInput value={emailAddress} onChangeText={setEmailAddress} placeholder="البريد الإلكتروني" keyboardType="email-address" autoCapitalize="none" style={[styles.input, { borderColor: colors.border, color: colors.foreground, backgroundColor: colors.card, borderRadius: colors.radius }]} />
+    <TextInput value={password} onChangeText={setPassword} placeholder="كلمة المرور" secureTextEntry style={[styles.input, { borderColor: colors.border, color: colors.foreground, backgroundColor: colors.card, borderRadius: colors.radius }]} />
     {errors.fields.identifier && <Text style={{ color: colors.destructive }}>{errors.fields.identifier.message}</Text>}
-    <Pressable disabled={fetchStatus === 'fetching'} onPress={submit} style={[styles.button, { backgroundColor: colors.primary }]}><Text style={{ color: colors.primaryForeground }}>دخول</Text></Pressable>
+    <Pressable disabled={fetchStatus === 'fetching'} onPress={submit} style={[styles.button, { backgroundColor: colors.primary, borderRadius: colors.radius }]}><Text style={{ color: colors.primaryForeground }}>دخول</Text></Pressable>
     <View style={styles.footer}><Text style={{ color: colors.foreground }}>ليس لديك حساب؟ </Text><Pressable onPress={() => router.replace('/(auth)/sign-up')}><Text style={{ color: colors.primary }}>إنشاء حساب</Text></Pressable></View>
   </KeyboardAwareScrollViewCompat>;
 }

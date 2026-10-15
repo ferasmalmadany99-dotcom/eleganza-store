@@ -72,7 +72,7 @@ export default function AccountScreen() {
     </View>
 
     {isSignedIn ? <>
-      <View style={[styles.profileCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+      <View style={[styles.profileCard, { backgroundColor: colors.card, borderColor: colors.border, borderRadius: colors.radius }]}>
         <View style={[styles.avatar, { backgroundColor: colors.secondary }]}>
           <Feather name="user" size={27} color={colors.accent} />
         </View>
@@ -90,7 +90,7 @@ export default function AccountScreen() {
             onChangeText={setFullName}
             placeholder="الاسم الكامل"
             accessibilityLabel="الاسم الكامل"
-            style={[styles.phoneInput, { borderColor: colors.border, backgroundColor: colors.background, color: colors.foreground }]}
+            style={[styles.phoneInput, { borderColor: colors.border, backgroundColor: colors.background, color: colors.foreground, borderRadius: colors.radius }]}
           /> : null}
           <TextInput
             value={phone}
@@ -98,9 +98,9 @@ export default function AccountScreen() {
             placeholder="رقم الهاتف"
             keyboardType="phone-pad"
             accessibilityLabel="رقم الهاتف"
-            style={[styles.phoneInput, { borderColor: colors.border, backgroundColor: colors.background, color: colors.foreground }]}
+            style={[styles.phoneInput, { borderColor: colors.border, backgroundColor: colors.background, color: colors.foreground, borderRadius: colors.radius }]}
           />
-          <Pressable disabled={saving} onPress={() => void saveProfile()} style={[styles.saveButton, { backgroundColor: colors.primary, opacity: saving ? 0.65 : 1 }]}>
+          <Pressable disabled={saving} onPress={() => void saveProfile()} style={[styles.saveButton, { backgroundColor: colors.primary, borderRadius: colors.radius, opacity: saving ? 0.65 : 1 }]}>
             <Text style={{ color: colors.primaryForeground }}>{saving ? 'جارٍ الحفظ…' : 'حفظ بياناتي'}</Text>
           </Pressable>
         </> : null}
@@ -110,7 +110,7 @@ export default function AccountScreen() {
           <Text style={{ color: colors.destructive, textAlign: 'right' }}>تعذر تحميل بيانات الحساب والمشتريات.</Text>
           <Pressable onPress={() => void account.refetch()}><Text style={{ color: colors.primary, textAlign: 'right' }}>إعادة المحاولة</Text></Pressable>
         </View> : null}
-        <Pressable accessibilityRole="button" onPress={() => void signOut()} style={[styles.logoutButton, { backgroundColor: colors.secondary }]}>
+        <Pressable accessibilityRole="button" onPress={() => void signOut()} style={[styles.logoutButton, { backgroundColor: colors.secondary, borderRadius: colors.radius }]}>
           <Feather name="log-out" size={16} color={colors.foreground} />
           <Text style={{ color: colors.foreground }}>تسجيل الخروج</Text>
         </Pressable>
@@ -122,7 +122,7 @@ export default function AccountScreen() {
       </View>
       {account.isLoading ? <ActivityIndicator color={colors.primary} style={{ marginTop: 16 }} /> : null}
       {!account.isLoading && !account.isError && account.data?.orders.length === 0 ? (
-        <View style={[styles.emptyOrders, { backgroundColor: colors.card, borderColor: colors.border }]}>
+        <View style={[styles.emptyOrders, { backgroundColor: colors.card, borderColor: colors.border, borderRadius: colors.radius }]}>
           <Feather name="package" size={23} color={colors.accent} />
           <Text style={[styles.orderEmptyTitle, { color: colors.foreground }]}>لا توجد مشتريات سابقة</Text>
           <Text style={[styles.muted, { color: colors.mutedForeground }]}>
@@ -132,7 +132,7 @@ export default function AccountScreen() {
       ) : null}
       {account.data?.orders.map((order) => {
         const expanded = expandedOrders.has(order.id);
-        return <View key={order.id} style={[styles.orderCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+        return <View key={order.id} style={[styles.orderCard, { backgroundColor: colors.card, borderColor: colors.border, borderRadius: colors.radius }]}>
           <Pressable
             accessibilityRole="button"
             accessibilityState={{ expanded }}
@@ -177,13 +177,13 @@ export default function AccountScreen() {
           </> : null}
         </View>;
       })}
-    </> : <View style={[styles.profileCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+    </> : <View style={[styles.profileCard, { backgroundColor: colors.card, borderColor: colors.border, borderRadius: colors.radius }]}>
       <View style={[styles.avatar, { backgroundColor: colors.secondary }]}>
         <Feather name="user" size={27} color={colors.accent} />
       </View>
       <Text style={[styles.profileName, { color: colors.foreground }]}>مساحتك الخاصة</Text>
       <Text style={[styles.muted, { color: colors.mutedForeground, textAlign: 'center' }]}>أنشئ حسابًا لمتابعة بياناتك ومشترياتك.</Text>
-      <Pressable accessibilityRole="button" onPress={() => router.push('/(auth)/sign-up')} style={[styles.saveButton, { backgroundColor: colors.primary }]}>
+      <Pressable accessibilityRole="button" onPress={() => router.push('/(auth)/sign-up')} style={[styles.saveButton, { backgroundColor: colors.primary, borderRadius: colors.radius }]}>
         <Text style={{ color: colors.primaryForeground }}>إنشاء حساب</Text>
       </Pressable>
       <Pressable accessibilityRole="button" onPress={() => router.push('/(auth)/sign-in')} style={styles.signInLink}>

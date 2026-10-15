@@ -12,6 +12,8 @@ export function ProductList({ onlyFavorites = false, onAdd, onFavorite, header }
   const { favorites } = useStore();
   const insets = useSafeAreaInsets();
   const [selectedProduct, setSelectedProduct] = useState<StorefrontProduct | null>(null);
+  const [selectedStory, setSelectedStory] = useState<Story | null>(null);
+  const [activeFilter, setActiveFilter] = useState<StoreFilter>('all');
   const [feedback, setFeedback] = useState<string | null>(null);
   const feedbackTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => () => { if (feedbackTimer.current) clearTimeout(feedbackTimer.current); }, []);
@@ -35,22 +37,48 @@ export function ProductList({ onlyFavorites = false, onAdd, onFavorite, header }
   const invalidResponse = query.isSuccess && responseProducts === null;
   const favoriteIds = Array.isArray(favorites) ? favorites : [];
   const products = (responseProducts ?? []).filter((p) => !onlyFavorites || favoriteIds.includes(p.id));
+  const newestIds = new Set([...products].sort((a, b) => b.id - a.id).slice(0, 6).map((product) => product.id));
+  const filteredProducts = products.filter((product) => {
+    if (activeFilter === 'new') return newestIds.has(product.id);
+    if (activeFilter === 'perfume') return ['fragrance', 'perfume'].includes(product.category.toLowerCase());
+    if (activeFilter === 'makeup') return product.category.toLowerCase() === 'makeup';
+    if (activeFilter === 'accessories') return product.category.toLowerCase() === 'accessories';
+    return true;
+  });
+  const featuredProducts = [...products].sort((a, b) => {
+    const featuredSkus = ['p01', 'a02'];
+    const aFeatured = featuredSkus.includes(a.sku.toLowerCase());
+    const bFeatured = featuredSkus.includes(b.sku.toLowerCase());
+    return Number(bFeatured) - Number(aFeatured) || b.id - a.id;
+  }).slice(0, 8);
   const emptyState = query.isLoading
     ? <View style={styles.center}><ActivityIndicator color={colors.primary} /></View>
     : query.isError
       ? <View style={styles.center}><Text style={{ color: colors.foreground }}>تعذر تحميل المنتجات</Text><Pressable onPress={() => void query.refetch()}><Text style={{ color: colors.primary }}>إعادة المحاولة</Text></Pressable></View>
       : invalidResponse
         ? <View style={styles.center}><Text style={{ color: colors.foreground }}>استجابة المنتجات غير متوقعة</Text><Text selectable style={{ color: colors.mutedForeground, textAlign: 'center' }}>{describePayload(query.data)}</Text><Pressable onPress={() => void query.refetch()}><Text style={{ color: colors.primary }}>إعادة المحاولة</Text></Pressable></View>
-      : <View style={styles.center}><Text style={{ color: colors.mutedForeground }}>{onlyFavorites ? 'لا توجد منتجات محفوظة بعد' : 'لا توجد منتجات متاحة الآن'}</Text></View>;
+      : <View style={styles.center}><Text style={{ color: colors.mutedForeground }}>{onlyFavorites ? 'لا توجد منتجات محفوظة بعد' : activeFilter === 'all' ? 'لا توجد منتجات متاحة الآن' : 'ما فيش منتجات في هذا التصنيف حالياً'}</Text></View>;
+  const listHeader = <>
+    {header ?? null}
+    {!onlyFavorites ? <HomeContentHeader
+      colors={colors}
+      products={featuredProducts}
+      activeFilter={activeFilter}
+      onFilter={setActiveFilter}
+      onSelect={setSelectedProduct}
+      onAdd={addProduct}
+    /> : null}
+  </>;
   return <View style={{ flex: 1 }}>
     <FlatList
       style={{ flex: 1 }}
-      data={products}
+      data={filteredProducts}
       keyExtractor={(item) => String(item.id)}
       numColumns={2}
       contentContainerStyle={styles.grid}
       columnWrapperStyle={styles.row}
-      ListHeaderComponent={header ?? null}
+      ListHeaderComponent={listHeader}
+      ListFooterComponent={!onlyFavorites ? <StoriesSection colors={colors} onRead={setSelectedStory} /> : null}
       ListEmptyComponent={emptyState}
       renderItem={({ item, index }) => <ProductCard product={item} index={index} onSelect={() => setSelectedProduct(item)} onAdd={() => addProduct(item)} onFavorite={() => toggleProductFavorite(item)} />}
     />
@@ -65,7 +93,170 @@ export function ProductList({ onlyFavorites = false, onAdd, onFavorite, header }
       onAdd={() => addProduct(selectedProduct)}
       onFavorite={() => toggleProductFavorite(selectedProduct)}
     /> : null}
+    {selectedStory ? <StoryDetails story={selectedStory} colors={colors} onClose={() => setSelectedStory(null)} /> : null}
   </View>;
+}
+
+type StoreFilter = 'all' | 'new' | 'perfume' | 'makeup' | 'accessories';
+type Story = { category: string; title: string; introduction: string; sections: { heading: string; body: string }[]; closing: string };
+type ThemeColors = ReturnType<typeof useColors>;
+
+const storeFilters: { id: StoreFilter; label: string }[] = [
+  { id: 'all', label: 'الكل' },
+  { id: 'new', label: 'وصل حديثاً' },
+  { id: 'perfume', label: 'عطور' },
+  { id: 'makeup', label: 'مكياج' },
+  { id: 'accessories', label: 'إكسسوارات' },
+];
+
+const stories: Story[] = [
+  {
+    category: 'ملاحظات ميدانية',
+    title: 'فن الطقس اليومي: عن العطر والبشرة وأخذ الوقت.',
+    introduction: 'لا يحتاج طقس الجمال إلى خطوات كثيرة. يكفي أن تمنحيه قليلًا من الانتباه حتى تتحول اللحظة العادية إلى وقت خاص بك.',
+    sections: [
+      { heading: 'ابدئي بالحواس', body: 'انتبهي إلى حرارة المكان، والضوء على المرآة، وملمس ما تضعينه على بشرتك. التمهّل يساعدك على معرفة ما يناسبك فعلًا بدل ملاحقة كل توصية عابرة.' },
+      { heading: 'اتركي العطر يستقر', body: 'يتغير العطر عندما يلامس دفء البشرة. ضعي كمية خفيفة على نقاط النبض ثم امنحيه وقتًا. الانطباع الأول مجرد بداية، أما الرائحة التي تبقى بعد ساعة فهي التي سترافقك.' },
+      { heading: 'احتفظي بما يضيف معنى', body: 'غالبًا ما يكون الطقس المدروس قصيرًا. عطر جميل، ولون يعيد الحيوية إلى الوجه، وتفصيل ذهبي صغير قد تكون أبلغ من روتين مزدحم.' },
+    ],
+    closing: 'المتعة ليست في فعل المزيد، بل في ملاحظة المزيد.',
+  },
+  {
+    category: 'عطور',
+    title: 'كيف تختارين عطرك المميز دون استعجال القرار.',
+    introduction: 'يجب أن يبدو عطرك المميز مألوفًا دون أن يصبح متوقعًا. الاختيار لا يتعلق بأقوى رائحة، بل باكتشاف ما ينسجم طبيعيًا مع بشرتك.',
+    sections: [
+      { heading: 'ابدئي بالشعور', body: 'قبل قراءة قائمة المكونات، حددي ما تريدين أن يقوله العطر: دفء، أو نقاء، أو نعومة، أو غموض. هذا يمنحك اتجاهًا أوضح من الاختيار حسب المكونات وحدها.' },
+      { heading: 'جرّبيه على البشرة', body: 'الأوراق العطرية مفيدة للانطباع الأول، لكن البشرة تكشف القصة الكاملة. جرّبي عطرًا واحدًا في كل مرة وراقبي كيف يتطور خلال اليوم.' },
+      { heading: 'عودي إليه قبل القرار', body: 'الاختيار الجيد يبقى جميلًا في التجربة الثانية والثالثة. امنحي نفسك عدة أيام قبل الشراء؛ فالعطر الذي يستمر في ذاكرتك غالبًا هو الذي يستحق البقاء.' },
+    ],
+    closing: 'اختاري العطر الذي يشبه التعرف على نفسك، لا محاولة أداء دور.',
+  },
+  {
+    category: 'في التطبيق',
+    title: 'إطلالة الخمس دقائق: أشياء قليلة جيدة، بلمسة مقصودة.',
+    introduction: 'خمس دقائق قد تكون كافية عندما يكون لكل منتج دور واضح. الهدف ليس إخفاء الوجه، بل إعادة الضوء والدفء والتحديد إليه.',
+    sections: [
+      { heading: 'وحّدي ما يحتاج فقط', body: 'استخدمي كمية صغيرة من مستحضر البشرة في منتصف الوجه وادمجيها نحو الخارج. اتركي البشرة الطبيعية ظاهرة في المناطق التي لا تحتاج إلى تغطية.' },
+      { heading: 'أضيفي لونًا حيًا واحدًا', body: 'قليل من أحمر الخدود الكريمي يعيد الحيوية إلى الوجه كله. مرري ما تبقى على أطراف الأصابع فوق الشفاه لتحصلي على تناغم بسيط.' },
+      { heading: 'أنهي بقليل من التحديد', body: 'رتبي الحاجبين، وارفعي الرموش، ثم اختاري تفصيلًا أخيرًا واحدًا. لون شفاه هادئ أو خط نظيف حول العينين يكفي.' },
+    ],
+    closing: 'ينجح الروتين القصير عندما تكون لكل حركة فيه قيمة.',
+  },
+];
+
+function productDescription(product: StorefrontProduct): string {
+  return product.descriptionAr?.trim() || productDetailsBySku[product.sku.toLowerCase()]?.note || 'اختيار أنيق من مجموعة إليغانزا، صُمم ليضيف لمسة جميلة إلى يومك.';
+}
+
+function HomeContentHeader({ colors, products, activeFilter, onFilter, onSelect, onAdd }: {
+  colors: ThemeColors;
+  products: StorefrontProduct[];
+  activeFilter: StoreFilter;
+  onFilter: (filter: StoreFilter) => void;
+  onSelect: (product: StorefrontProduct) => void;
+  onAdd: (product: StorefrontProduct) => void;
+}) {
+  return <View style={[styles.homeSections, { backgroundColor: colors.background }]}>
+    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterRow}>
+      {storeFilters.map((filter) => {
+        const selected = activeFilter === filter.id;
+        return <Pressable key={filter.id} testID={`store-filter-${filter.id}`} accessibilityRole="button" accessibilityState={{ selected }} onPress={() => onFilter(filter.id)}
+          style={[styles.filterChip, { borderColor: selected ? colors.primary : colors.border, backgroundColor: selected ? colors.primary : colors.card, borderRadius: colors.radius }]}>
+          <Text style={{ color: selected ? colors.primaryForeground : colors.foreground, fontSize: 13 }}>{filter.label}</Text>
+        </Pressable>;
+      })}
+    </ScrollView>
+    <View style={styles.featureHeading}>
+      <View style={styles.sectionCopy}>
+        <Text style={[styles.sectionTitle, { color: colors.foreground }]}>الأكثر شهرة وطلباً</Text>
+        <Text style={[styles.sectionNote, { color: colors.mutedForeground }]}>مختارات يوصي بها فريق إليغانزا</Text>
+      </View>
+      <Feather name="move" size={18} color={colors.accent} />
+    </View>
+    {products.length ? <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.featureRow}>
+      {products.map((product, index) => <FeatureCard key={product.id} product={product} index={index} colors={colors} onSelect={() => onSelect(product)} onAdd={() => onAdd(product)} />)}
+    </ScrollView> : <Text style={[styles.noFeatures, { color: colors.mutedForeground }]}>ستظهر مختاراتنا هنا بعد تحميل المنتجات.</Text>}
+    <View style={[styles.productHeading, { borderColor: colors.border }]}>
+      <Text style={[styles.sectionTitle, { color: colors.foreground }]}>تسوّقي مجموعتنا</Text>
+      <Text style={[styles.sectionNote, { color: colors.mutedForeground }]}>اسحبي التصنيفات لاكتشاف المزيد</Text>
+    </View>
+  </View>;
+}
+
+function FeatureCard({ product, index, colors, onSelect, onAdd }: { product: StorefrontProduct; index: number; colors: ThemeColors; onSelect: () => void; onAdd: () => void }) {
+  const image = product.imageUrls?.[0];
+  const isPopular = ['p01', 'a02'].includes(product.sku.toLowerCase());
+  return <View style={[styles.featureCard, { backgroundColor: colors.card, borderColor: colors.border, borderRadius: colors.radius }]}>
+    <Pressable accessibilityRole="button" onPress={onSelect}>
+      <View style={styles.featureImageWrap}>
+        {image ? <Image source={{ uri: image }} style={styles.featureImage} resizeMode="cover" /> : <View style={[styles.featureImage, styles.noImage, { backgroundColor: colors.secondary }]}><Text style={{ color: colors.mutedForeground }}>Eleganza</Text></View>}
+        <View style={[styles.featureBadge, { backgroundColor: colors.background, borderRadius: colors.radius }]}>
+          <Text style={{ color: colors.primary, fontSize: 10 }}>{isPopular ? 'الأكثر مبيعاً' : 'اختيار إليغانزا'}</Text>
+        </View>
+      </View>
+      <View style={styles.featureCopy}>
+        <Text numberOfLines={1} style={[styles.name, { color: colors.foreground }]}>{product.nameAr || product.nameEn}</Text>
+        <Text numberOfLines={2} style={[styles.featureDescription, { color: colors.mutedForeground }]}>{productDescription(product)}</Text>
+        <Text style={[styles.price, { color: colors.primary }]}>{formatPrice(product.salePriceMinor)} د.ل</Text>
+      </View>
+    </Pressable>
+    <Pressable accessibilityRole="button" onPress={onAdd} style={[styles.featureAddButton, { backgroundColor: colors.primary, borderRadius: colors.radius }]}>
+      <Feather name="plus" size={15} color={colors.primaryForeground} />
+      <Text style={{ color: colors.primaryForeground, fontSize: 12 }}>أضف للسلة</Text>
+    </Pressable>
+  </View>;
+}
+
+function StoriesSection({ colors, onRead }: { colors: ThemeColors; onRead: (story: Story) => void }) {
+  return <View style={[styles.storiesSection, { backgroundColor: colors.secondary }]}>
+    <View style={styles.storySectionHeader}>
+      <View style={styles.sectionCopy}>
+        <Text style={[styles.sectionTitle, { color: colors.foreground }]}>حكايات إليغانزا</Text>
+        <Text style={[styles.sectionNote, { color: colors.mutedForeground }]}>أفكار صغيرة للجمال والعناية</Text>
+      </View>
+      <Feather name="book-open" size={20} color={colors.accent} />
+    </View>
+    {stories.map((story, index) => <Pressable key={story.title} accessibilityRole="button" onPress={() => onRead(story)}
+      style={[styles.storyCard, { backgroundColor: colors.card, borderColor: colors.border, borderRadius: colors.radius }]}>
+      <View style={styles.storyCardTop}>
+        <Text style={[styles.storyCategory, { color: colors.primary }]}>{story.category} / 0{index + 1}</Text>
+        <Feather name="arrow-up-left" size={16} color={colors.accent} />
+      </View>
+      <Text style={[styles.storyTitle, { color: colors.foreground }]}>{story.title}</Text>
+      <Text numberOfLines={3} style={[styles.storyIntro, { color: colors.mutedForeground }]}>{story.introduction}</Text>
+      <View style={styles.readStory}><Text style={{ color: colors.primary, fontSize: 12 }}>اقرئي القصة</Text><Feather name="arrow-left" size={14} color={colors.primary} /></View>
+    </Pressable>)}
+  </View>;
+}
+
+function StoryDetails({ story, colors, onClose }: { story: Story; colors: ThemeColors; onClose: () => void }) {
+  const insets = useSafeAreaInsets();
+  return <Modal visible transparent animationType="slide" statusBarTranslucent onRequestClose={onClose}>
+    <View style={styles.modalBackdrop}>
+      <Pressable accessibilityLabel="إغلاق القصة" style={StyleSheet.absoluteFill} onPress={onClose} />
+      <View style={[styles.storySheet, { backgroundColor: colors.background, paddingBottom: Math.max(insets.bottom, 12), borderTopLeftRadius: colors.radius + 6, borderTopRightRadius: colors.radius + 6 }]}>
+        <View style={[styles.detailHeader, { borderBottomColor: colors.border }]}>
+          <View style={styles.detailHeadCopy}>
+            <Text style={[styles.detailOverline, { color: colors.accent }]}>{story.category}</Text>
+            <Text style={[styles.detailHeaderTitle, { color: colors.foreground }]}>حكايات إليغانزا</Text>
+          </View>
+          <Pressable accessibilityRole="button" accessibilityLabel="إغلاق" onPress={onClose} style={[styles.closeButton, { backgroundColor: colors.secondary }]}>
+            <Feather name="x" size={22} color={colors.foreground} />
+          </Pressable>
+        </View>
+        <ScrollView contentContainerStyle={styles.storyContent} showsVerticalScrollIndicator={false}>
+          <Text style={[styles.storyModalTitle, { color: colors.foreground }]}>{story.title}</Text>
+          <Text style={[styles.storyModalIntro, { color: colors.mutedForeground }]}>{story.introduction}</Text>
+          {story.sections.map((section) => <View key={section.heading} style={styles.storyParagraph}>
+            <Text style={[styles.storyParagraphTitle, { color: colors.primary }]}>{section.heading}</Text>
+            <Text style={[styles.storyBody, { color: colors.foreground }]}>{section.body}</Text>
+          </View>)}
+          <Text style={[styles.storyClosing, { color: colors.accent }]}>{story.closing}</Text>
+        </ScrollView>
+      </View>
+    </View>
+  </Modal>;
 }
 
 function extractProductArray(value: unknown, depth = 0): StorefrontProduct[] | null {
@@ -113,11 +304,11 @@ function ProductCard({ product, index, onSelect, onAdd, onFavorite }: { product:
   const { favorites } = useStore();
   const isFavorite = Array.isArray(favorites) && favorites.includes(product.id);
   const image = product.imageUrls?.[0];
-  return <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
+  return <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border, borderRadius: colors.radius }]}>
     <Pressable accessibilityRole="button" accessibilityLabel={`تفاصيل ${product.nameAr || product.nameEn}`} onPress={onSelect} android_ripple={{ color: colors.muted }}>
       <View style={styles.imageWrap}>
         {image ? <Image source={{ uri: image }} style={styles.image} resizeMode="cover" /> : <View style={[styles.image, styles.noImage, { backgroundColor: colors.secondary }]}><Text style={{ color: colors.mutedForeground }}>Eleganza</Text></View>}
-        <Text style={[styles.imageNumber, { color: colors.foreground, backgroundColor: colors.background + 'E8' }]}>{String(index + 1).padStart(2, '0')}</Text>
+        <Text style={[styles.imageNumber, { color: colors.foreground, backgroundColor: colors.background + 'E8', borderRadius: colors.radius }]}>{String(index + 1).padStart(2, '0')}</Text>
       </View>
       <View style={styles.cardCopy}>
         <Text numberOfLines={1} style={[styles.name, { color: colors.foreground }]}>{product.nameAr || product.nameEn}</Text>
@@ -127,7 +318,7 @@ function ProductCard({ product, index, onSelect, onAdd, onFavorite }: { product:
     <Pressable accessibilityRole="button" accessibilityState={{ selected: isFavorite }} accessibilityLabel={isFavorite ? 'إزالة من المفضلة' : 'حفظ في المفضلة'} hitSlop={6} style={[styles.favorite, { backgroundColor: colors.background }]} onPress={onFavorite}>
       <Ionicons name={isFavorite ? 'heart' : 'heart-outline'} size={19} color={isFavorite ? colors.primary : colors.foreground} />
     </Pressable>
-    <Pressable accessibilityRole="button" accessibilityLabel="أضف إلى السلة" onPress={onAdd} style={[styles.addButton, { backgroundColor: colors.primary }]}>
+    <Pressable accessibilityRole="button" accessibilityLabel="أضف إلى السلة" onPress={onAdd} style={[styles.addButton, { backgroundColor: colors.primary, borderRadius: colors.radius }]}>
       <Feather name="plus" size={16} color={colors.primaryForeground} />
       <Text style={[styles.addText, { color: colors.primaryForeground }]}>أضف للسلة</Text>
     </Pressable>
@@ -154,7 +345,7 @@ function ProductDetails({ product, favorite, onClose, onAdd, onFavorite }: {
   return <Modal visible transparent animationType="slide" statusBarTranslucent onRequestClose={onClose}>
     <View style={styles.modalBackdrop}>
       <Pressable accessibilityLabel="إغلاق تفاصيل المنتج" style={StyleSheet.absoluteFill} onPress={onClose} />
-      <View style={[styles.detailSheet, { backgroundColor: colors.background, paddingBottom: Math.max(insets.bottom, 12) }]}>
+      <View style={[styles.detailSheet, { backgroundColor: colors.background, paddingBottom: Math.max(insets.bottom, 12), borderTopLeftRadius: colors.radius + 6, borderTopRightRadius: colors.radius + 6 }]}>
         <View style={[styles.detailHeader, { borderBottomColor: colors.border }]}>
           <View style={styles.detailHeadCopy}>
             <Text style={[styles.detailOverline, { color: colors.accent }]}>ELEGANZA / PRODUCT</Text>
@@ -181,11 +372,11 @@ function ProductDetails({ product, favorite, onClose, onAdd, onFavorite }: {
             <DetailFact label="التوصيل" value="خلال 2–3 أيام" color={colors.foreground} muted={colors.mutedForeground} />
           </View>
           <View style={styles.detailActions}>
-            <Pressable accessibilityRole="button" onPress={onAdd} style={[styles.detailAddButton, { backgroundColor: colors.primary }]}>
+            <Pressable accessibilityRole="button" onPress={onAdd} style={[styles.detailAddButton, { backgroundColor: colors.primary, borderRadius: colors.radius }]}>
               <Feather name="plus" size={17} color={colors.primaryForeground} />
               <Text style={[styles.detailAddText, { color: colors.primaryForeground }]}>أضف للسلة</Text>
             </Pressable>
-            <Pressable accessibilityRole="button" accessibilityState={{ selected: favorite }} accessibilityLabel={favorite ? 'إزالة من المفضلة' : 'حفظ في المفضلة'} onPress={onFavorite} style={[styles.detailFavoriteButton, { borderColor: colors.border }]}>
+            <Pressable accessibilityRole="button" accessibilityState={{ selected: favorite }} accessibilityLabel={favorite ? 'إزالة من المفضلة' : 'حفظ في المفضلة'} onPress={onFavorite} style={[styles.detailFavoriteButton, { borderColor: colors.border, borderRadius: colors.radius }]}>
               <Ionicons name={favorite ? 'heart' : 'heart-outline'} size={22} color={favorite ? colors.primary : colors.foreground} />
             </Pressable>
           </View>
@@ -231,6 +422,39 @@ const productDetailsBySku: Record<string, { material: string; color: string; not
 const styles = StyleSheet.create({
   center: { flex: 1, minHeight: 240, alignItems: 'center', justifyContent: 'center', gap: 12 },
   grid: { paddingHorizontal: 14, paddingBottom: 112, paddingTop: 12 }, row: { gap: 11 },
+  homeSections: { paddingHorizontal: 14, paddingBottom: 4 },
+  filterRow: { flexDirection: 'row-reverse', gap: 6, paddingTop: 15, paddingBottom: 6 },
+  filterChip: { minHeight: 38, borderWidth: StyleSheet.hairlineWidth, paddingHorizontal: 10, alignItems: 'center', justifyContent: 'center' },
+  featureHeading: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', paddingTop: 19, paddingBottom: 2 },
+  sectionCopy: { alignItems: 'flex-end' },
+  sectionTitle: { fontFamily: 'serif', fontSize: 21, lineHeight: 28, textAlign: 'right', writingDirection: 'rtl' },
+  sectionNote: { marginTop: 3, fontSize: 12, textAlign: 'right', writingDirection: 'rtl' },
+  featureRow: { flexDirection: 'row-reverse', gap: 12, paddingTop: 10, paddingBottom: 8 },
+  featureCard: { width: 220, borderWidth: StyleSheet.hairlineWidth, overflow: 'hidden', paddingBottom: 10 },
+  featureImageWrap: { height: 152, position: 'relative' },
+  featureImage: { width: '100%', height: '100%' },
+  featureBadge: { position: 'absolute', top: 9, right: 9, paddingHorizontal: 10, paddingVertical: 6 },
+  featureCopy: { alignItems: 'flex-end', paddingHorizontal: 11, paddingTop: 9, minHeight: 101 },
+  featureDescription: { width: '100%', textAlign: 'right', fontSize: 12, lineHeight: 18, marginTop: 2 },
+  featureAddButton: { minHeight: 39, marginHorizontal: 9, marginTop: 5, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7 },
+  noFeatures: { textAlign: 'right', fontSize: 13, paddingVertical: 16 },
+  productHeading: { borderTopWidth: StyleSheet.hairlineWidth, paddingTop: 19, paddingBottom: 8, marginTop: 8, alignItems: 'flex-end' },
+  storiesSection: { marginTop: 16, paddingHorizontal: 14, paddingTop: 19, paddingBottom: 28, gap: 11 },
+  storySectionHeader: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', marginBottom: 3 },
+  storyCard: { padding: 15, borderWidth: StyleSheet.hairlineWidth, gap: 8 },
+  storyCardTop: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between' },
+  storyCategory: { fontSize: 10, letterSpacing: 0.6, writingDirection: 'rtl' },
+  storyTitle: { fontFamily: 'serif', fontSize: 20, lineHeight: 27, textAlign: 'right', writingDirection: 'rtl' },
+  storyIntro: { fontSize: 13, lineHeight: 21, textAlign: 'right', writingDirection: 'rtl' },
+  readStory: { marginTop: 2, flexDirection: 'row-reverse', alignItems: 'center', gap: 6, fontSize: 12, writingDirection: 'rtl' },
+  storySheet: { maxHeight: '92%', overflow: 'hidden' },
+  storyContent: { paddingHorizontal: 22, paddingTop: 22, paddingBottom: 30 },
+  storyModalTitle: { fontFamily: 'serif', fontSize: 28, lineHeight: 38, textAlign: 'right', writingDirection: 'rtl' },
+  storyModalIntro: { marginTop: 12, fontSize: 15, lineHeight: 25, textAlign: 'right', writingDirection: 'rtl' },
+  storyParagraph: { marginTop: 24, gap: 7 },
+  storyParagraphTitle: { fontSize: 16, fontWeight: '600', textAlign: 'right', writingDirection: 'rtl' },
+  storyBody: { fontSize: 14, lineHeight: 24, textAlign: 'right', writingDirection: 'rtl' },
+  storyClosing: { marginTop: 26, fontFamily: 'serif', fontSize: 19, lineHeight: 28, textAlign: 'right', writingDirection: 'rtl' },
   card: { flex: 1, marginBottom: 14, borderWidth: StyleSheet.hairlineWidth, overflow: 'hidden', paddingBottom: 11 },
   imageWrap: { position: 'relative' },
   image: { width: '100%', height: 174 }, noImage: { alignItems: 'center', justifyContent: 'center' },
@@ -242,7 +466,7 @@ const styles = StyleSheet.create({
   addButton: { minHeight: 42, marginHorizontal: 9, marginTop: 8, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 7 },
   addText: { fontSize: 13, writingDirection: 'rtl' },
   modalBackdrop: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(28, 22, 18, 0.56)' },
-  detailSheet: { maxHeight: '94%', borderTopLeftRadius: 20, borderTopRightRadius: 20, overflow: 'hidden' },
+  detailSheet: { maxHeight: '94%', overflow: 'hidden' },
   detailHeader: { minHeight: 68, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 18, borderBottomWidth: StyleSheet.hairlineWidth },
   detailHeadCopy: { alignItems: 'flex-end', gap: 2 },
   detailOverline: { fontSize: 9, letterSpacing: 1.2 },
@@ -261,6 +485,6 @@ const styles = StyleSheet.create({
   detailAddButton: { flex: 1, minHeight: 52, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 8 },
   detailAddText: { fontSize: 16, fontFamily: 'serif' },
   detailFavoriteButton: { width: 52, minHeight: 50, alignItems: 'center', justifyContent: 'center', borderWidth: StyleSheet.hairlineWidth },
-  toast: { position: 'absolute', left: 18, right: 18, minHeight: 52, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, paddingHorizontal: 16, borderRadius: 5, elevation: 8, shadowColor: '#000', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.18, shadowRadius: 8 },
+  toast: { position: 'absolute', left: 18, right: 18, minHeight: 52, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, paddingHorizontal: 16, borderRadius: 18, elevation: 8, shadowColor: '#000', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.18, shadowRadius: 8 },
   toastText: { fontSize: 14, fontWeight: '600', writingDirection: 'rtl' },
 });
