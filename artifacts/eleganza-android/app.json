@@ -2,7 +2,7 @@
   "expo": {
     "name": "Eleganza",
     "slug": "eleganza-android",
-    "version": "1.1.2",
+    "version": "1.1.3",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "eleganza-android",
@@ -12,7 +12,7 @@
     },
     "android": {
       "package": "com.eleganza.beauty",
-      "versionCode": 13
+      "versionCode": 14
     },
     "web": {
       "favicon": "./assets/images/icon.png"
