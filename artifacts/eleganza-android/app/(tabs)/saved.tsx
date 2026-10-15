@@ -12,7 +12,11 @@ export default function SavedScreen() {
   const colors = useColors(); const { isSignedIn } = useAuth(); const { add, toggleFavorite } = useStore();
   const insets = useSafeAreaInsets();
   const gated = () => router.push('/(auth)/sign-in');
-  const run = (action: (p: StorefrontProduct) => void) => (p: StorefrontProduct) => isSignedIn ? action(p) : gated();
+  const run = (action: (p: StorefrontProduct) => void) => (p: StorefrontProduct) => {
+    if (!isSignedIn) { gated(); return false; }
+    action(p);
+    return true;
+  };
   return <View style={{ flex: 1, backgroundColor: colors.background }}>
     <View style={{ paddingHorizontal: 20, paddingTop: Math.max(insets.top, 12) + 10, paddingBottom: 14, alignItems: 'flex-end' }}>
       <Text style={{ color: colors.accent, fontSize: 9, letterSpacing: 1.5 }}>اختياراتك</Text>

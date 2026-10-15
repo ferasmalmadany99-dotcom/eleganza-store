@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, inArray, sql } from "drizzle-orm";
 import { timingSafeEqual } from "node:crypto";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -101,6 +101,83 @@ router.post("/customers/profile", async (req, res): Promise<void> => {
     set: { customerName, customerPhone, customerEmail: email, updatedAt: new Date() },
   }).returning();
   res.status(201).json({ id: customer.id, customerName: customer.customerName });
+});
+
+router.get("/customers/me", async (req, res): Promise<void> => {
+  const userId = getAuth(req)?.userId;
+  if (!userId) {
+    res.status(401).json({ error: "Sign in to view your customer account" });
+    return;
+  }
+
+  const user = await clerkClient.users.getUser(userId);
+  const emailAddress = user.emailAddresses.find((address) => address.id === user.primaryEmailAddressId);
+  if (!emailAddress?.emailAddress || emailAddress.verification?.status !== "verified") {
+    res.status(403).json({ error: "A verified customer email is required" });
+    return;
+  }
+
+  const [staffAccount] = await db.select({ id: staffTable.id })
+    .from(staffTable)
+    .where(eq(staffTable.clerkUserId, userId))
+    .limit(1);
+  if (staffAccount) {
+    res.status(403).json({ error: "Staff accounts do not have a storefront customer account" });
+    return;
+  }
+
+  const [profile] = await db.select().from(storeCustomersTable)
+    .where(eq(storeCustomersTable.clerkUserId, userId))
+    .limit(1);
+  const verifiedPhone = user.phoneNumbers.find((phone) => phone.verification?.status === "verified")?.phoneNumber;
+  const customerPhone = profile?.customerPhone ?? verifiedPhone ?? null;
+  const normalizedPhone = customerPhone?.replace(/\D/g, "") ?? "";
+  const customerOrders = normalizedPhone
+    ? await db.select().from(ordersTable)
+      .where(sql`regexp_replace(COALESCE(${ordersTable.customerPhone}, ''), '[^0-9]', '', 'g') = ${normalizedPhone}`)
+      .orderBy(desc(ordersTable.createdAt))
+      .limit(20)
+    : [];
+  const orderItems = customerOrders.length
+    ? await db.select({
+        orderId: orderItemsTable.orderId,
+        productNameAr: productsTable.nameAr,
+        productNameEn: productsTable.nameEn,
+        quantity: orderItemsTable.quantity,
+        unitPriceMinor: orderItemsTable.unitPriceMinor,
+      }).from(orderItemsTable)
+        .leftJoin(productsTable, eq(orderItemsTable.productId, productsTable.id))
+        .where(inArray(orderItemsTable.orderId, customerOrders.map((order) => order.id)))
+    : [];
+  const itemsByOrder = new Map<number, typeof orderItems>();
+  for (const item of orderItems) {
+    const items = itemsByOrder.get(item.orderId) ?? [];
+    items.push(item);
+    itemsByOrder.set(item.orderId, items);
+  }
+
+  const clerkName = [user.firstName, user.lastName].filter(Boolean).join(" ").trim();
+  const customerName = profile?.customerName || clerkName || user.username || "";
+  res.json({
+    profile: {
+      customerName: customerName || emailAddress.emailAddress,
+      customerPhone,
+      customerEmail: emailAddress.emailAddress,
+      createdAt: profile?.createdAt.toISOString() ?? null,
+    },
+    orders: customerOrders.map((order) => ({
+      id: order.id,
+      orderNumber: order.orderNumber,
+      status: order.status,
+      totalMinor: order.totalMinor,
+      createdAt: order.createdAt.toISOString(),
+      items: (itemsByOrder.get(order.id) ?? []).map((item) => ({
+        productName: item.productNameAr || item.productNameEn || "منتج",
+        quantity: item.quantity,
+        unitPriceMinor: item.unitPriceMinor,
+      })),
+    })),
+  });
 });
 
 router.get("/products", async (req, res): Promise<void> => {

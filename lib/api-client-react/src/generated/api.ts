@@ -56,6 +56,7 @@ import type {
   StaffUpdate,
   StorefrontAccessCodeInput,
   StorefrontAccessVerification,
+  StorefrontCustomerAccount,
   StorefrontOrderInput,
   StorefrontProduct,
   SyncResult,
@@ -1909,6 +1910,83 @@ export const useCreateStorefrontCustomerProfile = <TError = ErrorType<void | Cre
       > => {
       return useMutation(getCreateStorefrontCustomerProfileMutationOptions(options));
     }
+
+export const getGetStorefrontCustomerAccountUrl = () => {
+
+
+
+
+  return `/api/storefront/customers/me`
+}
+
+/**
+ * @summary Get the signed-in customer's profile and purchase history
+ */
+export const getStorefrontCustomerAccount = async ( options?: Parameters<typeof customFetch>[1]): Promise<StorefrontCustomerAccount> => {
+
+  return customFetch<StorefrontCustomerAccount>(getGetStorefrontCustomerAccountUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetStorefrontCustomerAccountQueryKey = () => {
+    return [
+    `/api/storefront/customers/me`
+    ] as const;
+    }
+
+
+export const getGetStorefrontCustomerAccountQueryOptions = <TData = Awaited<ReturnType<typeof getStorefrontCustomerAccount>>, TError = ErrorType<void>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStorefrontCustomerAccount>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetStorefrontCustomerAccountQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getStorefrontCustomerAccount>>> = ({ signal }) => getStorefrontCustomerAccount({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getStorefrontCustomerAccount>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetStorefrontCustomerAccountQueryResult = NonNullable<Awaited<ReturnType<typeof getStorefrontCustomerAccount>>>
+export type GetStorefrontCustomerAccountQueryError = ErrorType<void>
+
+
+/**
+ * @summary Get the signed-in customer's profile and purchase history
+ */
+
+export function useGetStorefrontCustomerAccount<TData = Awaited<ReturnType<typeof getStorefrontCustomerAccount>>, TError = ErrorType<void>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStorefrontCustomerAccount>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetStorefrontCustomerAccountQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 
 export const getInviteStaffUrl = () => {
 

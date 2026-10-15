@@ -218,6 +218,47 @@ export interface CustomerProfileResult {
   customerName: string;
 }
 
+export interface StorefrontCustomerProfile {
+  customerName: string;
+  /** @nullable */
+  customerPhone: string | null;
+  customerEmail: string;
+  /** @nullable */
+  createdAt: string | null;
+}
+
+export type OrderStatus = typeof OrderStatus[keyof typeof OrderStatus];
+
+
+export const OrderStatus = {
+  pending: 'pending',
+  confirmed: 'confirmed',
+  processing: 'processing',
+  completed: 'completed',
+  cancelled: 'cancelled',
+  returned: 'returned',
+} as const;
+
+export interface StorefrontCustomerOrderItem {
+  productName: string;
+  quantity: number;
+  unitPriceMinor: number;
+}
+
+export interface StorefrontCustomerOrder {
+  id: number;
+  orderNumber: string;
+  status: OrderStatus;
+  totalMinor: number;
+  createdAt: string;
+  items: StorefrontCustomerOrderItem[];
+}
+
+export interface StorefrontCustomerAccount {
+  profile: StorefrontCustomerProfile;
+  orders: StorefrontCustomerOrder[];
+}
+
 export interface Product {
   id: number;
   sku: string;
@@ -450,18 +491,6 @@ export interface JournalEntryInput {
   /** @minItems 2 */
   lines: JournalLineInput[];
 }
-
-export type OrderStatus = typeof OrderStatus[keyof typeof OrderStatus];
-
-
-export const OrderStatus = {
-  pending: 'pending',
-  confirmed: 'confirmed',
-  processing: 'processing',
-  completed: 'completed',
-  cancelled: 'cancelled',
-  returned: 'returned',
-} as const;
 
 export type PaymentMethod = typeof PaymentMethod[keyof typeof PaymentMethod];
 

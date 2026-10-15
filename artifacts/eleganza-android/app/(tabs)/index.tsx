@@ -14,8 +14,16 @@ export default function HomeScreen() {
   const { isSignedIn } = useAuth();
   const { add, toggleFavorite } = useStore();
   const gated = () => router.push('/(auth)/sign-in');
-  const addProduct = (product: StorefrontProduct) => isSignedIn ? add(product) : gated();
-  const favorite = (product: StorefrontProduct) => isSignedIn ? toggleFavorite(product.id) : gated();
+  const addProduct = (product: StorefrontProduct) => {
+    if (!isSignedIn) { gated(); return false; }
+    add(product);
+    return true;
+  };
+  const favorite = (product: StorefrontProduct) => {
+    if (!isSignedIn) { gated(); return false; }
+    toggleFavorite(product.id);
+    return true;
+  };
   const header = (
     <View style={{ backgroundColor: colors.background }}>
       <View style={[styles.header, { paddingTop: Math.max(insets.top, 12) }]}>

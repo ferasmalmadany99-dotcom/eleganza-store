@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, FlatList, Image, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useListStorefrontProducts, type StorefrontProduct } from '@workspace/api-client-react';
 import { useColors } from '@/hooks/useColors';
@@ -6,11 +6,31 @@ import { useStore } from '@/context/StoreContext';
 import { Feather, Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-export function ProductList({ onlyFavorites = false, onAdd, onFavorite, header }: { onlyFavorites?: boolean; onAdd: (product: StorefrontProduct) => void; onFavorite: (product: StorefrontProduct) => void; header?: React.ReactElement | null }) {
+export function ProductList({ onlyFavorites = false, onAdd, onFavorite, header }: { onlyFavorites?: boolean; onAdd: (product: StorefrontProduct) => boolean; onFavorite: (product: StorefrontProduct) => boolean; header?: React.ReactElement | null }) {
   const colors = useColors();
   const query = useListStorefrontProducts();
   const { favorites } = useStore();
+  const insets = useSafeAreaInsets();
   const [selectedProduct, setSelectedProduct] = useState<StorefrontProduct | null>(null);
+  const [feedback, setFeedback] = useState<string | null>(null);
+  const feedbackTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => { if (feedbackTimer.current) clearTimeout(feedbackTimer.current); }, []);
+  const showFeedback = (message: string) => {
+    if (feedbackTimer.current) clearTimeout(feedbackTimer.current);
+    setFeedback(message);
+    feedbackTimer.current = setTimeout(() => setFeedback(null), 2400);
+  };
+  const addProduct = (product: StorefrontProduct) => {
+    if (!onAdd(product)) return;
+    setSelectedProduct(null);
+    showFeedback('تمت إضافة المنتج إلى السلة');
+  };
+  const toggleProductFavorite = (product: StorefrontProduct) => {
+    const wasFavorite = favorites.includes(product.id);
+    if (!onFavorite(product)) return;
+    if (selectedProduct?.id === product.id) setSelectedProduct(null);
+    showFeedback(wasFavorite ? 'تمت إزالة المنتج من المفضلة' : 'تمت إضافة المنتج إلى المفضلة');
+  };
   const responseProducts = extractProductArray(query.data);
   const invalidResponse = query.isSuccess && responseProducts === null;
   const favoriteIds = Array.isArray(favorites) ? favorites : [];
@@ -22,7 +42,7 @@ export function ProductList({ onlyFavorites = false, onAdd, onFavorite, header }
       : invalidResponse
         ? <View style={styles.center}><Text style={{ color: colors.foreground }}>استجابة المنتجات غير متوقعة</Text><Text selectable style={{ color: colors.mutedForeground, textAlign: 'center' }}>{describePayload(query.data)}</Text><Pressable onPress={() => void query.refetch()}><Text style={{ color: colors.primary }}>إعادة المحاولة</Text></Pressable></View>
       : <View style={styles.center}><Text style={{ color: colors.mutedForeground }}>{onlyFavorites ? 'لا توجد منتجات محفوظة بعد' : 'لا توجد منتجات متاحة الآن'}</Text></View>;
-  return <>
+  return <View style={{ flex: 1 }}>
     <FlatList
       style={{ flex: 1 }}
       data={products}
@@ -32,16 +52,20 @@ export function ProductList({ onlyFavorites = false, onAdd, onFavorite, header }
       columnWrapperStyle={styles.row}
       ListHeaderComponent={header ?? null}
       ListEmptyComponent={emptyState}
-       renderItem={({ item, index }) => <ProductCard product={item} index={index} onSelect={() => setSelectedProduct(item)} onAdd={() => onAdd(item)} onFavorite={() => onFavorite(item)} />}
+      renderItem={({ item, index }) => <ProductCard product={item} index={index} onSelect={() => setSelectedProduct(item)} onAdd={() => addProduct(item)} onFavorite={() => toggleProductFavorite(item)} />}
     />
+    {feedback ? <View accessibilityRole="alert" accessibilityLiveRegion="polite" style={[styles.toast, { bottom: Math.max(insets.bottom, 16) + 78, backgroundColor: colors.foreground }]}>
+      <Feather name="check-circle" size={18} color={colors.background} />
+      <Text style={[styles.toastText, { color: colors.background }]}>{feedback}</Text>
+    </View> : null}
     {selectedProduct ? <ProductDetails
       product={selectedProduct}
       favorite={favoriteIds.includes(selectedProduct.id)}
       onClose={() => setSelectedProduct(null)}
-      onAdd={() => onAdd(selectedProduct)}
-      onFavorite={() => onFavorite(selectedProduct)}
+      onAdd={() => addProduct(selectedProduct)}
+      onFavorite={() => toggleProductFavorite(selectedProduct)}
     /> : null}
-  </>;
+  </View>;
 }
 
 function extractProductArray(value: unknown, depth = 0): StorefrontProduct[] | null {
@@ -237,4 +261,6 @@ const styles = StyleSheet.create({
   detailAddButton: { flex: 1, minHeight: 52, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 8 },
   detailAddText: { fontSize: 16, fontFamily: 'serif' },
   detailFavoriteButton: { width: 52, minHeight: 50, alignItems: 'center', justifyContent: 'center', borderWidth: StyleSheet.hairlineWidth },
+  toast: { position: 'absolute', left: 18, right: 18, minHeight: 52, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, paddingHorizontal: 16, borderRadius: 5, elevation: 8, shadowColor: '#000', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.18, shadowRadius: 8 },
+  toastText: { fontSize: 14, fontWeight: '600', writingDirection: 'rtl' },
 });

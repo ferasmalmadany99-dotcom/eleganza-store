@@ -384,6 +384,21 @@ paths:
                 required: [error]
                 properties:
                   error: { type: string }
+  /storefront/customers/me:
+    get:
+      operationId: getStorefrontCustomerAccount
+      tags: [storefront]
+      summary: Get the signed-in customer's profile and purchase history
+      responses:
+        "200":
+          description: Customer profile and recent orders
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/StorefrontCustomerAccount" }
+        "401":
+          description: A signed-in account is required
+        "403":
+          description: A verified customer account is required
   /staff/invitations:
     post:
       operationId: inviteStaff
@@ -700,6 +715,41 @@ components:
       properties:
         id: { type: integer }
         customerName: { type: string }
+    StorefrontCustomerAccount:
+      type: object
+      required: [profile, orders]
+      properties:
+        profile: { $ref: "#/components/schemas/StorefrontCustomerProfile" }
+        orders:
+          type: array
+          items: { $ref: "#/components/schemas/StorefrontCustomerOrder" }
+    StorefrontCustomerProfile:
+      type: object
+      required: [customerName, customerPhone, customerEmail, createdAt]
+      properties:
+        customerName: { type: string }
+        customerPhone: { type: ["string", "null"] }
+        customerEmail: { type: string, format: email }
+        createdAt: { type: ["string", "null"], format: date-time }
+    StorefrontCustomerOrder:
+      type: object
+      required: [id, orderNumber, status, totalMinor, createdAt, items]
+      properties:
+        id: { type: integer }
+        orderNumber: { type: string }
+        status: { $ref: "#/components/schemas/OrderStatus" }
+        totalMinor: { type: integer }
+        createdAt: { type: string, format: date-time }
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/StorefrontCustomerOrderItem" }
+    StorefrontCustomerOrderItem:
+      type: object
+      required: [productName, quantity, unitPriceMinor]
+      properties:
+        productName: { type: string }
+        quantity: { type: integer }
+        unitPriceMinor: { type: integer }
     ProductAudience:
       type: string
       enum: [men, women]

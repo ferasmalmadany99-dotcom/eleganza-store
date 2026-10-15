@@ -770,6 +770,31 @@ export const CreateStorefrontCustomerProfileResponse = zod.object({
 
 
 /**
+ * @summary Get the signed-in customer's profile and purchase history
+ */
+export const GetStorefrontCustomerAccountResponse = zod.object({
+  "profile": zod.object({
+  "customerName": zod.string(),
+  "customerPhone": zod.string().nullable(),
+  "customerEmail": zod.string().email(),
+  "createdAt": zod.coerce.date().nullable()
+}),
+  "orders": zod.array(zod.object({
+  "id": zod.number().int(),
+  "orderNumber": zod.string(),
+  "status": zod.enum(['pending', 'confirmed', 'processing', 'completed', 'cancelled', 'returned']),
+  "totalMinor": zod.number().int(),
+  "createdAt": zod.coerce.date(),
+  "items": zod.array(zod.object({
+  "productName": zod.string(),
+  "quantity": zod.number().int(),
+  "unitPriceMinor": zod.number().int()
+}))
+}))
+})
+
+
+/**
  * @summary Invite a staff member
  */
 export const inviteStaffBodyDisplayNameMin = 2;
