@@ -1,6 +1,8 @@
 import { Router, type IRouter } from "express";
 import { desc, eq } from "drizzle-orm";
 import { timingSafeEqual } from "node:crypto";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { clerkClient, getAuth } from "@clerk/express";
 import { db, orderItemsTable, ordersTable, productsTable, staffTable, storeCustomersTable } from "@workspace/db";
 import { CreateStorefrontOrderBody, CreateStorefrontOrderResponse } from "@workspace/api-zod";
@@ -9,6 +11,43 @@ import { draftOrderNumber, salesInvoiceNumber } from "../lib/invoice";
 
 const router: IRouter = Router();
 export const storefrontAccessRouter: IRouter = Router();
+
+const productImageByName: Record<string, string> = {
+  "plum elan": "plum-elan-480.jpg",
+  "aurelia drops": "aurelia-drops-480.jpg",
+  "dawn flush": "dawn-flush-480.jpg",
+  "cedar afterglow": "cedar-afterglow-480.jpg",
+  "nocturne rouge": "nocturne-rouge-480.jpg",
+  "solstice chain": "solstice-chain-480.jpg",
+  "silk petal": "silk-petal-480.jpg",
+  "amber reverie": "amber-reverie-480.jpg",
+};
+
+const categoryProductImage: Record<string, string> = {
+  fragrance: "perfume-product-480.jpg",
+  accessories: "jewelry-product-480.jpg",
+  makeup: "makeup-product-480.jpg",
+  skincare: "makeup-product-480.jpg",
+};
+
+const allowedProductImages = new Set([
+  ...Object.values(productImageByName),
+  ...Object.values(categoryProductImage),
+]);
+
+router.get("/images/:filename", (req, res): void => {
+  const filename = req.params.filename;
+  if (!allowedProductImages.has(filename)) {
+    res.sendStatus(404);
+    return;
+  }
+
+  const imagePath = join(dirname(fileURLToPath(import.meta.url)), "storefront-images", filename);
+  res.setHeader("Cache-Control", "public, max-age=86400");
+  res.sendFile(imagePath, (error) => {
+    if (error && !res.headersSent) res.sendStatus(404);
+  });
+});
 
 storefrontAccessRouter.post("/verify", (req, res): void => {
   const expectedCode = process.env.ELEGANZA_STORE_ACCESS_CODE;
@@ -79,7 +118,19 @@ router.get("/products", async (_req, res): Promise<void> => {
   }).from(productsTable)
     .where(eq(productsTable.active, true))
     .orderBy(desc(productsTable.createdAt));
-  res.json(products);
+  const host = req.get("host");
+  const baseUrl = `https://${host}/api/storefront/images/`;
+  res.json(products.map((product) => {
+    if (Array.isArray(product.imageUrls) && product.imageUrls.length > 0) return product;
+
+    const normalizedName = (product.nameEn ?? "")
+      .normalize("NFD")
+      .replace(/\p{Diacritic}/gu, "")
+      .trim()
+      .toLowerCase();
+    const fallback = productImageByName[normalizedName] ?? categoryProductImage[product.category];
+    return fallback ? { ...product, imageUrls: [`${baseUrl}${fallback}`] } : product;
+  }));
 });
 
 router.post("/orders", async (req, res): Promise<void> => {
