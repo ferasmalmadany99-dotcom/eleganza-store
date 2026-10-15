@@ -210,3 +210,31 @@ mtime_ms = 1792062757933
 storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:3821a01d-12d0-419b-8cdf-56b57c32cd74/3f4b0405-040a-48ee-befe-d567681665f9/01e61646-4cba-4025-9fe6-5ab2269eafd3"
 storage_version_token = "1792062777689602"
 content_type = "application/octet-stream"
+
+[[outputs]]
+id = "VCd69h1SjdE0T_jUm3shr"
+uri = "file://generated-artifacts/Eleganza-1.1.1-arm64.apk"
+type = "unspecified"
+title = "Eleganza Android 1.1.1 — APK"
+description = "ملف تثبيت Android محدث، 59 MB. مناسب لهواتف Android بمعالج arm64، ويمكن تثبيته كتحديث فوق الإصدار السابق."
+logical_id = "3eb0531e-567a-4dac-8820-4fb17553229c"
+content_hash = "sha256:5d23e45dbae6ddfef4093bd7cba268db66f75f2ad4b645590b99007e51a31fcc"
+size = 60889979
+mtime_ms = 1792067185917
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:3821a01d-12d0-419b-8cdf-56b57c32cd74/3eb0531e-567a-4dac-8820-4fb17553229c/2b331674-2ef7-4096-96d9-54b9ab2893cf"
+storage_version_token = "1792067206388412"
+content_type = "application/octet-stream"
+
+[[outputs]]
+id = "xLkQdTypuzzWbidQGAMW6"
+uri = "file://generated-artifacts/Eleganza-1.1.1-arm64.zip"
+type = "unspecified"
+title = "Eleganza Android 1.1.1 — ZIP"
+description = "نسخة مضغوطة للتنزيل، 38 MB. فك الضغط ثم افتح ملف APK لتثبيته."
+logical_id = "582a5763-bd0a-4e1d-bde4-0b0a3ff7fcda"
+content_hash = "sha256:3ba4f76ffe8313fd05ea822e90bc6ef628b9ae79d5b926ee1e82bfae5af7075b"
+size = 39576829
+mtime_ms = 1792067190933
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:3821a01d-12d0-419b-8cdf-56b57c32cd74/582a5763-bd0a-4e1d-bde4-0b0a3ff7fcda/7857f8e3-407a-4ddb-8a1a-0c517289b110"
+storage_version_token = "1792067207404854"
+content_type = "application/octet-stream"
