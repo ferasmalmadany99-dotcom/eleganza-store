@@ -1,0 +1,27 @@
+.eleganza-current {
+  --el-background: #f8f3eb;
+  --el-foreground: #352d27;
+  --el-card: #f1e7d9;
+  --el-primary: #a1533f;
+  --el-primary-foreground: #fffaf4;
+  --el-secondary: #eee3d5;
+  --el-muted-foreground: #81756a;
+  --el-border: #d8c9b8;
+  color: var(--el-foreground);
+  background: var(--el-background);
+  font-family: Arial, "Noto Naskh Arabic", sans-serif;
+}
+
+.eleganza-current *,
+.eleganza-current *::before,
+.eleganza-current *::after {
+  box-sizing: border-box;
+}
+
+.eleganza-current button {
+  font: inherit;
+}
+
+.eleganza-current .el-serif {
+  font-family: Georgia, "Times New Roman", serif;
+}
