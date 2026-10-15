@@ -10,6 +10,7 @@ import {
   type AccountType,
 } from "@workspace/db";
 import { salesInvoiceNumber } from "./invoice";
+import { calculateInventoryMovementJournalAmountMinor } from "./inventory-cost";
 
 export const DEFAULT_ACCOUNTS = [
   { code: "1000", nameEn: "Cash", nameAr: "النقدية", type: "asset" as AccountType },
@@ -164,8 +165,9 @@ export async function postInventoryJournal(input: {
   if (existing[0]) return;
   const [product] = await db.select({ costMinor: productsTable.costMinor, nameEn: productsTable.nameEn })
     .from(productsTable).where(eq(productsTable.id, input.productId)).limit(1);
-  if (!product || product.costMinor <= 0) return;
-   const amount = Math.abs(input.quantity) * (input.unitCostMinor ?? product.costMinor);
+  if (!product) return;
+  const amount = calculateInventoryMovementJournalAmountMinor(input.quantity, input.unitCostMinor, product.costMinor);
+  if (amount <= 0) return;
   await ensureDefaultAccounts();
   const inventory = await accountId("1200");
   const cash = await accountId(PRIMARY_CASH_ACCOUNT_CODE);

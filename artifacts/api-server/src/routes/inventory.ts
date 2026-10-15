@@ -10,6 +10,7 @@ import {
 import { requireAuth, requireInventory, requireManager } from "../middlewares/auth";
 import { writeAudit } from "../lib/audit";
 import { salesInvoiceNumber } from "../lib/invoice";
+import { resolveInventoryMovementUnitCostMinor } from "../lib/inventory-cost";
 
 const router: IRouter = Router();
 router.use(requireAuth);
@@ -52,7 +53,7 @@ router.post("/inventory/movements", requireInventory, async (req, res): Promise<
       : parsed.data.type === "adjustment" ? parsed.data.quantity : -Math.abs(parsed.data.quantity);
     const after = product.quantityOnHand + delta;
     if (after < 0 && parsed.data.type !== "adjustment") throw new Error("NEGATIVE_STOCK");
-      const unitCostMinor = parsed.data.unitCostMinor ?? product.costMinor;
+      const unitCostMinor = resolveInventoryMovementUnitCostMinor(parsed.data.unitCostMinor, product.costMinor);
       const [updated] = await tx.update(productsTable).set({
         quantityOnHand: after,
         ...(parsed.data.type === "purchase" && parsed.data.unitCostMinor !== undefined
