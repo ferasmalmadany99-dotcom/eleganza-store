@@ -238,3 +238,31 @@ mtime_ms = 1792067190933
 storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:3821a01d-12d0-419b-8cdf-56b57c32cd74/582a5763-bd0a-4e1d-bde4-0b0a3ff7fcda/7857f8e3-407a-4ddb-8a1a-0c517289b110"
 storage_version_token = "1792067207404854"
 content_type = "application/octet-stream"
+
+[[outputs]]
+id = "pBSs0k7n71iz0rvimmsm2"
+uri = "file://generated-artifacts/Eleganza-1.1.2-arm64.apk"
+type = "unspecified"
+title = "Eleganza Android 1.1.2 (ARM64) — APK"
+description = "ملف APK قابل للتثبيت، إصدار 1.1.2 ورقم بناء 13. موقّع بمفتاح التطوير نفسه للنسخة السابقة."
+logical_id = "a9c2573e-fe51-4c38-9a58-222bf10e9f77"
+content_hash = "sha256:9e9f3ce1212c02a4dd88d8c5b607e5bd9379652e749aade45589ba617c275f03"
+size = 60895919
+mtime_ms = 1792087213297
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:3821a01d-12d0-419b-8cdf-56b57c32cd74/a9c2573e-fe51-4c38-9a58-222bf10e9f77/bbe9689e-1310-45b1-b7aa-36eee8ed9fed"
+storage_version_token = "1792087226760870"
+content_type = "application/octet-stream"
+
+[[outputs]]
+id = "G-HtllSHhzI8bSaoANoVU"
+uri = "file://generated-artifacts/Eleganza-1.1.2-arm64.zip"
+type = "unspecified"
+title = "Eleganza Android 1.1.2 — APK + تعليمات"
+description = "أرشيف ZIP يضم APK وتعليمات التثبيت والملاحظات المهمة."
+logical_id = "1f553199-a279-49b1-890c-a38185a3d8c2"
+content_hash = "sha256:5ee76852e7ebb02f2bcc2c943e91b0dac90a9ae3c1e45570a1056c38aa1d0963"
+size = 39626281
+mtime_ms = 1792087215905
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:3821a01d-12d0-419b-8cdf-56b57c32cd74/1f553199-a279-49b1-890c-a38185a3d8c2/52b004bc-c32f-4054-8043-ddeb4eb67fbe"
+storage_version_token = "1792087227862650"
+content_type = "application/octet-stream"
