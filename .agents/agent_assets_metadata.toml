@@ -280,3 +280,17 @@ mtime_ms = 1792093691873
 storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:3821a01d-12d0-419b-8cdf-56b57c32cd74/ce83ae5a-8899-4034-8b77-74312d17e1c6/5a4f629c-dc4a-4fa6-851c-0384fe995e1d"
 storage_version_token = "1792093727113844"
 content_type = "application/octet-stream"
+
+[[outputs]]
+id = "WUyYh5RKcoCtiXuMiE1aK"
+uri = "file://generated-artifacts/Eleganza-1.1.3-arm64.zip"
+type = "unspecified"
+title = "Eleganza Android 1.1.3 — ملف ZIP"
+description = "ملف مضغوط يحتوي على ملف APK لتحديث تطبيق Eleganza على Android."
+logical_id = "b576b40f-cf14-4772-86a7-86d50af81c16"
+content_hash = "sha256:9499bbb889b34cb52a0967de5f81f83df34931586d9cefbaf4927c6e1aa5e0c2"
+size = 39623564
+mtime_ms = 1792096271833
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:3821a01d-12d0-419b-8cdf-56b57c32cd74/b576b40f-cf14-4772-86a7-86d50af81c16/ff92b3c6-069b-44d9-b3f2-a02cb49b6032"
+storage_version_token = "1792096278684293"
+content_type = "application/octet-stream"
