@@ -182,3 +182,17 @@ mtime_ms = 1792053420202
 storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:3821a01d-12d0-419b-8cdf-56b57c32cd74/ce6572fb-600f-497d-ab32-dd021637b4f3/3a15d68f-0be9-4d46-8614-a69f542ca9f8"
 storage_version_token = "1792053445341993"
 content_type = "application/octet-stream"
+
+[[outputs]]
+id = "NlJbpSs4fagw2JSa_iBEW"
+uri = "file://generated-artifacts/Eleganza-1.0.9-dev.zip"
+type = "unspecified"
+title = "Eleganza 1.0.9 — تفاصيل المنتجات"
+description = "تحديث للتطبيق المثبّت يفتح نافذة تفاصيل عند الضغط على صورة المنتج أو اسمه. ZIP بحجم نحو 60 ميغابايت؛ يمكن تثبيته فوق النسخة الحالية دون حذفها."
+logical_id = "9842fbb2-afef-4597-8dd7-b5ef1cf718cf"
+content_hash = "sha256:b2afb892535b82ca61ccf28fbe85fbc9ff360c495e5b5d21ed8826819f070e6b"
+size = 62727723
+mtime_ms = 1792061084382
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:3821a01d-12d0-419b-8cdf-56b57c32cd74/9842fbb2-afef-4597-8dd7-b5ef1cf718cf/6706681c-4551-4e32-be34-285fb73e42b4"
+storage_version_token = "1792061124811012"
+content_type = "application/octet-stream"

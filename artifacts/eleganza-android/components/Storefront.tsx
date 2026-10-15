@@ -32,13 +32,13 @@ export function ProductList({ onlyFavorites = false, onAdd, onFavorite, header }
       ListEmptyComponent={emptyState}
       renderItem={({ item }) => <ProductCard product={item} onSelect={() => setSelectedProduct(item)} onAdd={() => onAdd(item)} onFavorite={() => onFavorite(item)} />}
     />
-    <ProductDetails
+    {selectedProduct ? <ProductDetails
       product={selectedProduct}
-      favorite={selectedProduct ? favoriteIds.includes(selectedProduct.id) : false}
+      favorite={favoriteIds.includes(selectedProduct.id)}
       onClose={() => setSelectedProduct(null)}
-      onAdd={() => { if (selectedProduct) onAdd(selectedProduct); }}
-      onFavorite={() => { if (selectedProduct) onFavorite(selectedProduct); }}
-    />
+      onAdd={() => onAdd(selectedProduct)}
+      onFavorite={() => onFavorite(selectedProduct)}
+    /> : null}
   </>;
 }
 
@@ -99,20 +99,22 @@ function ProductCard({ product, onSelect, onAdd, onFavorite }: { product: Storef
 }
 
 function ProductDetails({ product, favorite, onClose, onAdd, onFavorite }: {
-  product: StorefrontProduct | null;
+  product: StorefrontProduct;
   favorite: boolean;
   onClose: () => void;
   onAdd: () => void;
   onFavorite: () => void;
 }) {
   const colors = useColors();
-  const category = product ? categoryName(product.category) : '';
-  const description = product?.descriptionAr?.trim()
-    || product?.descriptionEn?.trim()
-    || (product ? `منتج من فئة ${category} ضمن مجموعة Eleganza، اختير بعناية.` : '');
-  const audience = product?.audience === 'men' ? 'رجالي' : product?.audience === 'women' ? 'نسائي' : '';
+  const category = categoryName(product.category);
+  const detailCopy = productDetailsBySku[product.sku];
+  const description = product.descriptionAr?.trim()
+    || detailCopy?.note
+    || product.descriptionEn?.trim()
+    || `منتج من فئة ${category} ضمن مجموعة Eleganza، اختير بعناية.`;
+  const audience = product.audience === 'men' ? 'رجالي' : product.audience === 'women' ? 'نسائي' : '';
 
-  return <Modal visible={product !== null} transparent animationType="slide" statusBarTranslucent onRequestClose={onClose}>
+  return <Modal visible transparent animationType="slide" statusBarTranslucent onRequestClose={onClose}>
     <View style={styles.modalBackdrop}>
       <Pressable accessibilityLabel="إغلاق تفاصيل المنتج" style={StyleSheet.absoluteFill} onPress={onClose} />
       <View style={[styles.detailSheet, { backgroundColor: colors.background }]}>
@@ -122,7 +124,7 @@ function ProductDetails({ product, favorite, onClose, onAdd, onFavorite }: {
             <Text style={[styles.closeText, { color: colors.foreground }]}>×</Text>
           </Pressable>
         </View>
-        {product && <ScrollView contentContainerStyle={styles.detailContent} showsVerticalScrollIndicator={false}>
+        <ScrollView contentContainerStyle={styles.detailContent} showsVerticalScrollIndicator={false}>
           {product.imageUrls?.[0]
             ? <Image source={{ uri: product.imageUrls[0] }} style={styles.detailImage} resizeMode="cover" />
             : <View style={[styles.detailImage, styles.noImage, { backgroundColor: colors.secondary }]}><Text style={{ color: colors.mutedForeground }}>Eleganza</Text></View>}
@@ -131,9 +133,12 @@ function ProductDetails({ product, favorite, onClose, onAdd, onFavorite }: {
           <Text style={[styles.detailPrice, { color: colors.primary }]}>{formatPrice(product.salePriceMinor)} د.ل</Text>
           <Text style={[styles.detailDescription, { color: colors.foreground }]}>{description}</Text>
           <View style={[styles.detailFacts, { borderColor: colors.border }]}>
+            {detailCopy ? <DetailFact label="التركيبة / الخامة" value={detailCopy.material} color={colors.foreground} muted={colors.mutedForeground} /> : null}
+            {detailCopy ? <DetailFact label="الرائحة / اللون" value={detailCopy.color} color={colors.foreground} muted={colors.mutedForeground} /> : null}
             <DetailFact label="الفئة" value={category} color={colors.foreground} muted={colors.mutedForeground} />
             {audience ? <DetailFact label="التصنيف" value={audience} color={colors.foreground} muted={colors.mutedForeground} /> : null}
             <DetailFact label="المخزون" value={`${Math.max(0, Number(product.quantityOnHand) || 0)} قطعة`} color={colors.foreground} muted={colors.mutedForeground} />
+            <DetailFact label="التوصيل" value="خلال 2–3 أيام" color={colors.foreground} muted={colors.mutedForeground} />
           </View>
           <View style={styles.detailActions}>
             <Pressable accessibilityRole="button" onPress={onAdd} style={[styles.detailAddButton, { backgroundColor: colors.primary }]}>
@@ -143,7 +148,7 @@ function ProductDetails({ product, favorite, onClose, onAdd, onFavorite }: {
               <Text style={{ color: favorite ? colors.primary : colors.foreground, fontSize: 24 }}>{favorite ? '♥' : '♡'}</Text>
             </Pressable>
           </View>
-        </ScrollView>}
+        </ScrollView>
       </View>
     </View>
   </Modal>;
@@ -166,6 +171,21 @@ function categoryName(category: string): string {
     default: return 'منتجات التجميل';
   }
 }
+
+const productDetailsBySku: Record<string, { material: string; color: string; note: string }> = {
+  p01: { material: 'أو دو بارفان / 50 مل', color: 'خشب الصندل / العنبر', note: 'عطر دافئ بجاذبية هادئة، يترك أثرًا مميزًا يدوم طويلًا.' },
+  m01: { material: 'أحمر خدود كريمي / 7 غ', color: 'وردي البتلات', note: 'لمسة وردية شفافة تبدو كلون بشرتك الطبيعي، ولكن بنعومة أجمل.' },
+  a01: { material: 'فضة إسترلينية مطلية بالذهب', color: 'ذهبي دافئ', note: 'تفصيل ذهبي بسيط يضفي لمسة أنيقة على إطلالتك اليومية.' },
+  m02: { material: 'أحمر شفاه ساتان / 3.5 غ', color: 'توتي داكن', note: 'لون شفاه ناعم بتأثير ضبابي ولمسة أكثر وضوحًا وتميّزًا.' },
+  p02: { material: 'أو دو بارفان / 75 مل', color: 'عنبر / فانيليا', note: 'عبير عنبري غني تلطفه نفحات الفانيليا الناعمة.' },
+  m03: { material: 'أحمر خدود بودرة / 8 غ', color: 'مرجاني ناعم', note: 'طبقة خفيفة من اللون المرجاني تضفي دفئًا طبيعيًا على الوجه.' },
+  a02: { material: 'فضة مطلية بالذهب / 42 سم', color: 'ذهبي لامع', note: 'سلسلة ذهبية رفيعة تلتقط الضوء مع كل حركة.' },
+  m04: { material: 'أحمر شفاه مطفي / 3.5 غ', color: 'أحمر معتّق', note: 'أحمر واثق بلمسة مطفية ناعمة ومريحة تدوم طويلًا.' },
+  p03: { material: 'أو دو بارفان / 50 مل', color: 'خشب الأرز / المسك الأبيض', note: 'خشب أرز نقي ومسك ناعم يستقران برقة بالقرب من البشرة.' },
+  m05: { material: 'أحمر خدود كريمي / 7 غ', color: 'خوخي دافئ', note: 'لون خوخي منعش يمنح البشرة إشراقة طبيعية بلا تكلّف.' },
+  a03: { material: 'فضة مطلية بالذهب', color: 'ذهبي ساتان', note: 'أقراط متدلية تلتقط الضوء بتصميم راقٍ وحركة انسيابية.' },
+  m06: { material: 'أحمر شفاه ساتان / 3.5 غ', color: 'برقوقي هادئ', note: 'درجة برقوقية هادئة تمنح الشفاه عمقًا وتبقى سهلة للاستخدام اليومي.' },
+};
 
 const styles = StyleSheet.create({
   center: { flex: 1, minHeight: 240, alignItems: 'center', justifyContent: 'center', gap: 12 },
