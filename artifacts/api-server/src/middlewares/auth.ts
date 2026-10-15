@@ -3,6 +3,7 @@ import type { NextFunction, Request, Response } from "express";
 import { eq } from "drizzle-orm";
 import { db, staffTable, storeCustomersTable } from "@workspace/db";
 import type { StaffRole } from "@workspace/api-zod";
+import { getAuthenticatedUserId, hasStaffPermission, isStaffActive, staffRolePolicies } from "./authorization";
 
 const staffRoles: StaffRole[] = ["owner", "manager", "inventory", "sales", "viewer"];
 
@@ -77,8 +78,7 @@ export async function ensureStaffProfile(userId: string, req: Request) {
 
 export async function requireAuth(req: Request, res: Response, next: NextFunction): Promise<void> {
   const auth = getAuth(req);
-  const candidate = auth?.sessionClaims?.userId || auth?.userId;
-  const userId = typeof candidate === "string" ? candidate : undefined;
+  const userId = getAuthenticatedUserId(auth);
   if (!userId) {
     res.status(401).json({ error: "Unauthorized" });
     return;
@@ -98,7 +98,7 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
       res.status(503).json({ error: "Staff profile could not be provisioned" });
       return;
     }
-    if (req.staff.status !== "active") {
+    if (!isStaffActive(req.staff.status)) {
       res.status(403).json({ error: "Staff access is pending activation" });
       return;
     }
@@ -111,8 +111,7 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
 
 export function requireRole(...roles: StaffRole[]) {
   return (req: Request, res: Response, next: NextFunction): void => {
-    const permissions = req.staff?.permissions ?? [req.staff?.role];
-    if (!req.staff || !roles.some((role) => permissions.includes(role) || permissions.includes("owner"))) {
+    if (!req.staff || !hasStaffPermission(req.staff.permissions, req.staff.role, roles)) {
       res.status(403).json({ error: "Insufficient permissions" });
       return;
     }
@@ -120,8 +119,8 @@ export function requireRole(...roles: StaffRole[]) {
   };
 }
 
-export const requireOwner = requireRole("owner");
-export const requireManager = requireRole("owner", "manager");
-export const requireInventory = requireRole("owner", "manager", "inventory");
-export const requireSales = requireRole("owner", "manager", "sales");
+export const requireOwner = requireRole(...staffRolePolicies.owner);
+export const requireManager = requireRole(...staffRolePolicies.manager);
+export const requireInventory = requireRole(...staffRolePolicies.inventory);
+export const requireSales = requireRole(...staffRolePolicies.sales);
 export const requireAdmin = requireRole("owner", "manager", "inventory", "sales");
