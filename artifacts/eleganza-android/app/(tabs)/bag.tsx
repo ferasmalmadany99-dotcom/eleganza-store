@@ -18,7 +18,7 @@ export default function BagScreen() {
   });
   const profilePrefilled = useRef(false);
   const [name, setName] = useState(''); const [phone, setPhone] = useState('');
-  const [editingCustomerInfo, setEditingCustomerInfo] = useState(false);
+  const [editingCustomerInfo, setEditingCustomerInfo] = useState(true);
   const [savingCustomerInfo, setSavingCustomerInfo] = useState(false);
   const [address, setAddress] = useState(''); const [locationUrl, setLocationUrl] = useState(''); const [busy, setBusy] = useState(false);
   const total = bag.reduce((sum, item) => sum + item.product.salePriceMinor * item.quantity, 0) / 100;
@@ -98,7 +98,13 @@ export default function BagScreen() {
         <Text style={[styles.checkoutTitle, { color: colors.foreground }]}>بيانات التوصيل</Text>
         <View style={[styles.customerInfo, { borderColor: colors.border }]}>
           <View style={styles.customerInfoHeader}>
-            <Pressable accessibilityRole="button" onPress={() => setEditingCustomerInfo((value) => !value)} style={styles.editInfoButton}>
+            <Pressable accessibilityRole="button" onPress={() => {
+              if (editingCustomerInfo) {
+                setName(account.data?.profile.customerName || user?.fullName || '');
+                setPhone(account.data?.profile.customerPhone || user?.primaryPhoneNumber?.phoneNumber || '');
+              }
+              setEditingCustomerInfo((value) => !value);
+            }} style={styles.editInfoButton}>
               <Feather name={editingCustomerInfo ? 'x' : 'edit-2'} size={15} color={colors.primary} />
               <Text style={{ color: colors.primary }}>{editingCustomerInfo ? 'إلغاء التعديل' : 'تعديل البيانات'}</Text>
             </Pressable>

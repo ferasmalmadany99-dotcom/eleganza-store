@@ -783,6 +783,8 @@ export const GetStorefrontCustomerAccountResponse = zod.object({
   "id": zod.number().int(),
   "orderNumber": zod.string(),
   "status": zod.enum(['pending', 'confirmed', 'processing', 'completed', 'cancelled', 'returned']),
+  "subtotalMinor": zod.number().int(),
+  "shippingMinor": zod.number().int(),
   "totalMinor": zod.number().int(),
   "createdAt": zod.coerce.date(),
   "items": zod.array(zod.object({

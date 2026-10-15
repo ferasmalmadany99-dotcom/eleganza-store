@@ -12,6 +12,8 @@ export interface StorefrontCustomerOrder {
   id: number;
   orderNumber: string;
   status: OrderStatus;
+  subtotalMinor: number;
+  shippingMinor: number;
   totalMinor: number;
   createdAt: Date;
   items: StorefrontCustomerOrderItem[];

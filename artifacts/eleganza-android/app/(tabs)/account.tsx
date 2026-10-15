@@ -137,12 +137,15 @@ export default function AccountScreen() {
             accessibilityRole="button"
             accessibilityState={{ expanded }}
             accessibilityLabel={`طلب ${order.orderNumber}، ${orderStatus[order.status] || order.status}`}
-            onPress={() => setExpandedOrders((current) => {
-              const next = new Set(current);
-              if (next.has(order.id)) next.delete(order.id);
-              else next.add(order.id);
-              return next;
-            })}
+            onPress={() => {
+              if (!expanded) void account.refetch();
+              setExpandedOrders((current) => {
+                const next = new Set(current);
+                if (next.has(order.id)) next.delete(order.id);
+                else next.add(order.id);
+                return next;
+              });
+            }}
           >
             <View style={styles.orderHeader}>
               <Feather name={expanded ? 'chevron-up' : 'chevron-down'} size={18} color={colors.mutedForeground} />
