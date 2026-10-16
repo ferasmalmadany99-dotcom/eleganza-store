@@ -98,8 +98,8 @@ type StorefrontInventoryProduct = {
   category: string;
   descriptionEn?: string | null;
   descriptionAr?: string | null;
-  imageUrls?: string[];
-  audience?: 'men' | 'women';
+  imageUrls?: string[] | null;
+  audience?: 'men' | 'women' | null;
   salePriceMinor: number;
   quantityOnHand: number;
 };
@@ -790,6 +790,58 @@ const serverProductToStorefrontProduct = (serverProduct: StorefrontInventoryProd
     note: serverProduct.descriptionEn || 'A considered addition to the Eleganza collection.',
     badge: 'New',
   };
+};
+
+const storefrontCatalogCacheKey = 'eleganza-storefront-server-catalog-v1';
+const storefrontCatalogCacheTtlMs = 24 * 60 * 60 * 1000;
+
+const isStorefrontInventoryProduct = (value: unknown): value is StorefrontInventoryProduct => {
+  if (!value || typeof value !== 'object') return false;
+  const product = value as Partial<StorefrontInventoryProduct>;
+  return typeof product.id === 'number'
+    && Number.isFinite(product.id)
+    && typeof product.sku === 'string'
+    && typeof product.nameEn === 'string'
+    && typeof product.nameAr === 'string'
+    && typeof product.category === 'string'
+    && (product.descriptionEn === undefined || product.descriptionEn === null || typeof product.descriptionEn === 'string')
+    && (product.descriptionAr === undefined || product.descriptionAr === null || typeof product.descriptionAr === 'string')
+    && (product.imageUrls === undefined || product.imageUrls === null || (Array.isArray(product.imageUrls) && product.imageUrls.every((url) => typeof url === 'string')))
+    && (product.audience === undefined || product.audience === null || product.audience === 'men' || product.audience === 'women')
+    && typeof product.salePriceMinor === 'number'
+    && Number.isFinite(product.salePriceMinor)
+    && typeof product.quantityOnHand === 'number'
+    && Number.isFinite(product.quantityOnHand);
+};
+
+const mergeServerProductsIntoCatalog = (serverProducts: StorefrontInventoryProduct[]): Product[] => {
+  const nextCatalog = [...products];
+  for (const serverProduct of serverProducts) {
+    const matchingProduct = nextCatalog.some((product) =>
+      normalizeProductName(product.name) === normalizeProductName(serverProduct.nameEn)
+      || (serverProduct.nameAr && normalizeProductName(product.name) === normalizeProductName(serverProduct.nameAr)),
+    );
+    if (!matchingProduct) nextCatalog.push(serverProductToStorefrontProduct(serverProduct));
+  }
+  return nextCatalog;
+};
+
+const readCachedServerCatalog = (): Product[] | null => {
+  try {
+    const cachedValue: unknown = JSON.parse(window.localStorage.getItem(storefrontCatalogCacheKey) ?? 'null');
+    if (!cachedValue || typeof cachedValue !== 'object') return null;
+    const cache = cachedValue as { savedAt?: unknown; products?: unknown };
+    const now = Date.now();
+    if (
+      typeof cache.savedAt !== 'number'
+      || cache.savedAt > now
+      || now - cache.savedAt > storefrontCatalogCacheTtlMs
+    ) return null;
+    if (!Array.isArray(cache.products) || !cache.products.every(isStorefrontInventoryProduct)) return null;
+    return mergeServerProductsIntoCatalog(cache.products);
+  } catch {
+    return null;
+  }
 };
 
 function BrandName({ compact = false }: { compact?: boolean }) {
@@ -1505,7 +1557,7 @@ function Storefront() {
   const [selectedArticleId, setSelectedArticleId] = useState<ArticleId | null>(null);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [notice, setNotice] = useState('');
-  const [catalogProducts, setCatalogProducts] = useState<Product[]>(products);
+  const [catalogProducts, setCatalogProducts] = useState<Product[]>(() => readCachedServerCatalog() ?? products);
   const [inventoryByName, setInventoryByName] = useState<Record<string, { id: number; quantityOnHand: number; salePriceMinor: number }>>({});
   const [inventoryLoaded, setInventoryLoaded] = useState(false);
   const c = copy[language];
@@ -1534,21 +1586,27 @@ function Storefront() {
     let disposed = false;
     const loadInventory = async () => {
       try {
-        const response = await fetch('/api/storefront/products', { headers: { Accept: 'application/json' } });
+        const response = await fetch('/api/storefront/products', {
+          cache: 'no-store',
+          headers: { Accept: 'application/json', 'Cache-Control': 'no-cache' },
+        });
         if (!response.ok) throw new Error(`Inventory request failed with ${response.status}`);
-        const data = await response.json() as StorefrontInventoryProduct[];
-        if (disposed) return;
-        const nextCatalog = [...products];
-        for (const serverProduct of data) {
-          const matchingIndex = nextCatalog.findIndex((product) =>
-            normalizeProductName(product.name) === normalizeProductName(serverProduct.nameEn)
-            || (serverProduct.nameAr && normalizeProductName(product.name) === normalizeProductName(serverProduct.nameAr)),
-          );
-          if (matchingIndex === -1) {
-            nextCatalog.push(serverProductToStorefrontProduct(serverProduct));
-          }
+        const responseData: unknown = await response.json();
+        if (!Array.isArray(responseData) || !responseData.every(isStorefrontInventoryProduct)) {
+          throw new Error('Storefront products response has an unexpected shape');
         }
+        const data = responseData;
+        if (disposed) return;
+        const nextCatalog = mergeServerProductsIntoCatalog(data);
         setCatalogProducts(nextCatalog);
+        try {
+          window.localStorage.setItem(storefrontCatalogCacheKey, JSON.stringify({
+            savedAt: Date.now(),
+            products: data,
+          }));
+        } catch (cacheError) {
+          console.warn('Could not cache storefront products for the next visit', cacheError);
+        }
         const next: Record<string, { id: number; quantityOnHand: number; salePriceMinor: number }> = {};
         for (const product of data) {
           const quantity = Math.max(0, Number(product.quantityOnHand) || 0);
