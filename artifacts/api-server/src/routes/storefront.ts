@@ -200,6 +200,9 @@ router.get("/products", async (req, res): Promise<void> => {
     .orderBy(desc(productsTable.createdAt));
   const host = req.get("host");
   const baseUrl = `https://${host}/api/storefront/images/`;
+  // The React Native client treats an empty 304 response as successful data,
+  // which clears the product list. Always return the catalog body to mobile clients.
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
   res.json(products.map((product) => {
     if (Array.isArray(product.imageUrls) && product.imageUrls.length > 0) return product;
 

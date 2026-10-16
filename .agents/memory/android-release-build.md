@@ -9,6 +9,12 @@ For Android release builds, default Gradle/CMake parallelism can exhaust the wor
 
 **How to apply:** on future `assembleRelease` builds in this workspace, limit Gradle and CMake parallelism before increasing heap size or restarting from a clean build.
 
+After a forced full rerun hit OOM, a normal incremental `assembleRelease` completed with one Gradle worker, a 1.5 GiB JVM heap, and the Expo preview workflow stopped temporarily to free memory. Gradle rebuilt the JS bundle because the app source had changed.
+
+**Why:** `--rerun-tasks` needlessly repeated native work and pushed the 8 GiB workspace over its memory limit; reusing successful outputs and pausing Metro gave the build enough headroom.
+
+**How to apply:** prefer a normal incremental build after source changes. Stop and restart the Expo workflow only when memory pressure requires it; restart it after the build. Force the bundle task only when public environment values changed without a tracked source change.
+
 The workspace may not have a writable Android SDK available through the package installer. Nix-provided SDKs are read-only and can place the NDK at `ndk-bundle`, while Gradle expects a versioned `ndk/<version>` path and additional Build Tools packages. Avoid copying the full NDK into the workspace; that can exceed its per-user disk quota.
 
 **Why:** release builds need SDK paths and components Gradle can both discover and update, but the Nix SDK store is immutable and the complete NDK is too large for a workspace copy.

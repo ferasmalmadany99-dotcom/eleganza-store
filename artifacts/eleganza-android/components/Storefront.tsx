@@ -8,7 +8,12 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export function ProductList({ onlyFavorites = false, onAdd, onFavorite, header }: { onlyFavorites?: boolean; onAdd: (product: StorefrontProduct) => boolean; onFavorite: (product: StorefrontProduct) => boolean; header?: React.ReactElement | null }) {
   const colors = useColors();
-  const query = useListStorefrontProducts();
+  const query = useListStorefrontProducts({
+    request: {
+      cache: 'no-store',
+      headers: { 'Cache-Control': 'no-cache' },
+    },
+  });
   const { favorites } = useStore();
   const insets = useSafeAreaInsets();
   const [selectedProduct, setSelectedProduct] = useState<StorefrontProduct | null>(null);
