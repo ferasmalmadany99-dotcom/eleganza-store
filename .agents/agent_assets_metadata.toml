@@ -350,3 +350,17 @@ mtime_ms = 1792241801088
 storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:3821a01d-12d0-419b-8cdf-56b57c32cd74/8304580e-52fe-41b5-88ee-3aeccd9dd571/e767fc2d-cfa1-49f4-a87d-ffd92545bbe6"
 storage_version_token = "1792241812418828"
 content_type = "image/png"
+
+[[outputs]]
+id = "AvAnA-v3VXVap1fvY6jKt"
+uri = "file://attached_assets/generated_images/eleganza-app-icon-preview-v3.png"
+type = "image"
+title = "معاينة شعار Eleganza — خط يدوي"
+description = "اسم Eleganza بخط Allura اليدوي المتصل، قريب من Playlist Script، بالأسود على خلفية بيضاء. معاينة فقط ولم أغيّر التطبيق."
+logical_id = "15e98079-418e-4017-aee3-1a1b6e2f9b9a"
+content_hash = "sha256:b61b8d0b39b7f70718210183692e1199a009046fae2a022f95d76d5d5e3e4328"
+size = 35630
+mtime_ms = 1792242012061
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:3821a01d-12d0-419b-8cdf-56b57c32cd74/15e98079-418e-4017-aee3-1a1b6e2f9b9a/bf0d4c07-738d-4049-8457-9388522601d9"
+storage_version_token = "1792242028557603"
+content_type = "image/png"
