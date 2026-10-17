@@ -322,3 +322,17 @@ mtime_ms = 1792102041879
 storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:3821a01d-12d0-419b-8cdf-56b57c32cd74/f2566dd1-e57a-49ad-8739-050d452ea751/7c60e364-ceaf-4f59-a4ea-40446a07edf2"
 storage_version_token = "1792102139720660"
 content_type = "application/octet-stream"
+
+[[outputs]]
+id = "IzxwiRLjBFjznbUS6ZB9Z"
+uri = "file://attached_assets/generated_images/eleganza-app-icon-preview.png"
+type = "image"
+title = "معاينة شعار Eleganza"
+description = "معاينة أولية بخلفية بيضاء، زهرة بسيطة واسم Eleganza ببني راقٍ. لم أغيّر أيقونة التطبيق بعد."
+logical_id = "7f485b0c-e7f9-43ca-bffe-68072397da51"
+content_hash = "sha256:ed13c12b1ba8fd01be5b193e3c1cfb34dac277a2c4675dbe5b1ea20d269d179b"
+size = 2098346
+mtime_ms = 1792241638736
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:3821a01d-12d0-419b-8cdf-56b57c32cd74/7f485b0c-e7f9-43ca-bffe-68072397da51/792b1f1d-6fdf-469f-9b52-0516e3cd1139"
+storage_version_token = "1792241648560379"
+content_type = "image/png"
