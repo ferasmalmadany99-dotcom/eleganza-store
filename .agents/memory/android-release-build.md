@@ -19,7 +19,7 @@ The workspace may not have a writable Android SDK available through the package 
 
 **Why:** release builds need SDK paths and components Gradle can both discover and update, but the Nix SDK store is immutable and the complete NDK is too large for a workspace copy.
 
-**How to apply:** if Android SDK discovery or SDK component installation fails, use a writable SDK root with links to the Nix SDK components, provide the expected versioned NDK path, and install missing Build Tools into that writable root.
+**How to apply:** if Android SDK discovery or SDK component installation fails, use a writable SDK root with links to Nix SDK components and provide the expected versioned NDK path. Keep component parents writable when packages are missing: for example, make `build-tools` a real directory and link existing versions into it before installing missing Build Tools or CMake with `sdkmanager`. Do not symlink the entire parent directory if the installer must add a version.
 
 Workspace restarts can terminate an active Gradle build and erase a temporary SDK root under `/tmp`, causing `SDK location not found` even when the Nix SDK remains installed.
 
