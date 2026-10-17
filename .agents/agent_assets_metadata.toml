@@ -406,3 +406,17 @@ mtime_ms = 1792245439747
 storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:3821a01d-12d0-419b-8cdf-56b57c32cd74/faf759aa-f185-4706-9762-f421c6ae4a44/3eaa5119-d24b-4d9f-a01e-aad4bd7f08d1"
 storage_version_token = "1792245447392338"
 content_type = "application/octet-stream"
+
+[[outputs]]
+id = "KpqB_oaRPAodtVlWywlg4"
+uri = "file://generated-artifacts/Eleganza-Android-Full.zip"
+type = "unspecified"
+title = "Eleganza Android — النسخة الكاملة"
+description = "ZIP كامل لجميع معماريات Android، يحتوي ملف app-release.apk. نزّله ثم استخرج APK وثبّته."
+logical_id = "dbc60e22-083c-405c-9399-29f4cb489b1e"
+content_hash = "sha256:d47837e907918b9c2227778653cdb6d0f6f3bcec7fb8f1d02c1208b108d0e94c"
+size = 62628308
+mtime_ms = 1792245879225
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:3821a01d-12d0-419b-8cdf-56b57c32cd74/dbc60e22-083c-405c-9399-29f4cb489b1e/68248793-beb9-48ae-9dd0-c91c3ee838b5"
+storage_version_token = "1792245906104700"
+content_type = "application/octet-stream"
