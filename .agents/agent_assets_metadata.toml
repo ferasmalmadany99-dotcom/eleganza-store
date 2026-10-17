@@ -378,3 +378,17 @@ mtime_ms = 1792242119668
 storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:3821a01d-12d0-419b-8cdf-56b57c32cd74/d1146a03-a6a5-4c3c-a154-ff3909b82af9/ce3447a5-eea0-4305-b678-f72abf4f50f3"
 storage_version_token = "1792242132861091"
 content_type = "image/png"
+
+[[outputs]]
+id = "ymLofBtrhpe4GMj8_yTZI"
+uri = "file://attached_assets/generated_images/eleganza-app-icon-preview-v5.png"
+type = "image"
+title = "معاينة شعار Eleganza — طابع فاخر"
+description = "شعار نصي أصلي باسم ELEGANZA بخط GFS Didot عالي التباين، أسود على خلفية بيضاء، مستوحى من هوية دور الأزياء الفاخرة دون نسخ شعار Zara. معاينة فقط."
+logical_id = "ff5394e3-bf81-4607-905e-9e01684cd01c"
+content_hash = "sha256:8fb1af274096a767ef35da8228a478f09c52199ff975dbe889a0f5b6b591bb6a"
+size = 39961
+mtime_ms = 1792242285172
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:3821a01d-12d0-419b-8cdf-56b57c32cd74/ff5394e3-bf81-4607-905e-9e01684cd01c/1a569480-9c95-49ab-bfd4-24cd365b4cef"
+storage_version_token = "1792242307146199"
+content_type = "image/png"
