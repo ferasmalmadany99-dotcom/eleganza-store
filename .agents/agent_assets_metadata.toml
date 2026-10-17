@@ -364,3 +364,17 @@ mtime_ms = 1792242012061
 storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:3821a01d-12d0-419b-8cdf-56b57c32cd74/15e98079-418e-4017-aee3-1a1b6e2f9b9a/bf0d4c07-738d-4049-8457-9388522601d9"
 storage_version_token = "1792242028557603"
 content_type = "image/png"
+
+[[outputs]]
+id = "VIHoJw6U3BsGaeSbazsXJ"
+uri = "file://attached_assets/generated_images/eleganza-app-icon-preview-v4.png"
+type = "image"
+title = "معاينة شعار Eleganza — خط أثخن"
+description = "كتابة Eleganza بخط يدوي متصل أثخن وأوضح على خلفية بيضاء. هذه معاينة فقط ولم أغيّر أيقونة التطبيق."
+logical_id = "d1146a03-a6a5-4c3c-a154-ff3909b82af9"
+content_hash = "sha256:3192ea68f8e9cb9fec9b8fb03798152c076ee2342d5c333ca4ea874341946556"
+size = 60275
+mtime_ms = 1792242119668
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:3821a01d-12d0-419b-8cdf-56b57c32cd74/d1146a03-a6a5-4c3c-a154-ff3909b82af9/ce3447a5-eea0-4305-b678-f72abf4f50f3"
+storage_version_token = "1792242132861091"
+content_type = "image/png"
