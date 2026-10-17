@@ -50,3 +50,9 @@ A cold Android release build can take many minutes initializing Gradle/Expo and 
 **Why:** after a workspace reset, this release spent several minutes in Gradle setup, Metro bundling, and native compilation while the processes remained active and eventually advanced.
 
 **How to apply:** if Gradle, Metro, Ninja, or clang are still active and the log advances, allow the cold build to continue; restart only after a real error or a confirmed stalled process.
+
+Chat asset attachments have a 100 MiB upload limit. A universal Android release APK can exceed it because it bundles native libraries for several CPU architectures.
+
+**Why:** the four-architecture Eleganza APK exceeded the attachment limit, so it could not be delivered in chat.
+
+**How to apply:** when a downloadable APK must fit the chat attachment limit and the target phone's ABI is confirmed, build only that ABI, verify the new APK and ZIP are below the limit, then attach the ZIP. Keep universal builds for broader distribution.
