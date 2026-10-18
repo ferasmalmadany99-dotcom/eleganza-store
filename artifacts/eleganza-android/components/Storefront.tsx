@@ -1,19 +1,41 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, FlatList, Image, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useListStorefrontProducts, type StorefrontProduct } from '@workspace/api-client-react';
 import { useColors } from '@/hooks/useColors';
 import { useStore } from '@/context/StoreContext';
 import { Feather, Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { offlineStorefrontCatalog } from '@/constants/offlineCatalog';
+
+const storefrontCatalogStorageKey = 'eleganza-mobile-storefront-catalog-v1';
 
 export function ProductList({ onlyFavorites = false, onAdd, onFavorite, header }: { onlyFavorites?: boolean; onAdd: (product: StorefrontProduct) => boolean; onFavorite: (product: StorefrontProduct) => boolean; header?: React.ReactElement | null }) {
   const colors = useColors();
   const query = useListStorefrontProducts({
+    query: { queryKey: ['/api/storefront/products'], staleTime: 60_000 },
     request: {
       cache: 'no-store',
       headers: { 'Cache-Control': 'no-cache' },
     },
   });
+  const [savedProducts, setSavedProducts] = useState<StorefrontProduct[]>(offlineStorefrontCatalog);
+  useEffect(() => {
+    let active = true;
+    AsyncStorage.getItem(storefrontCatalogStorageKey).then((stored) => {
+      if (!active || !stored) return;
+      const products = extractProductArray(JSON.parse(stored));
+      if (products?.length) setSavedProducts(products);
+    }).catch((error) => console.warn('Unable to restore the saved storefront catalog', error));
+    return () => { active = false; };
+  }, []);
+  const responseProducts = extractProductArray(query.data);
+  useEffect(() => {
+    if (!responseProducts?.length) return;
+    setSavedProducts(responseProducts);
+    AsyncStorage.setItem(storefrontCatalogStorageKey, JSON.stringify(responseProducts))
+      .catch((error) => console.warn('Unable to save the storefront catalog', error));
+  }, [responseProducts]);
   const { favorites } = useStore();
   const insets = useSafeAreaInsets();
   const [selectedProduct, setSelectedProduct] = useState<StorefrontProduct | null>(null);
@@ -38,10 +60,9 @@ export function ProductList({ onlyFavorites = false, onAdd, onFavorite, header }
     if (selectedProduct?.id === product.id) setSelectedProduct(null);
     showFeedback(wasFavorite ? 'تمت إزالة المنتج من المفضلة' : 'تمت إضافة المنتج إلى المفضلة');
   };
-  const responseProducts = extractProductArray(query.data);
   const invalidResponse = query.isSuccess && responseProducts === null;
   const favoriteIds = Array.isArray(favorites) ? favorites : [];
-  const products = (responseProducts ?? []).filter((p) => !onlyFavorites || favoriteIds.includes(p.id));
+  const products = (responseProducts?.length ? responseProducts : savedProducts).filter((p) => !onlyFavorites || favoriteIds.includes(p.id));
   const newestIds = new Set([...products].sort((a, b) => b.id - a.id).slice(0, 6).map((product) => product.id));
   const filteredProducts = products.filter((product) => {
     if (activeFilter === 'new') return newestIds.has(product.id);
@@ -56,7 +77,7 @@ export function ProductList({ onlyFavorites = false, onAdd, onFavorite, header }
     const bFeatured = featuredSkus.includes(b.sku.toLowerCase());
     return Number(bFeatured) - Number(aFeatured) || b.id - a.id;
   }).slice(0, 8);
-  const emptyState = query.isLoading
+  const emptyState = query.isLoading && products.length === 0
     ? <View style={styles.center}><ActivityIndicator color={colors.primary} /></View>
     : query.isError
       ? <View style={styles.center}><Text style={{ color: colors.foreground }}>تعذر تحميل المنتجات</Text><Pressable onPress={() => void query.refetch()}><Text style={{ color: colors.primary }}>إعادة المحاولة</Text></Pressable></View>
