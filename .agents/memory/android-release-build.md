@@ -39,6 +39,12 @@ Gradle may mark the React Native release JS bundle as up to date even when only 
 
 **How to apply:** force `:app:createBundleReleaseJsAndAssets` to rerun with the intended `EXPO_PUBLIC_DOMAIN` and `EXPO_PUBLIC_API_BASE_URL`, then inspect `assets/index.android.bundle` inside the APK for the expected host before distributing it.
 
+An Android release can build successfully but close immediately on launch if Expo bundled the app without `EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY`.
+
+**Why:** a release APK built directly through Gradle without exporting the Clerk public key contained the app's missing-key startup failure, despite passing the native build.
+
+**How to apply:** export the Clerk public key and required public host values before forcing the release JS bundle; inspect the bundle inside the finished APK for the key's presence, expected host, and absence of the missing-key failure without printing the key itself.
+
 An arm64 release with the corrected Expo Router startup route and Clerk configuration was installed on the user's Android phone, and the user confirmed that the app works well.
 
 **Why:** a successful web preview or APK build alone does not prove the native app starts correctly on-device.
