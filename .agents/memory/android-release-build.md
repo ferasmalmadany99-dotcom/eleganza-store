@@ -45,6 +45,12 @@ An Android release can build successfully but close immediately on launch if Exp
 
 **How to apply:** export the Clerk public key and required public host values before forcing the release JS bundle; inspect the bundle inside the finished APK for the key's presence, expected host, and absence of the missing-key failure without printing the key itself.
 
+Changing the Expo splash image in app config does not necessarily update Android's generated native splash resources in an existing native project.
+
+**Why:** the configured splash already referenced the new icon, but the Android-generated density assets still contained the old image until Expo prebuild synchronized the native project.
+
+**How to apply:** after changing splash configuration or source images, run Expo prebuild for Android before building the release APK, then verify the packaged Android splash resources rather than relying on the config alone.
+
 An arm64 release with the corrected Expo Router startup route and Clerk configuration was installed on the user's Android phone, and the user confirmed that the app works well.
 
 **Why:** a successful web preview or APK build alone does not prove the native app starts correctly on-device.
