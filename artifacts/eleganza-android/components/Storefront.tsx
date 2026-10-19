@@ -63,7 +63,7 @@ export function ProductList({ onlyFavorites = false, onAdd, onFavorite, header }
   const invalidResponse = query.isSuccess && responseProducts === null;
   const favoriteIds = Array.isArray(favorites) ? favorites : [];
   const products = (responseProducts?.length ? responseProducts : savedProducts).filter((p) => !onlyFavorites || favoriteIds.includes(p.id));
-  const newestIds = new Set([...products].sort((a, b) => b.id - a.id).slice(0, 6).map((product) => product.id));
+  const newestIds = new Set(products.slice(0, 6).map((product) => product.id));
   const filteredProducts = products.filter((product) => {
     if (activeFilter === 'new') return newestIds.has(product.id);
     if (activeFilter === 'perfume') return ['fragrance', 'perfume'].includes(product.category.toLowerCase());
@@ -137,42 +137,42 @@ const storeFilters: { id: StoreFilter; label: string }[] = [
 
 const stories: Story[] = [
   {
-    category: 'ملاحظات ميدانية',
-    title: 'فن الطقس اليومي: عن العطر والبشرة وأخذ الوقت.',
-    introduction: 'لا يحتاج طقس الجمال إلى خطوات كثيرة. يكفي أن تمنحيه قليلًا من الانتباه حتى تتحول اللحظة العادية إلى وقت خاص بك.',
-    sections: [
-      { heading: 'ابدئي بالحواس', body: 'انتبهي إلى حرارة المكان، والضوء على المرآة، وملمس ما تضعينه على بشرتك. التمهّل يساعدك على معرفة ما يناسبك فعلًا بدل ملاحقة كل توصية عابرة.' },
-      { heading: 'اتركي العطر يستقر', body: 'يتغير العطر عندما يلامس دفء البشرة. ضعي كمية خفيفة على نقاط النبض ثم امنحيه وقتًا. الانطباع الأول مجرد بداية، أما الرائحة التي تبقى بعد ساعة فهي التي سترافقك.' },
-      { heading: 'احتفظي بما يضيف معنى', body: 'غالبًا ما يكون الطقس المدروس قصيرًا. عطر جميل، ولون يعيد الحيوية إلى الوجه، وتفصيل ذهبي صغير قد تكون أبلغ من روتين مزدحم.' },
-    ],
-    closing: 'المتعة ليست في فعل المزيد، بل في ملاحظة المزيد.',
-  },
-  {
     category: 'عطور',
-    title: 'كيف تختارين عطرك المميز دون استعجال القرار.',
-    introduction: 'يجب أن يبدو عطرك المميز مألوفًا دون أن يصبح متوقعًا. الاختيار لا يتعلق بأقوى رائحة، بل باكتشاف ما ينسجم طبيعيًا مع بشرتك.',
+    title: 'كيف تختبرين العطر قبل اختياره',
+    introduction: 'قد تختلف رائحة العطر على البشرة عن رائحته على ورقة الاختبار. جرّبيه بهذه الخطوات قبل اتخاذ قرارك.',
     sections: [
-      { heading: 'ابدئي بالشعور', body: 'قبل قراءة قائمة المكونات، حددي ما تريدين أن يقوله العطر: دفء، أو نقاء، أو نعومة، أو غموض. هذا يمنحك اتجاهًا أوضح من الاختيار حسب المكونات وحدها.' },
-      { heading: 'جرّبيه على البشرة', body: 'الأوراق العطرية مفيدة للانطباع الأول، لكن البشرة تكشف القصة الكاملة. جرّبي عطرًا واحدًا في كل مرة وراقبي كيف يتطور خلال اليوم.' },
-      { heading: 'عودي إليه قبل القرار', body: 'الاختيار الجيد يبقى جميلًا في التجربة الثانية والثالثة. امنحي نفسك عدة أيام قبل الشراء؛ فالعطر الذي يستمر في ذاكرتك غالبًا هو الذي يستحق البقاء.' },
+      { heading: 'ابدئي بكمية قليلة', body: 'ضعي رشة واحدة على الجلد، واتركيها تجف من دون فرك حتى لا تتغير الرائحة.' },
+      { heading: 'انتظري قليلًا', body: 'عودي إلى العطر بعد نصف ساعة؛ عندها تكون الرائحة قد هدأت وظهرت تفاصيلها.' },
+      { heading: 'جرّبي عطرًا واحدًا كل مرة', body: 'تجنبي وضع عدة عطور معًا. دوّني الاسم إذا أردت المقارنة أو العودة إليه لاحقًا.' },
     ],
-    closing: 'اختاري العطر الذي يشبه التعرف على نفسك، لا محاولة أداء دور.',
+    closing: 'اختبريه على بشرتك قبل الشراء، لا على ورقة الاختبار فقط.',
   },
   {
-    category: 'في التطبيق',
-    title: 'إطلالة الخمس دقائق: أشياء قليلة جيدة، بلمسة مقصودة.',
-    introduction: 'خمس دقائق قد تكون كافية عندما يكون لكل منتج دور واضح. الهدف ليس إخفاء الوجه، بل إعادة الضوء والدفء والتحديد إليه.',
+    category: 'عناية بالبشرة',
+    title: 'ترتيب بسيط لروتين الصباح',
+    introduction: 'ابدئي بالمنتجات الخفيفة، واتركي كل طبقة تستقر قبل وضع التالية.',
     sections: [
-      { heading: 'وحّدي ما يحتاج فقط', body: 'استخدمي كمية صغيرة من مستحضر البشرة في منتصف الوجه وادمجيها نحو الخارج. اتركي البشرة الطبيعية ظاهرة في المناطق التي لا تحتاج إلى تغطية.' },
-      { heading: 'أضيفي لونًا حيًا واحدًا', body: 'قليل من أحمر الخدود الكريمي يعيد الحيوية إلى الوجه كله. مرري ما تبقى على أطراف الأصابع فوق الشفاه لتحصلي على تناغم بسيط.' },
-      { heading: 'أنهي بقليل من التحديد', body: 'رتبي الحاجبين، وارفعي الرموش، ثم اختاري تفصيلًا أخيرًا واحدًا. لون شفاه هادئ أو خط نظيف حول العينين يكفي.' },
+      { heading: 'نظّفي البشرة', body: 'استخدمي منظفًا يناسب بشرتك، ثم جففيها بالتربيت بدل الفرك.' },
+      { heading: 'ضعي المرطب', body: 'اختاري مرطبك المعتاد واتركيه حتى تمتصه البشرة.' },
+      { heading: 'لا تنسي واقي الشمس', body: 'استخدمي واقي شمس مناسبًا في النهار، واتبعي تعليمات العبوة عند إعادة وضعه.' },
     ],
-    closing: 'ينجح الروتين القصير عندما تكون لكل حركة فيه قيمة.',
+    closing: 'إذا كانت لديك حالة جلدية أو تحسس، استشيري مختصًا قبل تغيير روتينك.',
+  },
+  {
+    category: 'مكياج',
+    title: 'مكياج يومي بثلاث خطوات',
+    introduction: 'روتين قصير يبدأ بما تحتاجينه فعلًا، من دون إضافة خطوات لا تستخدمينها.',
+    sections: [
+      { heading: 'ابدئي بالبشرة', body: 'ضعي المرطب أو مستحضر التغطية الذي تستخدمينه عادةً، بكمية تناسبك.' },
+      { heading: 'أضيفي اللون', body: 'اختاري أحمر خدود أو لون شفاه؛ ليس من الضروري استخدامهما معًا.' },
+      { heading: 'أنهي بما تفضلينه', body: 'أضيفي الماسكارا أو رتبي الحواجب إذا كان ذلك جزءًا من روتينك.' },
+    ],
+    closing: 'عدّلي الخطوات حسب المنتجات التي ترتاحين لاستخدامها.',
   },
 ];
 
 function productDescription(product: StorefrontProduct): string {
-  return product.descriptionAr?.trim() || productDetailsBySku[product.sku.toLowerCase()]?.note || 'اختيار أنيق من مجموعة إليغانزا، صُمم ليضيف لمسة جميلة إلى يومك.';
+  return product.descriptionAr?.trim() || productDetailsBySku[product.sku.toLowerCase()]?.note || 'لا تتوفر تفاصيل إضافية لهذا المنتج حالياً.';
 }
 
 function HomeContentHeader({ colors, products, activeFilter, onFilter, onSelect, onAdd }: {
@@ -195,30 +195,29 @@ function HomeContentHeader({ colors, products, activeFilter, onFilter, onSelect,
     </ScrollView>
     <View style={styles.featureHeading}>
       <View style={styles.sectionCopy}>
-        <Text style={[styles.sectionTitle, { color: colors.foreground }]}>الأكثر شهرة وطلباً</Text>
-        <Text style={[styles.sectionNote, { color: colors.mutedForeground }]}>مختارات يوصي بها فريق إليغانزا</Text>
+        <Text style={[styles.sectionTitle, { color: colors.foreground }]}>منتجات إليغانزا</Text>
+        <Text style={[styles.sectionNote, { color: colors.mutedForeground }]}>العطور والمكياج والإكسسوارات</Text>
       </View>
-      <Feather name="move" size={18} color={colors.accent} />
+      <Feather name="shopping-bag" size={18} color={colors.accent} />
     </View>
     {products.length ? <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.featureRow}>
-      {products.map((product, index) => <FeatureCard key={product.id} product={product} index={index} colors={colors} onSelect={() => onSelect(product)} onAdd={() => onAdd(product)} />)}
-    </ScrollView> : <Text style={[styles.noFeatures, { color: colors.mutedForeground }]}>ستظهر مختاراتنا هنا بعد تحميل المنتجات.</Text>}
+      {products.map((product) => <FeatureCard key={product.id} product={product} colors={colors} onSelect={() => onSelect(product)} onAdd={() => onAdd(product)} />)}
+    </ScrollView> : <Text style={[styles.noFeatures, { color: colors.mutedForeground }]}>لا توجد منتجات متاحة للعرض الآن.</Text>}
     <View style={[styles.productHeading, { borderColor: colors.border }]}>
-      <Text style={[styles.sectionTitle, { color: colors.foreground }]}>تسوّقي مجموعتنا</Text>
-      <Text style={[styles.sectionNote, { color: colors.mutedForeground }]}>اسحبي التصنيفات لاكتشاف المزيد</Text>
+      <Text style={[styles.sectionTitle, { color: colors.foreground }]}>جميع المنتجات</Text>
+      <Text style={[styles.sectionNote, { color: colors.mutedForeground }]}>استخدمي التصنيفات لتضييق الاختيار</Text>
     </View>
   </View>;
 }
 
-function FeatureCard({ product, index, colors, onSelect, onAdd }: { product: StorefrontProduct; index: number; colors: ThemeColors; onSelect: () => void; onAdd: () => void }) {
+function FeatureCard({ product, colors, onSelect, onAdd }: { product: StorefrontProduct; colors: ThemeColors; onSelect: () => void; onAdd: () => void }) {
   const image = product.imageUrls?.[0];
-  const isPopular = ['p01', 'a02'].includes(product.sku.toLowerCase());
   return <View style={[styles.featureCard, { backgroundColor: colors.card, borderColor: colors.border, borderRadius: colors.radius }]}>
     <Pressable accessibilityRole="button" onPress={onSelect}>
       <View style={styles.featureImageWrap}>
         {image ? <Image source={{ uri: image }} style={styles.featureImage} resizeMode="cover" /> : <View style={[styles.featureImage, styles.noImage, { backgroundColor: colors.secondary }]}><Text style={{ color: colors.mutedForeground }}>Eleganza</Text></View>}
         <View style={[styles.featureBadge, { backgroundColor: colors.background, borderRadius: colors.radius }]}>
-          <Text style={{ color: colors.primary, fontSize: 10 }}>{isPopular ? 'الأكثر مبيعاً' : 'اختيار إليغانزا'}</Text>
+          <Text style={{ color: colors.primary, fontSize: 10 }}>{categoryName(product.category)}</Text>
         </View>
       </View>
       <View style={styles.featureCopy}>
@@ -238,8 +237,8 @@ function StoriesSection({ colors, onRead }: { colors: ThemeColors; onRead: (stor
   return <View style={[styles.storiesSection, { backgroundColor: colors.secondary }]}>
     <View style={styles.storySectionHeader}>
       <View style={styles.sectionCopy}>
-        <Text style={[styles.sectionTitle, { color: colors.foreground }]}>حكايات إليغانزا</Text>
-        <Text style={[styles.sectionNote, { color: colors.mutedForeground }]}>أفكار صغيرة للجمال والعناية</Text>
+        <Text style={[styles.sectionTitle, { color: colors.foreground }]}>نصائح للعناية</Text>
+        <Text style={[styles.sectionNote, { color: colors.mutedForeground }]}>خطوات واضحة قبل اختيار المنتج</Text>
       </View>
       <Feather name="book-open" size={20} color={colors.accent} />
     </View>
@@ -265,7 +264,7 @@ function StoryDetails({ story, colors, onClose }: { story: Story; colors: ThemeC
         <View style={[styles.detailHeader, { borderBottomColor: colors.border }]}>
           <View style={styles.detailHeadCopy}>
             <Text style={[styles.detailOverline, { color: colors.accent }]}>{story.category}</Text>
-            <Text style={[styles.detailHeaderTitle, { color: colors.foreground }]}>حكايات إليغانزا</Text>
+            <Text style={[styles.detailHeaderTitle, { color: colors.foreground }]}>نصائح للعناية</Text>
           </View>
           <Pressable accessibilityRole="button" accessibilityLabel="إغلاق" onPress={onClose} style={[styles.closeButton, { backgroundColor: colors.secondary }]}>
             <Feather name="x" size={22} color={colors.foreground} />
@@ -395,7 +394,7 @@ function ProductDetails({ product, favorite, onClose, onAdd, onFavorite }: {
             <DetailFact label="الفئة" value={category} color={colors.foreground} muted={colors.mutedForeground} />
             {audience ? <DetailFact label="التصنيف" value={audience} color={colors.foreground} muted={colors.mutedForeground} /> : null}
             <DetailFact label="المخزون" value={`${Math.max(0, Number(product.quantityOnHand) || 0)} قطعة`} color={colors.foreground} muted={colors.mutedForeground} />
-            <DetailFact label="التوصيل" value="خلال 2–3 أيام" color={colors.foreground} muted={colors.mutedForeground} />
+            <DetailFact label="الدفع" value="عند الاستلام" color={colors.foreground} muted={colors.mutedForeground} />
           </View>
           <View style={styles.detailActions}>
             <Pressable accessibilityRole="button" onPress={onAdd} style={[styles.detailAddButton, { backgroundColor: colors.primary, borderRadius: colors.radius }]}>
@@ -426,7 +425,7 @@ function categoryName(category: string): string {
     case 'makeup': return 'مكياج';
     case 'accessories': return 'إكسسوارات';
     case 'skincare': return 'العناية بالبشرة';
-    default: return 'منتجات التجميل';
+    default: return 'منتجات أخرى';
   }
 }
 

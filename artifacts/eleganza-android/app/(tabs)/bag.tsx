@@ -71,12 +71,12 @@ export default function BagScreen() {
     <View style={styles.pageHead}>
       <Text style={[styles.overline, { color: colors.accent }]}>حقيبتك</Text>
       <Text style={[styles.title, { color: colors.foreground }]}>حقيبة التسوق</Text>
-      <Text style={[styles.subtitle, { color: colors.mutedForeground }]}>{bag.length ? 'مراجعة مختاراتك قبل إتمام الطلب' : 'قطعك المختارة تظهر هنا'}</Text>
+      <Text style={[styles.subtitle, { color: colors.mutedForeground }]}>{bag.length ? 'راجعي المنتجات والسعر قبل تأكيد الطلب' : 'أضيفي منتجات من المتجر لتجهيز طلبك'}</Text>
     </View>
     {!bag.length ? <View style={[styles.emptyState, { backgroundColor: colors.card, borderColor: colors.border, borderRadius: colors.radius }]}>
       <Feather name="shopping-bag" size={26} color={colors.accent} />
       <Text style={[styles.emptyTitle, { color: colors.foreground }]}>حقيبتك فارغة حاليًا</Text>
-      <Text style={[styles.emptyCopy, { color: colors.mutedForeground }]}>ابدئي باكتشاف العطور والجمال المختار بعناية.</Text>
+      <Text style={[styles.emptyCopy, { color: colors.mutedForeground }]}>اختاري منتجاً من المتجر وسيظهر هنا.</Text>
     </View> : bag.map(({ product, quantity }) => <View key={product.id} style={[styles.item, { backgroundColor: colors.card, borderColor: colors.border, borderRadius: colors.radius }]}>
       {product.imageUrls?.[0] ? <Image source={{ uri: product.imageUrls[0] }} style={styles.itemImage} resizeMode="cover" /> : <View style={[styles.itemImage, styles.itemPlaceholder, { backgroundColor: colors.secondary }]}><Text style={{ color: colors.mutedForeground, fontFamily: 'serif' }}>E</Text></View>}
       <View style={styles.itemCopy}>

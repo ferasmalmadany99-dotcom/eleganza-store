@@ -53,7 +53,7 @@ const colors = {
 
   // Border radius (in px). Sync from the sibling web artifact's --radius
   // CSS variable. This value applies to cards, buttons, inputs, and modals.
-  radius: 18,
+  radius: 3,
 };
 
 export default colors;
